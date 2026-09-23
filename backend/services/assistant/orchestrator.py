@@ -1,16 +1,19 @@
 """Assistant Orchestrator for EduAccess AI.
 
-Coordinates context assembly, deterministic action matching, RAG retrieval,
-and Gemma generation for the global AI assistant.
+Coordinates intent classification, deterministic action matching, multimodal
+visual telemetry, accessibility disparity analysis, grounded RAG retrieval,
+and adaptive learning assistance for the global AI assistant.
 """
 from __future__ import annotations
 
 import json
 import logging
+from pathlib import Path
 from typing import Any, AsyncGenerator
 
 from backend import config, storage
 from backend.services.ai.gemma_service import get_gemma_service
+from backend.services.assistant.intent import AssistantIntent, classify_intent
 from backend.services.assistant.tools import execute_tool, ASSISTANT_TOOL_DEFINITIONS
 from backend.services.rag import get_retriever
 
@@ -23,57 +26,37 @@ class AssistantOrchestrator:
     def __init__(self):
         self.gemma = get_gemma_service()
 
-    def _match_deterministic_action(self, user_msg: str) -> dict[str, Any] | None:
-        """Fast deterministic route for simple UI commands (Token Optimization)."""
-        msg = user_msg.lower().strip()
-
-        # Captions
-        if any(p in msg for p in ("turn on caption", "enable caption", "show caption", "شغل الترجمة", "فعل الترجمة")):
-            return {"action": "toggle_captions", "enabled": True, "message": "Captions have been enabled."}
-        if any(p in msg for p in ("turn off caption", "disable caption", "hide caption", "اوقف الترجمة", "الغاء الترجمة")):
-            return {"action": "toggle_captions", "enabled": False, "message": "Captions have been disabled."}
-
-        # Audio descriptions
-        if any(p in msg for p in ("turn on audio desc", "enable audio desc", "start narration", "شغل الوصف الصوتي")):
-            return {"action": "toggle_audio_description", "enabled": True, "message": "Spoken audio descriptions turned on."}
-        if any(p in msg for p in ("turn off audio desc", "disable audio desc", "stop narration", "اوقف الوصف الصوتي")):
-            return {"action": "toggle_audio_description", "enabled": False, "message": "Spoken audio descriptions turned off."}
-
-        # Open quiz
-        if any(p in msg for p in ("open quiz", "take quiz", "start quiz", "show quiz", "give me a quiz", "افتح الاختبار", "بدء الاختبار")):
-            return {"action": "open_quiz", "message": "Opening the lecture quiz."}
-
-        if "next question" in msg:
-            return {"action": "next_quiz_question", "message": "Moving to the next quiz question."}
-        if any(p in msg for p in ("increase font", "larger text", "make text bigger")):
-            return {"action": "font_size", "delta": 1, "message": "Increasing text size."}
-        if any(p in msg for p in ("decrease font", "smaller text", "make text smaller")):
-            return {"action": "font_size", "delta": -1, "message": "Decreasing text size."}
-
-        return None
-
     def chat(
         self,
         message: str,
         context: dict[str, Any],
         history: list[dict[str, str]] | None = None,
     ) -> dict[str, Any]:
-        """Process an assistant message, returning response text and any triggered action."""
+        """Process an assistant message, routing by intent."""
         clean_msg = message.strip()
-        if not clean_msg:
-            return {"reply": "How can I help you with your lecture today?", "action": None}
+        classification = classify_intent(clean_msg)
+        intent = classification.intent
 
-        # 1. Check deterministic action
-        det_action = self._match_deterministic_action(clean_msg)
-        if det_action:
+        # 1. Deterministic UI actions (captions, audio descriptions, font size)
+        if intent == AssistantIntent.DETERMINISTIC_ACTION:
             return {
-                "reply": det_action["message"],
-                "action": det_action.get("action"),
-                "action_payload": det_action,
+                "reply": classification.direct_reply or "Action executed.",
+                "action": classification.action,
+                "action_payload": classification.action_payload,
                 "evidence": [],
+                "provider": "deterministic_action",
             }
 
-        # 2. Extract and normalize context
+        # 2. Conversational, Platform explanation, and Ambiguous clarification
+        if intent in (AssistantIntent.CONVERSATIONAL, AssistantIntent.PLATFORM, AssistantIntent.CLARIFICATION):
+            return {
+                "reply": classification.direct_reply or "",
+                "action": None,
+                "evidence": [],
+                "provider": "intent_router",
+            }
+
+        # 3. Extract and normalize lecture context
         job_id = (
             context.get("lecture_id")
             or context.get("job_id")
@@ -83,25 +66,102 @@ class AssistantOrchestrator:
         )
         timestamp = float(context.get("timestamp") or 0.0)
 
-        # 3. Validate lecture context presence
-        if not job_id or not storage.job_exists(job_id):
+        # 4. Learning Progress / Next Best Action
+        if intent == AssistantIntent.LEARNING_PROGRESS:
+            try:
+                from backend.services import learning_agent
+                student_id = context.get("student_id") or "default_student"
+                agent_view = learning_agent.build_personal_agent(student_id)
+                insights = agent_view.get("insights", [])
+                recommended = agent_view.get("recommended_actions", [])
+
+                mastery_info = next((ins for ins in insights if ins.get("kind") == "mastery"), None)
+                if mastery_info:
+                    mastered = mastery_info.get("mastered", [])
+                    needs_work = mastery_info.get("needs_work", [])
+                    reply = "📊 **Learning Progress Summary**:\n"
+                    if mastered:
+                        reply += f"• **Mastered Concepts**: {', '.join(mastered)}\n"
+                    if needs_work:
+                        reply += f"• **Needs Review**: {', '.join(needs_work)}\n"
+
+                    if recommended:
+                        top_rec = recommended[0]
+                        rec_label = top_rec.get("label") or top_rec.get("action_type", "Review")
+                        rec_reason = top_rec.get("reasoning", "")
+                        reply += f"\n🎯 **Recommended Next Action**: {rec_label}\n{rec_reason}"
+                else:
+                    reply = (
+                        "You haven't completed any quizzes yet. "
+                        "Complete a quiz on this lecture in the Studio to diagnose your learning gaps and get personalized study recommendations!"
+                    )
+            except Exception as exc:
+                logger.warning("Error building personal learning agent: %s", exc)
+                reply = "Complete a quiz on this lecture in the Studio to see your personalized learning progress and study recommendations!"
+
             return {
-                "reply": "Open or process a lecture first to use the content-aware Assistant.",
-                "action": None,
+                "reply": reply,
+                "action": "open_learning" if job_id else None,
                 "evidence": [],
-                "provider": "none",
+                "provider": "learning_agent",
             }
 
-        job = storage.get_job(job_id)
-        from pathlib import Path
-        stem = Path(job.get("video_path", "")).stem or job_id
+        # 5. Quiz & Practice Intent
+        if intent == AssistantIntent.QUIZ:
+            if not job_id or not storage.job_exists(job_id):
+                return {
+                    "reply": "Open or process a lecture first to practice with interactive quizzes!",
+                    "action": None,
+                    "evidence": [],
+                    "provider": "none",
+                }
 
-        current_segment = execute_tool("get_current_segment", {}, context)
-        current_visual = execute_tool("get_current_visual_event", {}, context)
+            try:
+                from backend.services import quiz as quiz_svc
+                quiz_file = config.QUIZZES_DIR / f"{job_id}_quiz.json"
+                if quiz_file.exists():
+                    q_list = quiz_svc.load_quiz(f"{job_id}_quiz")
+                    if q_list:
+                        first_q = q_list[0]
+                        options = first_q.get("options", [])
+                        opts_str = "\n".join(f"  • {opt}" for opt in options) if options else ""
+                        reply = (
+                            f"📝 **Lecture Practice Question**:\n\n"
+                            f"**{first_q.get('question')}**\n"
+                            f"{opts_str}\n\n"
+                            f"Opening the interactive Quiz in the Studio for you to practice."
+                        )
+                        return {
+                            "reply": reply,
+                            "action": "open_quiz",
+                            "action_payload": {"action": "open_quiz", "message": "Opening lecture quiz."},
+                            "evidence": [],
+                            "provider": "quiz_service",
+                        }
+            except Exception as err:
+                logger.warning("Failed to load quiz for %s: %s", job_id, err)
 
-        # 4. Handle "What am I looking at right now" / "What is on screen"
-        lower_msg = clean_msg.lower()
-        if any(k in lower_msg for k in ("what am i looking at", "what is on screen", "what is shown", "ماذا يظهر", "ما المعروض")):
+            return {
+                "reply": "Opening the interactive Quiz panel in the Studio for this lecture.",
+                "action": "open_quiz",
+                "action_payload": {"action": "open_quiz", "message": "Opening lecture quiz."},
+                "evidence": [],
+                "provider": "quiz_service",
+            }
+
+        # 6. Current Visual Intent ("What am I looking at right now?")
+        if intent == AssistantIntent.CURRENT_VISUAL:
+            if not job_id or not storage.job_exists(job_id):
+                return {
+                    "reply": "Open or process a lecture first to inspect on-screen visuals.",
+                    "action": None,
+                    "evidence": [],
+                    "provider": "none",
+                }
+
+            current_segment = execute_tool("get_current_segment", {}, context)
+            current_visual = execute_tool("get_current_visual_event", {}, context)
+
             vtype = current_visual.get("type", "scene")
             vdesc = current_visual.get("description", "Standard lecture video scene.")
             ocr = current_visual.get("ocr_text", "")
@@ -111,18 +171,27 @@ class AssistantOrchestrator:
             if ocr and ocr.strip():
                 reply += f"\n\nOn-screen text:\n{ocr.strip()}"
             speech = current_segment.get("text")
-            if speech and speech != "No speech detected at this exact second." and speech != "No active lecture selected.":
+            if speech and speech not in ("No speech detected at this exact second.", "No active lecture selected."):
                 reply += f"\n\nInstructor speech at this moment: \"{speech.strip()}\""
 
             return {
                 "reply": reply,
                 "action": None,
-                "evidence": [{"time": time_str, "type": vtype, "snippet": vdesc}],
+                "evidence": [{"time": time_str, "type": vtype, "snippet": vdesc[:120]}],
                 "provider": "visual_telemetry",
             }
 
-        # 5. Handle "What was shown but not explained?" / "What am I missing?"
-        if any(k in lower_msg for k in ("what was shown but not explained", "what am i missing", "ما الذي فاتني", "ما الذي لم يشرح")):
+        # 7. Accessibility Intent ("What was shown but not explained?")
+        if intent == AssistantIntent.ACCESSIBILITY:
+            if not job_id or not storage.job_exists(job_id):
+                return {
+                    "reply": "Open or process a lecture first to analyze accessibility gaps.",
+                    "action": None,
+                    "evidence": [],
+                    "provider": "none",
+                }
+
+            job = storage.get_job(job_id)
             from backend.services import lecture_data, visual_companion
             result_obj = job.get("result") or {}
             segments = lecture_data.load_segments(job, result_obj)
@@ -135,8 +204,7 @@ class AssistantOrchestrator:
 
             missing_items = visual_companion.build_missing_items(segments, events, analysis, "blind", lecture_id=job_id)
             time_str = f"{int(timestamp//60):02d}:{int(timestamp%60):02d}"
-            
-            # Find gap near current timestamp or first gap
+
             nearby_gap = None
             for item in missing_items:
                 start_t = float(item.get("timestamp_start") or item.get("timestamp") or 0.0)
@@ -151,7 +219,7 @@ class AssistantOrchestrator:
                 v_claim = target_gap.get("missing_information") or target_gap.get("what_you_might_miss") or "Visual content on screen"
                 s_claim = target_gap.get("what_you_hear") or "General spoken description"
                 reasoning = target_gap.get("why_it_matters") or "Visual detail not fully explained by speech."
-                
+
                 reply = (
                     f"Accessibility Disparity Gap at [{gap_label}]:\n"
                     f"• Visual on screen: {v_claim}\n"
@@ -170,7 +238,21 @@ class AssistantOrchestrator:
                 "provider": "gap_reasoning",
             }
 
-        # 6. Multimodal RAG query via hybrid retriever
+        # 8. Content-related intents (LEARNING_HELP or LECTURE_CONTENT)
+        if not job_id or not storage.job_exists(job_id):
+            return {
+                "reply": "Open or process a lecture first to use the content-aware Assistant.",
+                "action": None,
+                "evidence": [],
+                "provider": "none",
+            }
+
+        job = storage.get_job(job_id)
+        stem = Path(job.get("video_path", "")).stem or job_id
+
+        current_segment = execute_tool("get_current_segment", {}, context)
+        current_visual = execute_tool("get_current_visual_event", {}, context)
+
         retriever = get_retriever(job_id, stem)
         chunks = retriever.retrieve(clean_msg, top_k=config.MAX_RAG_CHUNKS)
         rag_context = ""
@@ -182,13 +264,23 @@ class AssistantOrchestrator:
                 for c in chunks[:3]
             ]
 
-        # 7. Formulate prompt for Gemma
-        system_prompt = (
-            "You are EduAccess AI, a helpful, accessible learning assistant.\n"
-            "Answer the student's question accurately using the provided lecture context.\n"
-            "Be clear, concise, and educational. When relevant, cite the timestamp.\n"
-        )
-        user_prompt = f"Student Question: {clean_msg}\n\n"
+        if intent == AssistantIntent.LEARNING_HELP:
+            system_prompt = (
+                "You are EduAccess AI, an educational accessibility learning tutor.\n"
+                "The student needs a simplified, beginner-friendly explanation, breakdown, or intuitive example.\n"
+                "Explain the concept clearly and simply using the provided lecture evidence.\n"
+                "Do not just copy or dump raw lecture transcript. Break it down step by step with clear intuition.\n"
+                "When relevant, cite the timestamp.\n"
+            )
+            user_prompt = f"Student Request: {clean_msg}\n\n"
+        else:
+            system_prompt = (
+                "You are EduAccess AI, a helpful, accessible learning assistant.\n"
+                "Answer the student's question accurately using the provided lecture context.\n"
+                "Be clear, concise, and educational. When relevant, cite the timestamp.\n"
+            )
+            user_prompt = f"Student Question: {clean_msg}\n\n"
+
         if rag_context:
             user_prompt += f"Relevant Lecture Evidence:\n{rag_context}\n\n"
         if current_segment.get("text") and current_segment.get("text") not in ("No speech detected at this exact second.", "No active lecture selected."):
@@ -211,9 +303,16 @@ class AssistantOrchestrator:
             logger.warning("Learner-facing Gemma cloud call failed: %s; using grounded fallback.", exc)
             if chunks:
                 top = chunks[0]
-                reply = f"Based on the lecture at [{top.get('timestamp_label', '')}]: {top.get('text', '')}"
-                if len(chunks) > 1:
-                    reply += f"\n\nAdditional context at [{chunks[1].get('timestamp_label', '')}]: {chunks[1].get('text', '')}"
+                if intent == AssistantIntent.LEARNING_HELP:
+                    reply = (
+                        f"Here is a simple breakdown from the lecture at [{top.get('timestamp_label', '')}]:\n\n"
+                        f"• **Key Concept**: {top.get('text', '')}\n"
+                        f"• **Intuition**: The instructor explains and demonstrates this step by step."
+                    )
+                else:
+                    reply = f"Based on the lecture at [{top.get('timestamp_label', '')}]: {top.get('text', '')}"
+                    if len(chunks) > 1:
+                        reply += f"\n\nAdditional context at [{chunks[1].get('timestamp_label', '')}]: {chunks[1].get('text', '')}"
                 provider = "grounded_evidence"
             elif current_segment.get("text"):
                 reply = f"At [{int(timestamp//60):02d}:{int(timestamp%60):02d}], the instructor explains: {current_segment.get('text')}"
@@ -237,14 +336,27 @@ class AssistantOrchestrator:
     ) -> AsyncGenerator[str, None]:
         """Stream assistant response tokens via SSE."""
         clean_msg = message.strip()
-        if not clean_msg:
-            yield json.dumps({"token": "How can I help you with your lecture today?", "done": True})
+        classification = classify_intent(clean_msg)
+        intent = classification.intent
+
+        # 1. Deterministic action
+        if intent == AssistantIntent.DETERMINISTIC_ACTION:
+            yield json.dumps({
+                "token": classification.direct_reply or "Action executed.",
+                "action": classification.action,
+                "action_payload": classification.action_payload,
+                "done": True,
+            })
             return
 
-        # For simple deterministic actions, emit immediately
-        det_action = self._match_deterministic_action(clean_msg)
-        if det_action:
-            yield json.dumps({"token": det_action["message"], "action": det_action.get("action"), "action_payload": det_action, "done": True})
+        # 2. Conversational, Platform, Clarification
+        if intent in (AssistantIntent.CONVERSATIONAL, AssistantIntent.PLATFORM, AssistantIntent.CLARIFICATION):
+            direct_reply = classification.direct_reply or ""
+            words = direct_reply.split(" ")
+            for i in range(0, len(words), 3):
+                chunk = " ".join(words[i:i+3]) + (" " if i + 3 < len(words) else "")
+                yield json.dumps({"token": chunk, "done": False})
+            yield json.dumps({"token": "", "done": True})
             return
 
         job_id = (
@@ -256,42 +368,53 @@ class AssistantOrchestrator:
         )
         timestamp = float(context.get("timestamp") or 0.0)
 
-        if not job_id or not storage.job_exists(job_id):
-            yield json.dumps({"token": "Open or process a lecture first to use the content-aware Assistant.", "done": True})
-            return
-
-        # Special query routes (visual on-screen and missing disparity)
-        lower_msg = clean_msg.lower()
-        if any(k in lower_msg for k in ("what am i looking at", "what is on screen", "what is shown", "what was shown but not explained", "what am i missing", "ماذا يظهر", "ما المعروض", "ما الذي فاتني")):
+        # 3. Non-generative intents (Visual, Accessibility, Quiz, Progress)
+        if intent in (AssistantIntent.CURRENT_VISUAL, AssistantIntent.ACCESSIBILITY, AssistantIntent.QUIZ, AssistantIntent.LEARNING_PROGRESS):
             chat_res = self.chat(clean_msg, context, history=history)
             full_reply = chat_res.get("reply", "")
+            action = chat_res.get("action")
+            action_payload = chat_res.get("action_payload")
             words = full_reply.split(" ")
             for i in range(0, len(words), 3):
                 chunk = " ".join(words[i:i+3]) + (" " if i + 3 < len(words) else "")
                 yield json.dumps({"token": chunk, "done": False})
-            yield json.dumps({"token": "", "done": True})
+            yield json.dumps({"token": "", "action": action, "action_payload": action_payload, "done": True})
+            return
+
+        # 4. Content and Learning Help intents
+        if not job_id or not storage.job_exists(job_id):
+            yield json.dumps({"token": "Open or process a lecture first to use the content-aware Assistant.", "done": True})
             return
 
         job = storage.get_job(job_id)
-        from pathlib import Path
         stem = Path(job.get("video_path", "")).stem or job_id
 
         current_segment = execute_tool("get_current_segment", {}, context)
         current_visual = execute_tool("get_current_visual_event", {}, context)
 
-        # Retrieve RAG context
-        rag_context = ""
         retriever = get_retriever(job_id, stem)
         chunks = retriever.retrieve(clean_msg, top_k=config.MAX_RAG_CHUNKS)
+        rag_context = ""
         if chunks:
             rag_context = "\n---\n".join(f"{c.get('timestamp_label', '')}: {c.get('text', '')}" for c in chunks)
 
-        system_prompt = (
-            "You are EduAccess AI, a helpful, accessible learning assistant.\n"
-            "Answer the student's question accurately using the provided lecture context.\n"
-            "Be clear, concise, and educational. When relevant, cite the timestamp.\n"
-        )
-        user_prompt = f"Student Question: {clean_msg}\n\n"
+        if intent == AssistantIntent.LEARNING_HELP:
+            system_prompt = (
+                "You are EduAccess AI, an educational accessibility learning tutor.\n"
+                "The student needs a simplified, beginner-friendly explanation, breakdown, or intuitive example.\n"
+                "Explain the concept clearly and simply using the provided lecture evidence.\n"
+                "Do not just copy or dump raw lecture transcript. Break it down step by step with clear intuition.\n"
+                "When relevant, cite the timestamp.\n"
+            )
+            user_prompt = f"Student Request: {clean_msg}\n\n"
+        else:
+            system_prompt = (
+                "You are EduAccess AI, a helpful, accessible learning assistant.\n"
+                "Answer the student's question accurately using the provided lecture context.\n"
+                "Be clear, concise, and educational. When relevant, cite the timestamp.\n"
+            )
+            user_prompt = f"Student Question: {clean_msg}\n\n"
+
         if rag_context:
             user_prompt += f"Relevant Lecture Evidence:\n{rag_context}\n\n"
         if current_segment.get("text") and current_segment.get("text") not in ("No speech detected at this exact second.", "No active lecture selected."):

@@ -71,10 +71,15 @@ class TestAssistantContextEndToEnd(unittest.TestCase):
     def test_grounded_rag_with_evidence(self):
         """Verify RAG query returns grounded evidence with timestamps."""
         context = {"lecture_id": self.demo_job_id, "timestamp": 5.0}
-        res = self.orchestrator.chat("What is a for loop in Python?", context=context)
-        self.assertIn("reply", res)
-        self.assertNotIn("Open or process a lecture first", res["reply"])
-        self.assertIsInstance(res.get("evidence"), list)
+        with patch.object(
+            self.orchestrator.gemma,
+            "generate_cloud",
+            return_value="A for loop in Python iterates over a sequence citing [00:10]."
+        ):
+            res = self.orchestrator.chat("What is a for loop in Python?", context=context)
+            self.assertIn("reply", res)
+            self.assertNotIn("Open or process a lecture first", res["reply"])
+            self.assertIsInstance(res.get("evidence"), list)
 
     def test_stream_chat_empty_context(self):
         """Verify streaming chat rejects empty context with honest token."""
