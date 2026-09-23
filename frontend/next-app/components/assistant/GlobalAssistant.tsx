@@ -1,8 +1,8 @@
 "use client";
 
 import * as React from "react";
-import { useState, useRef, useEffect, useCallback } from "react";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useState, useRef, useEffect } from "react";
+import { usePathname, useRouter } from "next/navigation";
 import {
   MessageSquareText,
   X,
@@ -14,12 +14,8 @@ import {
   Sparkles,
   Bot,
   User,
-  Lightbulb,
-  ArrowRight,
-  Maximize2,
-  Minimize2,
 } from "lucide-react";
-import { assistantChat, assistantStream, listLectures, type AssistantChatResponse } from "@/lib/api";
+import { assistantChat, assistantStream, type AssistantChatResponse } from "@/lib/api";
 import { cn } from "@/lib/format";
 
 interface Message {
@@ -30,42 +26,30 @@ interface Message {
   isStreaming?: boolean;
 }
 
-const QUICK_PROMPTS = [
-  "What am I looking at right now?",
+const GENERAL_QUICK_PROMPTS = [
+  "What is Python?",
+  "Explain machine learning",
+  "What is a for loop?",
+  "Tell me a joke",
+  "What can you do?",
+  "What is SQL?",
+];
+
+const LECTURE_QUICK_PROMPTS = [
   "Explain this section simply",
+  "What am I looking at right now?",
   "What was shown but not explained?",
   "Give me a quiz hint",
   "Turn on captions",
   "Turn on audio descriptions",
 ];
 
-const SELECTED_LECTURE_STORAGE_KEY = "eduaccess:selected-lecture-id";
-
-function getClientSearchParams(): URLSearchParams | null {
-  if (typeof window === "undefined") return null;
-  return new URLSearchParams(window.location.search);
-}
-
 function resolveActiveJob(pathname: string): string | null {
-  // 1. Path match: /lectures/:jobId (excluding index, new, upload)
+  // Strictly match active lecture route: /lectures/:jobId
   const routeMatch = pathname.match(/^\/lectures\/([^\/?#]+)/);
-  if (routeMatch && routeMatch[1] && !["page", "new", "upload"].includes(routeMatch[1])) {
+  if (routeMatch && routeMatch[1] && !["page", "new", "upload", "index"].includes(routeMatch[1])) {
     return decodeURIComponent(routeMatch[1]);
   }
-
-  // 2. Query param ONLY when on lecture or quiz route: ?job=..., ?jobId=...
-  if (pathname.startsWith("/lectures") || pathname.startsWith("/quiz")) {
-    const searchParams = getClientSearchParams();
-    if (searchParams) {
-      const qJob =
-        searchParams.get("job") ||
-        searchParams.get("jobId") ||
-        searchParams.get("lecture_id") ||
-        searchParams.get("id");
-      if (qJob) return qJob;
-    }
-  }
-
   return null;
 }
 
@@ -97,8 +81,8 @@ export default function GlobalAssistant() {
   const recognitionRef = useRef<any>(null);
   const handleSendRef = useRef<(customText?: string) => Promise<void>>(async () => {});
 
-  // Synchronize active job ID dynamically across navigation:
-  // Clears to null when the user navigates away from a lecture to general pages.
+  // Dynamically synchronize active job ID from current route:
+  // Strictly null on all general pages (/ , /learning, /quiz, /settings, /upload, /report, etc.)
   useEffect(() => {
     const resolved = resolveActiveJob(pathname);
     setActiveJobId(resolved);
@@ -107,24 +91,30 @@ export default function GlobalAssistant() {
     }
   }, [pathname]);
 
-  // Window event listeners for real-time lecture changes & video time updates
+  // Window event listeners for in-lecture playback updates ONLY
   useEffect(() => {
     if (typeof window === "undefined") return;
 
     const onLectureChange = (e: Event) => {
-      const customEvent = e as CustomEvent<{ jobId?: string | null }>;
-      if (typeof customEvent.detail?.jobId !== "undefined") {
-        setActiveJobId(customEvent.detail.jobId);
+      const isLectureRoute = Boolean(resolveActiveJob(pathname));
+      if (isLectureRoute) {
+        const customEvent = e as CustomEvent<{ jobId?: string | null }>;
+        if (typeof customEvent.detail?.jobId !== "undefined") {
+          setActiveJobId(customEvent.detail.jobId);
+        }
       }
     };
 
     const onTimeUpdate = (e: Event) => {
-      const customEvent = e as CustomEvent<{ time?: number; jobId?: string }>;
-      if (typeof customEvent.detail?.time === "number") {
-        setCurrentTime(customEvent.detail.time);
-      }
-      if (customEvent.detail?.jobId) {
-        setActiveJobId(customEvent.detail.jobId);
+      const isLectureRoute = Boolean(resolveActiveJob(pathname));
+      if (isLectureRoute) {
+        const customEvent = e as CustomEvent<{ time?: number; jobId?: string }>;
+        if (typeof customEvent.detail?.time === "number") {
+          setCurrentTime(customEvent.detail.time);
+        }
+        if (customEvent.detail?.jobId) {
+          setActiveJobId(customEvent.detail.jobId);
+        }
       }
     };
 
@@ -135,7 +125,7 @@ export default function GlobalAssistant() {
       window.removeEventListener("eduaccess:lecture-change", onLectureChange);
       window.removeEventListener("eduaccess:timeupdate", onTimeUpdate);
     };
-  }, []);
+  }, [pathname]);
 
   // Auto-scroll on new messages
   useEffect(() => {
@@ -212,13 +202,13 @@ export default function GlobalAssistant() {
     setInputValue("");
     setIsLoading(true);
 
-    const activeJob = activeJobId || resolveActiveJob(pathname);
+    const activeJob = resolveActiveJob(pathname);
 
     const contextPayload = {
       page: pathname,
       lecture_id: activeJob || undefined,
       job_id: activeJob || undefined,
-      timestamp: currentTime,
+      timestamp: activeJob ? currentTime : undefined,
     };
 
     try {
@@ -341,6 +331,8 @@ export default function GlobalAssistant() {
     }
   };
 
+  const quickPrompts = activeJobId ? LECTURE_QUICK_PROMPTS : GENERAL_QUICK_PROMPTS;
+
   return (
     <>
       {/* Floating Action Button */}
@@ -429,7 +421,7 @@ export default function GlobalAssistant() {
 
           {/* Quick Prompts Bar */}
           <div className="border-b border-[#E7DED2] bg-[#FBF8F2]/60 px-3 py-2 flex items-center gap-1.5 overflow-x-auto no-scrollbar">
-            {QUICK_PROMPTS.map((prompt) => (
+            {quickPrompts.map((prompt) => (
               <button
                 key={prompt}
                 onClick={() => handleSend(prompt)}

@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { createContext, useCallback, useContext, useEffect, useState } from "react";
-import { useSearchParams, ReadonlyURLSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { listLectures, getResult } from "@/lib/api";
 import type { LectureRecord } from "@/types/backend";
 
@@ -11,14 +11,13 @@ interface WorkspaceValue {
   loading: boolean;
   error: string | null;
   selectedId: string | null;
-  setSelectedId: (id: string) => void;
+  setSelectedId: (id: string | null) => void;
   selected?: LectureRecord;
   result?: Record<string, unknown>;
   refresh: () => Promise<void>;
 }
 
 const Ctx = createContext<WorkspaceValue | null>(null);
-const SELECTED_LECTURE_STORAGE_KEY = "eduaccess:selected-lecture-id";
 
 export function useWorkspace(): WorkspaceValue {
   const v = useContext(Ctx);
@@ -47,20 +46,14 @@ export function WorkspaceProvider({
       const data = await listLectures();
       setLectures(data.lectures);
       const param = searchParams.get("job");
-      const storedId = typeof window === "undefined"
-        ? null
-        : window.localStorage.getItem(SELECTED_LECTURE_STORAGE_KEY);
       const isAvailable = (id: string | null) => Boolean(id && data.lectures.some((l) => l.job_id === id));
 
       if (initialJobId) {
         setSelectedIdState(initialJobId);
       } else if (isAvailable(param)) {
         setSelectedIdState(param);
-      } else if (isAvailable(storedId)) {
-        setSelectedIdState(storedId);
-      } else if (data.lectures.length > 0) {
-        setSelectedIdState((cur) => cur ?? data.lectures[0].job_id);
       }
+      // Never auto-select default demo lecture on general pages
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to load lectures");
     } finally {
@@ -77,19 +70,9 @@ export function WorkspaceProvider({
     if (param) setSelectedIdState(param);
   }, [searchParams]);
 
-  useEffect(() => {
-    if (selectedId && typeof window !== "undefined") {
-      window.localStorage.setItem(SELECTED_LECTURE_STORAGE_KEY, selectedId);
-      window.dispatchEvent(
-        new CustomEvent("eduaccess:lecture-change", { detail: { jobId: selectedId } })
-      );
-    }
-  }, [selectedId]);
-
-  const setSelectedId = useCallback((id: string) => {
+  const setSelectedId = useCallback((id: string | null) => {
     setSelectedIdState(id);
-    if (typeof window !== "undefined") {
-      window.localStorage.setItem(SELECTED_LECTURE_STORAGE_KEY, id);
+    if (typeof window !== "undefined" && id) {
       window.dispatchEvent(
         new CustomEvent("eduaccess:lecture-change", { detail: { jobId: id } })
       );
