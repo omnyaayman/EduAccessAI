@@ -96,6 +96,8 @@ interface ContextualIntelligencePanelProps {
   jumpTo: (s: number) => void;
   mode?: "default" | "blind" | "lv" | "deaf" | "cognitive";
   className?: string;
+  captionsEnabled?: boolean;
+  visualCompanionEnabled?: boolean;
 }
 
 export function ContextualIntelligencePanel({
@@ -107,6 +109,8 @@ export function ContextualIntelligencePanel({
   adCues,
   jumpTo,
   className,
+  captionsEnabled = true,
+  visualCompanionEnabled = true,
 }: ContextualIntelligencePanelProps) {
   const [collapsed, setCollapsed] = React.useState<Record<string, boolean>>({});
   const toggle = (id: string) =>
@@ -215,7 +219,7 @@ export function ContextualIntelligencePanel({
       </div>
 
       {/* 6 Sections */}
-      {renderCollapsible(
+      {visualCompanionEnabled && renderCollapsible(
         SECTIONS[0],
         activeVisual ? (
           <div className="space-y-2">
@@ -255,7 +259,7 @@ export function ContextualIntelligencePanel({
         true
       )}
 
-      {renderCollapsible(
+      {captionsEnabled && renderCollapsible(
         SECTIONS[1],
         activeSegment ? (
           <div className="space-y-2">
@@ -273,7 +277,7 @@ export function ContextualIntelligencePanel({
         true
       )}
 
-      {renderCollapsible(
+      {visualCompanionEnabled && renderCollapsible(
         SECTIONS[2],
         activeAnalysis?.ocr_text ? (
           <div className="space-y-2">

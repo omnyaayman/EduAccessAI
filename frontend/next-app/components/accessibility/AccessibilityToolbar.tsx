@@ -11,95 +11,44 @@ import {
   Type,
   Activity,
   Keyboard,
-  Glasses,
   X,
   Check,
 } from "lucide-react";
 import { cn } from "@/lib/format";
+import {
+  applyAccessibilityPreferences,
+  DEFAULT_ACCESSIBILITY_PREFERENCES,
+  loadAccessibilityPreferences,
+} from "@/lib/accessibilityPreferences.mjs";
+import type { AccessibilityPreferences } from "@/lib/accessibilityPreferences.mjs";
 
-interface AccessibilitySettings {
-  captions: boolean;
-  audioDescription: boolean;
-  visualCompanion: boolean;
-  highContrast: boolean;
-  largeText: boolean;
-  reducedMotion: boolean;
-  screenReaderMode: boolean;
+function safeLocalStorage(): Storage | null {
+  try { return window.localStorage; } catch { return null; }
 }
-
-const DEFAULT_SETTINGS: AccessibilitySettings = {
-  captions: true,
-  audioDescription: true,
-  visualCompanion: true,
-  highContrast: false,
-  largeText: false,
-  reducedMotion: false,
-  screenReaderMode: false,
-};
 
 export default function AccessibilityToolbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [showShortcuts, setShowShortcuts] = useState(false);
-  const [settings, setSettings] = useState<AccessibilitySettings>(DEFAULT_SETTINGS);
+  const [settings, setSettings] = useState<AccessibilityPreferences>({ ...DEFAULT_ACCESSIBILITY_PREFERENCES });
 
   // Load from localStorage on mount
   useEffect(() => {
-    try {
-      const stored = localStorage.getItem("eduaccess_accessibility_settings");
-      if (stored) {
-        const parsed = JSON.parse(stored);
-        setSettings((prev) => ({ ...prev, ...parsed }));
-      }
-    } catch {
-      // ignore
-    }
+    setSettings(loadAccessibilityPreferences(
+      safeLocalStorage(),
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    ));
   }, []);
 
-  // Apply settings to document element and dispatch sync events
+  // Persist and apply every preference consistently for the app and lecture consumers.
   useEffect(() => {
-    try {
-      localStorage.setItem("eduaccess_accessibility_settings", JSON.stringify(settings));
-    } catch {
-      // ignore
-    }
-
-    const root = document.documentElement;
-
-    // High contrast
-    if (settings.highContrast) {
-      root.classList.add("high-contrast");
-    } else {
-      root.classList.remove("high-contrast");
-    }
-
-    // Large text
-    if (settings.largeText) {
-      root.classList.add("text-large");
-    } else {
-      root.classList.remove("text-large");
-    }
-
-    // Reduced motion
-    if (settings.reducedMotion) {
-      root.classList.add("reduced-motion");
-    } else {
-      root.classList.remove("reduced-motion");
-    }
-
-    // Screen reader mode
-    if (settings.screenReaderMode) {
-      root.classList.add("screen-reader-mode");
-    } else {
-      root.classList.remove("screen-reader-mode");
-    }
-
-    // Notify window listeners
-    window.dispatchEvent(
-      new CustomEvent("eduaccess:accessibility_update", { detail: settings })
-    );
+    applyAccessibilityPreferences(settings, {
+      root: document.documentElement,
+      storage: safeLocalStorage(),
+      target: window,
+    });
   }, [settings]);
 
-  const toggleSetting = (key: keyof AccessibilitySettings) => {
+  const toggleSetting = (key: keyof AccessibilityPreferences) => {
     setSettings((prev) => ({ ...prev, [key]: !prev[key] }));
   };
 
@@ -110,6 +59,8 @@ export default function AccessibilityToolbar() {
         type="button"
         onClick={() => setIsOpen(!isOpen)}
         aria-label="Accessibility Settings Toolbar"
+        aria-expanded={isOpen}
+        aria-controls="eduaccess-accessibility-panel"
         className="eduaccess-accessibility-trigger fixed bottom-6 left-6 z-40 flex size-12 items-center justify-center rounded-2xl border border-[#DDD0C0] bg-[#FFFDFC] text-[#51483F] shadow-sm transition-all hover:border-[#B85C38]/60 hover:text-[#B85C38] hover:shadow-md focus:outline-none focus:ring-4 focus:ring-[#B85C38]/20 cursor-pointer"
       >
         <Accessibility className="size-5" />
@@ -120,6 +71,8 @@ export default function AccessibilityToolbar() {
         <div
           role="dialog"
           aria-label="Accessibility Preferences"
+          aria-modal="false"
+          id="eduaccess-accessibility-panel"
           className="eduaccess-accessibility-panel fixed bottom-20 left-6 z-40 w-72 sm:w-80 rounded-3xl border border-[#E4D9CC] bg-[#FFFDFC]/95 p-4 shadow-xl backdrop-blur-xl transition-all text-[#2F2924]"
         >
           <div className="flex items-center justify-between border-b border-[#E7DED2] pb-3">
@@ -141,7 +94,7 @@ export default function AccessibilityToolbar() {
           </div>
 
           <div className="mt-3 space-y-1.5">
-            <label className="flex items-center justify-between p-2 rounded-xl hover:bg-[#F1E8DC]/60 cursor-pointer transition">
+            <label title="Show synchronized transcript text while a lecture plays, when transcript data is available." className="flex items-center justify-between p-2 rounded-xl hover:bg-[#F1E8DC]/60 cursor-pointer transition">
               <div className="flex items-center gap-2.5 text-xs font-semibold text-[#51483F]">
                 <Eye className="size-4 text-[#5F9A9A]" />
                 Captions
@@ -154,7 +107,7 @@ export default function AccessibilityToolbar() {
               />
             </label>
 
-            <label className="flex items-center justify-between p-2 rounded-xl hover:bg-[#F1E8DC]/60 cursor-pointer transition">
+            <label title="Play available synchronized visual narration during the lecture." className="flex items-center justify-between p-2 rounded-xl hover:bg-[#F1E8DC]/60 cursor-pointer transition">
               <div className="flex items-center gap-2.5 text-xs font-semibold text-[#51483F]">
                 <Volume2 className="size-4 text-[#5F8A62]" />
                 Audio Description
@@ -167,7 +120,7 @@ export default function AccessibilityToolbar() {
               />
             </label>
 
-            <label className="flex items-center justify-between p-2 rounded-xl hover:bg-[#F1E8DC]/60 cursor-pointer transition">
+            <label title="Show grounded descriptions and OCR from the current lecture visuals." className="flex items-center justify-between p-2 rounded-xl hover:bg-[#F1E8DC]/60 cursor-pointer transition">
               <div className="flex items-center gap-2.5 text-xs font-semibold text-[#51483F]">
                 <Tv className="size-4 text-[#6C63A8]" />
                 Visual Companion
@@ -221,18 +174,9 @@ export default function AccessibilityToolbar() {
               />
             </label>
 
-            <label className="flex items-center justify-between p-2 rounded-xl hover:bg-[#F1E8DC]/60 cursor-pointer transition">
-              <div className="flex items-center gap-2.5 text-xs font-semibold text-[#51483F]">
-                <Glasses className="size-4 text-[#6C63A8]" />
-                Screen Reader Mode
-              </div>
-              <input
-                type="checkbox"
-                checked={settings.screenReaderMode}
-                onChange={() => toggleSetting("screenReaderMode")}
-                className="size-4 rounded border-[#DDD0C0] text-[#B85C38] focus:ring-[#B85C38] accent-[#B85C38] cursor-pointer"
-              />
-            </label>
+            <p className="px-2 py-1 text-[11px] leading-relaxed text-[#7A7067]" role="note">
+              Screen readers use your browser and device settings. EduAccess controls work with standard assistive technology.
+            </p>
 
             <button
               type="button"

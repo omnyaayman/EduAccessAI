@@ -8,6 +8,7 @@
     "build": "next build",
     "start": "next start",
     "typecheck": "tsc --noEmit",
+    "test:accessibility": "node --test tests/accessibility-preferences.test.mjs",
     "lint": "next lint"
   },
   "dependencies": {

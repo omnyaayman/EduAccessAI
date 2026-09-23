@@ -3,6 +3,7 @@
 import * as React from "react";
 import { motion, useReducedMotion } from "motion/react";
 import { cn } from "@/lib/format";
+import { resolveReducedMotion } from "@/lib/accessibilityPreferences.mjs";
 import { ScoreRing } from "@/components/ui/score-ring";
 import { ArrowUpRight, ArrowDownRight, ExternalLink } from "lucide-react";
 
@@ -108,19 +109,24 @@ export function HealthDiagnostic({
   onNavigateReport,
 }: HealthDiagnosticProps) {
   const prefersReducedMotion = useReducedMotion();
-  const [cssReducedMotion, setCssReducedMotion] = React.useState(false);
+  const [motionPreference, setMotionPreference] = React.useState({ explicit: false, reduced: false });
 
   React.useEffect(() => {
     const root = document.documentElement;
-    setCssReducedMotion(root.classList.contains("reduced-motion"));
-    const obs = new MutationObserver(() => {
-      setCssReducedMotion(root.classList.contains("reduced-motion"));
+    const sync = () => setMotionPreference({
+      explicit: root.classList.contains("motion-preference-set"),
+      reduced: root.classList.contains("reduced-motion"),
     });
+    sync();
+    const obs = new MutationObserver(sync);
     obs.observe(root, { attributes: true, attributeFilter: ["class"] });
     return () => obs.disconnect();
   }, []);
 
-  const reduced = prefersReducedMotion || cssReducedMotion;
+  const reduced = resolveReducedMotion(
+    motionPreference.explicit ? motionPreference.reduced : undefined,
+    prefersReducedMotion
+  );
 
   const step0 = components[0];
   const step1 = components[1];

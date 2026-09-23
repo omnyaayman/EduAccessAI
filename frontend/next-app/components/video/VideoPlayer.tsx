@@ -66,6 +66,22 @@ export const VideoPlayer = React.forwardRef<VideoPlayerHandle, VideoPlayerProps>
   const [interactiveEnabled, setInteractiveEnabled] = React.useState(enableInteractiveLayer);
   const effectiveMuted = audioMuted || userMuted;
 
+  React.useEffect(() => {
+    const syncCaptions = (event: Event) => {
+      const detail = (event as CustomEvent<{ captions?: boolean }>).detail;
+      if (typeof detail?.captions !== "boolean") return;
+      setCcOn(detail.captions);
+      const track = videoRef.current?.textTracks[0];
+      if (track) track.mode = detail.captions ? "showing" : "hidden";
+    };
+    window.addEventListener("eduaccess:accessibility_update", syncCaptions);
+    try {
+      const stored = localStorage.getItem("eduaccess_accessibility_settings");
+      if (stored) syncCaptions(new CustomEvent("eduaccess:accessibility_update", { detail: JSON.parse(stored) }));
+    } catch { /* Preferences are optional. */ }
+    return () => window.removeEventListener("eduaccess:accessibility_update", syncCaptions);
+  }, []);
+
   React.useImperativeHandle(ref, () => ({
     seekTo: (seconds: number) => {
       if (videoRef.current) {
@@ -179,7 +195,7 @@ export const VideoPlayer = React.forwardRef<VideoPlayerHandle, VideoPlayerProps>
       >
         {captionsSrc && <track ref={(el) => { if (el) {
           el.addEventListener("load", () => {
-            if (videoRef.current?.textTracks[0]) videoRef.current.textTracks[0].mode = ccOn ? "showing" : "hidden";
+          if (videoRef.current?.textTracks[0]) videoRef.current.textTracks[0].mode = ccOn ? "showing" : "hidden";
           });
         } }} kind="captions" src={captionsSrc} label="Captions" default />}
       </video>

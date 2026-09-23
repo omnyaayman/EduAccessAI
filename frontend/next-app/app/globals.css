@@ -131,12 +131,13 @@
   }
 
   @media (prefers-reduced-motion: reduce) {
-    *,
-    *::before,
-    *::after {
-      animation-duration: 0.01ms !important;
-      animation-iteration-count: 1 !important;
-      transition-duration: 0.01ms !important;
+    html:not(.motion-preference-set) *,
+    html:not(.motion-preference-set) *::before,
+    html:not(.motion-preference-set) *::after {
+      animation: none !important;
+      transition-duration: 0s !important;
+      transition-delay: 0s !important;
+      scroll-behavior: auto !important;
     }
   }
 }
@@ -538,6 +539,18 @@
 
 /* Accessibility Toolbar Mode Overrides */
 html.high-contrast {
+  color-scheme: light;
+  --bg-primary: #ffffff;
+  --bg-cream: #ffffff;
+  --bg-surface-secondary: #eeeeee;
+  --bg-elevated: #ffffff;
+  --text-primary: #000000;
+  --text-secondary: #111111;
+  --text-body: #111111;
+  --text-muted: #222222;
+  --text-subtle: #333333;
+  --border-primary: #000000;
+  --border-soft: #333333;
   --app-bg: #ffffff;
   --app-panel: #ffffff;
   --app-panel2: #000000;
@@ -555,19 +568,43 @@ html.high-contrast * {
   border-color: #000000 !important;
 }
 
+html.high-contrast [class*="text-[#"] {
+  color: #000000 !important;
+}
+
+html.high-contrast :focus-visible {
+  outline: 3px solid #005fcc !important;
+  outline-offset: 2px !important;
+}
+
 html.high-contrast button,
 html.high-contrast a {
-  outline: 1px solid #000000 !important;
+  outline-color: #000000 !important;
+}
+
+html.high-contrast input,
+html.high-contrast textarea,
+html.high-contrast select,
+html.high-contrast [role="dialog"] {
+  color: #000000 !important;
+  background-color: #ffffff !important;
+}
+
+html.high-contrast a {
+  color: #003c8f !important;
 }
 
 html.text-large {
   font-size: 112.5% !important;
 }
 
-html.screen-reader-mode {
-  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
-  line-height: 1.75 !important;
-  letter-spacing: 0.02em !important;
+html.reduced-motion *,
+html.reduced-motion *::before,
+html.reduced-motion *::after {
+  scroll-behavior: auto !important;
+  animation: none !important;
+  transition-duration: 0s !important;
+  transition-delay: 0s !important;
 }
 
 .sr-only {

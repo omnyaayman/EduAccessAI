@@ -178,10 +178,25 @@ function WorkspaceBody() {
   const videoRef = useRef<VideoPlayerHandle>(null);
   const adAudioRef = useRef<HTMLAudioElement | null>(null);
   const [adMode, setAdMode] = useState(false);
+  const [accessibilityPrefs, setAccessibilityPrefs] = useState({ captions: true, audioDescription: true, visualCompanion: true });
   const [activeCueIdx, setActiveCueIdx] = useState<number>(-1);
   const [adError, setAdError] = useState<string | null>(null);
   const [lecturePickerOpen, setLecturePickerOpen] = useState(false);
   const [selectedGapId, setSelectedGapId] = useState<string | number | null>(null);
+
+  useEffect(() => {
+    const sync = (event: Event) => {
+      const detail = (event as CustomEvent<{ captions?: boolean; audioDescription?: boolean; visualCompanion?: boolean }>).detail;
+      setAccessibilityPrefs((current) => ({ ...current, ...detail }));
+      if (typeof detail?.audioDescription === "boolean") setAdMode(detail.audioDescription);
+    };
+    window.addEventListener("eduaccess:accessibility_update", sync);
+    try {
+      const stored = localStorage.getItem("eduaccess_accessibility_settings");
+      if (stored) sync(new CustomEvent("eduaccess:accessibility_update", { detail: JSON.parse(stored) }));
+    } catch { /* Preferences are optional. */ }
+    return () => window.removeEventListener("eduaccess:accessibility_update", sync);
+  }, []);
 
   const [data, setData] = useState<LiveVisualData>({
     analysis: [],
@@ -582,7 +597,7 @@ function WorkspaceBody() {
               src={src}
               onTimeUpdate={setTime}
               onPlayChange={setPlaying}
-              enableCaptions
+              enableCaptions={accessibilityPrefs.captions}
               onReady={() => setVideoReady(true)}
               ariaLabel={`${lec.filename} video`}
               audioMuted={false}
@@ -600,7 +615,7 @@ function WorkspaceBody() {
                 {adError}
               </div>
             )}
-            {activeSegment && (
+            {activeSegment && accessibilityPrefs.captions && (
               <div className="mt-3 flex items-start gap-3 rounded-xl bg-[#F4F7FA] border border-[#D5E1EC] px-4 py-3 shadow-xs">
                 <div className="size-7 shrink-0 mt-0.5 rounded-lg bg-[#5B82A6]/15 text-[#5B82A6] flex items-center justify-center">
                   <Quote className="size-3.5" />
@@ -650,9 +665,11 @@ function WorkspaceBody() {
                 missing={data.missing}
                 adCues={data.adCues as any}
                 jumpTo={jumpTo}
+                captionsEnabled={accessibilityPrefs.captions}
+                visualCompanionEnabled={accessibilityPrefs.visualCompanion}
               />
             )}
-            {activeTab === "visual" && (
+            {activeTab === "visual" && accessibilityPrefs.visualCompanion && (
               <div className="space-y-5">
                 <VisualCompanion
                   active={activeAnalysis}
@@ -685,6 +702,11 @@ function WorkspaceBody() {
                   </div>
                 </div>
               </div>
+            )}
+            {activeTab === "visual" && !accessibilityPrefs.visualCompanion && (
+              <p className="rounded-xl border border-[#DDD0C0] bg-[#FBF8F2] p-4 text-sm text-[#51483F]" role="status">
+                Visual Companion is off. Turn it on in Accessibility Preferences to show grounded slide descriptions and OCR.
+              </p>
             )}
             {activeTab === "audio" && (
               <div className="space-y-5">
