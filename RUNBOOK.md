@@ -89,13 +89,12 @@ npm run dev
 
 ## 4. Pre-Loaded Demonstration Data
 
-The repository includes pre-computed lecture assets in `data/outputs/` and pre-packaged videos in `data/videos/`:
+The repository includes pre-computed lecture assets in `data/outputs/` and pre-packaged video in `data/videos/`:
 - `DEMO_python_loops.mp4` (`DEMO_python_loops`): Fully processed lecture on Python Loops with 100% verified captions, visual events, knowledge graph, and audio description tracks.
-- `7ef3b9ae49a5_WhatsApp Video...`: Real dialectal Egyptian Arabic coding lecture.
 
-To run a demo instantly without waiting for Whisper/OCR processing:
+To run the demo instantly without waiting for Whisper/OCR processing:
 1. Open `http://localhost:3000`
-2. Select **"Python Loops & Range"** or **"Egyptian Arabic Python"** from the workspace catalog.
+2. Launch **"DEMO_python_loops"** (`/lectures/DEMO_python_loops`).
 3. The lecture workspace opens immediately with all multimodal representations.
 
 ---

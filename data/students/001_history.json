@@ -15,6 +15,7 @@
     0.0,
     0.0,
     0.0,
+    33.3,
     33.3
   ],
   "weak_topics": [
@@ -337,16 +338,43 @@
           "correct": false
         }
       ]
+    },
+    {
+      "quiz_id": "DEMO_python_loops_quiz",
+      "lesson_title": "DEMO_python_loops",
+      "timestamp": "2026-09-23T15:26:49.877448+00:00",
+      "score_percent": 33.3,
+      "correct_count": 1.0,
+      "total": 3,
+      "questions": [
+        {
+          "question": "What is the main benefit of a loop?",
+          "concept": "loops",
+          "concept_id": "loops",
+          "lecture_id": "DEMO_python_loops",
+          "type": "multiple_choice",
+          "correct": true
+        },
+        {
+          "question": "Briefly explain the main programming concept explained in this lesson.",
+          "concept": "general_programming",
+          "concept_id": "general_programming",
+          "lecture_id": "DEMO_python_loops",
+          "type": "short_answer",
+          "correct": false
+        },
+        {
+          "question": "هل تبدأ الحلقات التكرارية دائماً بالقيمة 1 في بايثون؟",
+          "concept": "loops_indexing",
+          "concept_id": "loops_indexing",
+          "lecture_id": "DEMO_python_loops",
+          "type": "true_false",
+          "correct": false
+        }
+      ]
     }
   ],
   "recent_activity": [
-    {
-      "type": "quiz",
-      "quiz_id": "test_integration_job_quiz",
-      "title": "test_integration_job_quiz",
-      "score_percent": 100.0,
-      "timestamp": "2026-08-29T19:57:23.811298+00:00"
-    },
     {
       "type": "quiz",
       "quiz_id": "2924ba8f8909_quiz",
@@ -409,6 +437,13 @@
       "title": "DEMO_python_loops",
       "score_percent": 33.3,
       "timestamp": "2026-09-19T19:17:23.446697+00:00"
+    },
+    {
+      "type": "quiz",
+      "quiz_id": "DEMO_python_loops_quiz",
+      "title": "DEMO_python_loops",
+      "score_percent": 33.3,
+      "timestamp": "2026-09-23T15:26:49.877448+00:00"
     }
   ]
 }

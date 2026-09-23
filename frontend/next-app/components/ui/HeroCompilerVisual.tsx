@@ -60,10 +60,10 @@ export const COMPILER_STAGES: CompilerPipelineStage[] = [
     textColor: "text-[#E8C2B2]",
     pulseClass: "pulse-critical",
     telemetry: {
-      title: "Input Stream: sample_lecture.mp4",
-      timestamp: "00:00.0 → 00:54.0",
+      title: "Input Stream: DEMO_python_loops.mp4",
+      timestamp: "00:00.0 → 00:28.0",
       metrics: "1080p · 30 FPS · Stereo 44.1kHz",
-      detail: "Demuxed 54.0s Python Loops lecture with synchronized stereo audio & 30fps frames.",
+      detail: "Demuxed 28.0s Python Loops lecture with synchronized stereo audio & 30fps frames.",
     },
   },
   {
@@ -352,7 +352,7 @@ export default function HeroCompilerVisual() {
           <div className="flex items-center justify-between text-xs font-mono text-[#E8DCD1]">
             <span className="flex items-center gap-1.5 text-[#FFF8F0] font-semibold">
               <span className="size-2 rounded-full bg-[#B94A48] animate-ping" />
-              sample_lecture.mp4
+              DEMO_python_loops.mp4
             </span>
             <span className="text-[#8DB4D6] font-bold">00:26.0s</span>
           </div>

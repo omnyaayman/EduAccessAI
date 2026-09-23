@@ -1,7 +1,5 @@
 import demoPythonLoopsRaw from "./demoData/DEMO_python_loops.json";
-import demoArabicRaw from "./demoData/7ef3b9ae49a5.json";
 import demoQuizPython from "./demoData/DEMO_python_loops_quiz.json";
-import demoQuizArabic from "./demoData/7ef3b9ae49a5_quiz.json";
 import demoProfiles from "./demoData/profiles.json";
 import demo001History from "./demoData/001_history.json";
 import demoDefaultHistory from "./demoData/default_history.json";
@@ -52,17 +50,12 @@ export interface DemoJob {
 // In-memory demo store
 const DEMO_JOBS: Record<string, DemoJob> = {
   DEMO_python_loops: demoPythonLoopsRaw as unknown as DemoJob,
-  "7ef3b9ae49a5": demoArabicRaw as unknown as DemoJob,
 };
 
 const QUIZZES: Record<string, Quiz> = {
   DEMO_python_loops_quiz: {
     quiz_id: "DEMO_python_loops_quiz",
     questions: demoQuizPython as any,
-  },
-  "7ef3b9ae49a5_quiz": {
-    quiz_id: "7ef3b9ae49a5_quiz",
-    questions: demoQuizArabic as any,
   },
 };
 
@@ -95,7 +88,7 @@ export function getDemoLectures(): LectureRecord[] {
       error: job.error,
       created_at: job.created_at || "2026-08-30T12:00:00Z",
       updated_at: job.updated_at || "2026-08-30T12:00:00Z",
-      duration: (meta.duration as number) || (job.job_id === "DEMO_python_loops" ? 28 : 95),
+      duration: (meta.duration as number) || 28,
       has_result: Boolean(job.result),
       student_id: "001",
       assets: {

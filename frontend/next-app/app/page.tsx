@@ -241,7 +241,7 @@ function HomeContent() {
           <div className="grid gap-6 lg:grid-cols-12 items-center">
             <div className="lg:col-span-7 rounded-2xl border border-[#DDD0C0] bg-[#FFFDFC] p-5 sm:p-6 space-y-4 shadow-sm">
               <div className="flex items-center justify-between text-xs font-mono text-[#7A7067]">
-                <span className="text-[#2F2924] font-bold text-sm">sample_lecture.mp4</span>
+                <span className="text-[#2F2924] font-bold text-sm">DEMO_python_loops.mp4</span>
                 <span className="text-[#B85C38] font-bold">1080p @ 30fps · H.264 / AAC</span>
               </div>
 
@@ -251,7 +251,7 @@ function HomeContent() {
                 </div>
                 <div>
                   <h4 className="text-[#2F2924] font-bold text-lg">Python 3.10: For Loop Iteration Lecture</h4>
-                  <p className="text-[#7A7067] text-sm font-mono mt-1">Duration: 54.0s · Stereo Audio Channel · 1,620 Discrete Frames</p>
+                  <p className="text-[#7A7067] text-sm font-mono mt-1">Duration: 28.0s · Stereo Audio Channel · 840 Discrete Frames</p>
                 </div>
                 <div className="flex flex-wrap items-center justify-center gap-2 pt-2">
                   <span className="rounded-lg bg-[#FFFDFC] border border-[#DDD0C0] px-3 py-1.5 text-xs font-mono text-[#51483F] font-semibold shadow-xs">Audio Extracted: 44.1kHz WAV</span>

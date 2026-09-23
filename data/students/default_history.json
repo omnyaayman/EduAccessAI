@@ -6,8 +6,7 @@
     66.7,
     66.7,
     66.7,
-    66.7,
-    50.0
+    66.7
   ],
   "weak_topics": [
     {
@@ -202,32 +201,6 @@
           "correct": true
         }
       ]
-    },
-    {
-      "quiz_id": "7ef3b9ae49a5_quiz",
-      "lesson_title": "7ef3b9ae49a5_quiz",
-      "timestamp": "2026-09-09T19:21:29.625022+00:00",
-      "score_percent": 50.0,
-      "correct_count": 1.0,
-      "total": 2,
-      "questions": [
-        {
-          "question": "Briefly explain the main programming concept explained in this lesson.",
-          "concept": "general_programming",
-          "concept_id": "general_programming",
-          "lecture_id": "7ef3b9ae49a5",
-          "type": "short_answer",
-          "correct": false
-        },
-        {
-          "question": "Do loops always start at 1 in Python?",
-          "concept": "loops_indexing",
-          "concept_id": "loops_indexing",
-          "lecture_id": "7ef3b9ae49a5",
-          "type": "true_false",
-          "correct": true
-        }
-      ]
     }
   ],
   "recent_activity": [
@@ -272,13 +245,6 @@
       "title": "DEMO_python_loops_quiz",
       "score_percent": 66.7,
       "timestamp": "2026-09-02T21:18:20.612432+00:00"
-    },
-    {
-      "type": "quiz",
-      "quiz_id": "7ef3b9ae49a5_quiz",
-      "title": "7ef3b9ae49a5_quiz",
-      "score_percent": 50.0,
-      "timestamp": "2026-09-09T19:21:29.625022+00:00"
     }
   ]
 }
