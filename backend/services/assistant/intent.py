@@ -2,15 +2,16 @@
 
 Classifies incoming user queries into discrete intent categories:
 - DETERMINISTIC_ACTION: Direct UI commands (toggles, font size, quiz launch)
-- CONVERSATIONAL: Greetings, gratitude, pleasantries, acknowledgements, farewells
+- CONVERSATIONAL: Greetings, gratitude, affection, jokes, pleasantries, acknowledgements, farewells
 - PLATFORM: Questions about EduAccess AI platform features and capabilities
 - CURRENT_VISUAL: Questions about what is currently visible on screen at timestamp
 - ACCESSIBILITY: Cross-modal disparity gaps, audio description, missing visual elements
-- LEARNING_HELP: Requests to simplify, explain simply, beginner explanations, examples
-- QUIZ: Practice requests, interactive comprehension questions, quiz hints
 - LEARNING_PROGRESS: Next best action, mastery gaps, recommended next steps
+- QUIZ: Practice requests, interactive comprehension questions, quiz hints
 - CLARIFICATION: Ambiguous short prompts requesting more context
-- LECTURE_CONTENT: Content-specific lecture questions grounded in RAG evidence
+- LEARNING_HELP: Requests to simplify, explain simply, beginner explanations, examples
+- LECTURE_CONTENT: Content-specific lecture questions grounded in active RAG evidence
+- GENERAL_QUERY: General programming, AI/ML, tech, data science, math, conceptual Q&A
 """
 from __future__ import annotations
 
@@ -25,11 +26,12 @@ class AssistantIntent(str, Enum):
     PLATFORM = "platform"
     CURRENT_VISUAL = "current_visual"
     ACCESSIBILITY = "accessibility"
-    LEARNING_HELP = "learning_help"
-    QUIZ = "quiz"
     LEARNING_PROGRESS = "learning_progress"
+    QUIZ = "quiz"
     CLARIFICATION = "clarification"
+    LEARNING_HELP = "learning_help"
     LECTURE_CONTENT = "lecture_content"
+    GENERAL_QUERY = "general_query"
 
 
 class IntentClassification(NamedTuple):
@@ -44,23 +46,77 @@ class IntentClassification(NamedTuple):
 GREETING_REPLY = "Hi there! 👋 I'm EduAccess Assistant. How can I help you?"
 THANKS_REPLY = "You're welcome! 😊"
 STATUS_REPLY = "I'm doing great! Ready to help you learn. What would you like to explore?"
-ACK_REPLY = "Got it! Let me know whenever you want to ask a question or explore the lecture."
+ACK_REPLY = "Got it! Let me know whenever you want to ask a question or explore a concept."
 FAREWELL_REPLY = "Goodbye! Happy learning and have a great day! 👋"
+AFFECTION_REPLY = "Aww, thank you! ❤️ I'm here to help you learn and explore anytime."
+JOKE_REPLY = "Why do programmers prefer dark mode? Because light attracts bugs! 🐛😄 What concept or topic would you like to explore today?"
 
 PLATFORM_EXPLANATION = (
     "I am the **EduAccess AI Assistant**, an educational accessibility companion built directly into this platform. Here is what I can help you with:\n\n"
-    "• 🎥 **Live On-Screen Visuals**: Ask *'What am I looking at right now?'* to understand on-screen slides, diagrams, and OCR code at your current playback time.\n"
+    "• 🧠 **General Educational AI**: Ask any question about Python, Machine Learning, Data Science, algorithms, math, or computer science concepts anytime.\n"
+    "• 🎥 **Live On-Screen Visuals**: When a video is open, ask *'What am I looking at right now?'* to understand on-screen slides, diagrams, and OCR code.\n"
     "• 👁️ **Accessibility & Gap Analysis**: Ask *'What was shown but not explained?'* to discover visual information the teacher displayed without audio narration.\n"
     "• 📖 **Grounded Lecture Q&A**: Ask lecture questions and get verified answers citing exact lecture timestamps and speech evidence.\n"
-    "• 💡 **Adaptive Learning Help**: Say *'Explain this simply'* or *'Give me an example'* to get beginner-friendly explanations of difficult concepts.\n"
+    "• 💡 **Adaptive Learning Help**: Say *'Explain this simply'* or *'Give me an example'* to get beginner-friendly explanations.\n"
     "• 📝 **Practice & Quizzes**: Say *'Quiz me'* or *'Test me on this lecture'* to practice interactive questions.\n"
     "• 🎯 **Learning Progress & Next Steps**: Say *'What should I study next?'* to review your concept mastery and personalized study recommendations.\n"
     "• 🎛️ **Accessibility Controls**: Say *'Turn on captions'* or *'Turn on audio descriptions'* to adjust playback controls."
 )
 
 CLARIFICATION_REPLY = (
-    "Sure — would you like me to explain the current lecture section, describe what's on screen, or help you practice it?"
+    "Sure — would you like me to explain a concept simply, describe what's on screen, or help you practice with a quiz?"
 )
+
+
+def is_lecture_specific(message: str) -> bool:
+    """Check if the query explicitly or contextually refers to lecture/video/slide/teacher/playback."""
+    msg = message.lower().strip()
+
+    # 1. Explicit references to lecture/video/lesson/class/clip/recording
+    if re.search(r"\b(this|the|current)\s+(lecture|video|lesson|clip|recording|course|class|presentation)\b", msg):
+        return True
+    if re.search(r"\b(in|from|during|according to)\s+(this|the)\s+(video|lecture|lesson|clip)\b", msg):
+        return True
+
+    # 2. References to teacher/instructor/speaker/presenter/professor
+    if re.search(r"\b(the|this)\s+(teacher|instructor|speaker|presenter|professor|narrator)\b", msg):
+        return True
+    if re.search(r"\bwhat did (the teacher|the instructor|he|she|they) (say|mean|explain|show|demonstrate|write|point at)\b", msg):
+        return True
+
+    # 3. References to slide/screen/visual/diagram/code on screen
+    if re.search(r"\b(this|the)\s+(slide|screen|diagram|flowchart|frame|scene)\b", msg):
+        return True
+    if re.search(r"\b(on|from)\s+(the|this)\s+(slide|screen|board)\b", msg):
+        return True
+    if re.search(r"\b(code|diagram|example|text)\s+(on|shown on|displayed on)\s+(screen|the screen|this slide|the slide)\b", msg):
+        return True
+
+    # 4. Deictic / contextual references to "this section", "here", "right now", "just watched"
+    if re.search(r"\b(this|the)\s+section\b", msg):
+        return True
+    if re.search(r"\b(what am i looking at|what is on screen|what is on the screen|what is shown|what was shown|what did i miss)\b", msg):
+        return True
+    if re.search(r"\bwhat was (shown|demonstrated|displayed|written)\b", msg):
+        return True
+    if re.search(r"\bwhat (i|we) just (watched|saw|heard|learned)\b", msg):
+        return True
+    if re.search(r"\b(at this timestamp|at this time|at this point|right now|at this moment)\b", msg):
+        return True
+    if re.search(r"\bexplain (this section|what happened|what just happened|what was explained)\b", msg):
+        return True
+
+    # 5. Arabic lecture cues
+    if re.search(r"(هذا المقطع|هذا الفيديو|هذه المحاضرة|هذا الدرس|في الفيديو|في المحاضرة|في هذا الفيديو)", msg):
+        return True
+    if re.search(r"(المدرس|المعلم|المحاضر|ماذا قال|ما قاله المدرس|ما شرحه)", msg):
+        return True
+    if re.search(r"(الشريحة|السلايد|على الشاشة|في الشاشة|المعروض|ما يظهر)", msg):
+        return True
+    if re.search(r"(في هذه اللحظة|الآن|ما تم عرضه|ما الذي فاتني|ماذا ارى)", msg):
+        return True
+
+    return False
 
 
 def classify_intent(message: str) -> IntentClassification:
@@ -134,9 +190,28 @@ def classify_intent(message: str) -> IntentClassification:
         )
 
     # 2. CONVERSATIONAL INTENTS
-    # Normalize punctuation for clean conversational match
+    # Normalize punctuation and emojis for clean conversational match
     clean_words = re.sub(r"[^\w\s]", "", msg).strip().split()
     clean_joined = " ".join(clean_words)
+
+    # Affection & Praise (e.g. "I love you", "love you", "I love you ❤️", "بحبك", "احبك")
+    if re.fullmatch(
+        r"(i\s+love\s+you(\s+(so\s+much|very\s+much|a\s+lot))?|love\s+you(\s+(so\s+much|too))?|i\s+like\s+you|you\s+are\s+(great|awesome|the\s+best|amazing)|youre\s+(great|awesome|the\s+best|amazing)|بحبك|احبك|أحبك|انت\s+رائع|أنت\s+رائع|ممتاز\s+يا\s+بوت)(\s+(assistant|eduaccess(\s+ai)?|ai|bot|friend))?",
+        clean_joined,
+    ):
+        return IntentClassification(
+            intent=AssistantIntent.CONVERSATIONAL,
+            sub_type="affection",
+            direct_reply=AFFECTION_REPLY,
+        )
+
+    # Humor / Jokes
+    if any(p in msg for p in ("tell me a joke", "tell a joke", "make me laugh", "say something funny", "قل لي نكتة", "نكتة")):
+        return IntentClassification(
+            intent=AssistantIntent.CONVERSATIONAL,
+            sub_type="joke",
+            direct_reply=JOKE_REPLY,
+        )
 
     # Gratitude
     if re.fullmatch(
@@ -252,28 +327,36 @@ def classify_intent(message: str) -> IntentClassification:
             intent=AssistantIntent.QUIZ,
         )
 
-    # 8. LEARNING HELP / SIMPLIFICATION INTENT
-    if any(p in msg for p in (
-        "i don't understand", "i dont understand", "explain it simply", "explain this simply", "explain this", "explain that",
-        "explain like i'm a beginner", "explain like im a beginner", "can you explain this like i'm a beginner",
-        "can you explain this like im a beginner", "can you simplify", "give me an example",
-        "why does this work", "can you explain that again", "explain that again",
-        "eli5", "simplify this", "break this down", "make this simpler", "make it simpler",
-        "اشرح ببساطة", "لم افهم", "بسط هذا", "اشرح كمبتدئ", "اعطني مثال", "وضح اكثر"
-    )):
-        return IntentClassification(
-            intent=AssistantIntent.LEARNING_HELP,
-        )
-
-    # 9. AMBIGUOUS CLARIFICATION INTENT
+    # 8. AMBIGUOUS CLARIFICATION INTENT
     if clean_joined in ("tell me more", "more", "continue", "go on", "why", "elaborate", "tell me more details", "زدني", "اكمل", "تابع"):
         return IntentClassification(
             intent=AssistantIntent.CLARIFICATION,
             direct_reply=CLARIFICATION_REPLY,
         )
 
-    # 10. DEFAULT TO LECTURE CONTENT
-    return IntentClassification(
-        intent=AssistantIntent.LECTURE_CONTENT,
-    )
+    # 9. LECTURE-SPECIFIC OR GENERAL CONTENT ROUTING
+    lecture_ref = is_lecture_specific(msg)
 
+    # Learning help / simplification queries
+    learning_help_phrases = (
+        "i don't understand", "i dont understand", "explain it simply", "explain this simply", "explain simply",
+        "explain like i'm a beginner", "explain like im a beginner", "can you explain this like i'm a beginner",
+        "can you explain this like im a beginner", "can you simplify", "give me an example",
+        "why does this work", "can you explain that again", "explain that again",
+        "eli5", "simplify this", "break this down", "make this simpler", "make it simpler",
+        "اشرح ببساطة", "لم افهم", "بسط هذا", "اشرح كمبتدئ", "اعطني مثال", "وضح اكثر"
+    )
+    is_learning_help = any(p in msg for p in learning_help_phrases)
+
+    if lecture_ref:
+        if is_learning_help:
+            return IntentClassification(intent=AssistantIntent.LEARNING_HELP)
+        return IntentClassification(intent=AssistantIntent.LECTURE_CONTENT)
+
+    if is_learning_help:
+        return IntentClassification(intent=AssistantIntent.LEARNING_HELP)
+
+    # Default to GENERAL_QUERY for all standard technical, programming, AI/ML, educational, or general questions
+    return IntentClassification(
+        intent=AssistantIntent.GENERAL_QUERY,
+    )

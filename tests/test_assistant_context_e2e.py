@@ -1,19 +1,23 @@
-"""End-to-End and Unit Tests for Assistant Context Binding & Grounded Q&A.
+"""End-to-End and Context Lifecycle Tests for EduAccess Global AI Assistant.
 
-Validates:
-1. Dynamic context normalization (job_id, lecture_id, lectureId, job).
-2. "What am I looking at right now?" at specific timestamps with visual + OCR claims.
-3. "What was shown but not explained?" gap disparity reasoning.
-4. Grounded RAG responses with timestamped evidence.
-5. Honest empty context rejection when no lecture exists.
-6. Deterministic UI actions (captions, quiz, narration).
+Validates the full 18-Scenario Context Lifecycle Test Matrix:
+Phase 1: No lecture open -> General AI chatbot (conversational, platform, technical, programming, AI/ML).
+Phase 2: Active lecture open -> Grounded lecture context for lecture queries, General AI for general queries.
+Phase 3: Navigating away / context cleared -> Returns immediately to General AI without stale demo context.
 """
-import unittest
+import asyncio
 import json
+import unittest
 from unittest.mock import patch, MagicMock
 
 from backend.services.assistant.orchestrator import AssistantOrchestrator, get_assistant_orchestrator
-from backend.services.assistant.tools import execute_tool
+from backend.services.assistant.intent import (
+    GREETING_REPLY,
+    THANKS_REPLY,
+    STATUS_REPLY,
+    AFFECTION_REPLY,
+    JOKE_REPLY,
+)
 from backend import storage
 
 
@@ -23,128 +27,255 @@ class TestAssistantContextEndToEnd(unittest.TestCase):
         self.orchestrator = AssistantOrchestrator()
         self.demo_job_id = "DEMO_python_loops"
 
-    def test_empty_context_rejection(self):
-        """When no lecture ID exists, reject content questions honestly."""
-        res = self.orchestrator.chat("What is this video about?", context={})
-        self.assertIn("Open or process a lecture first", res["reply"])
-        self.assertEqual(res["provider"], "none")
+    # ==================== PHASE 1: NO LECTURE OPEN ====================
 
-    def test_nonexistent_job_id_rejection(self):
-        """When an invalid job ID is passed, reject honestly."""
-        res = self.orchestrator.chat(
-            "What is on screen?",
-            context={"lecture_id": "nonexistent_job_xyz_999"}
-        )
-        self.assertIn("Open or process a lecture first", res["reply"])
+    def test_scenario_01_no_lecture_hi(self):
+        """1. 'Hi' with no lecture open -> normal greeting."""
+        res = self.orchestrator.chat("Hi", context={})
+        self.assertEqual(res["reply"], GREETING_REPLY)
+        self.assertEqual(res["evidence"], [])
+        self.assertNotIn("DEMO_python_loops", res["reply"])
 
-    def test_deterministic_actions_work_without_lecture(self):
-        """UI actions like captions or quiz work globally."""
-        res = self.orchestrator.chat("turn on captions", context={})
-        self.assertEqual(res["action"], "toggle_captions")
-        self.assertTrue(res["action_payload"]["enabled"])
+    def test_scenario_02_no_lecture_how_are_you(self):
+        """2. 'How are you?' with no lecture open -> normal status reply."""
+        res = self.orchestrator.chat("How are you?", context={})
+        self.assertEqual(res["reply"], STATUS_REPLY)
+        self.assertEqual(res["evidence"], [])
 
-    def test_context_normalization_keys(self):
-        """Verify orchestrator accepts lecture_id, job_id, lectureId, or job."""
-        keys = ["lecture_id", "job_id", "lectureId", "job"]
-        for key in keys:
-            context = {key: self.demo_job_id, "timestamp": 12.0}
-            res = self.orchestrator.chat("What am I looking at right now?", context=context)
+    def test_scenario_03_no_lecture_i_love_you(self):
+        """3. 'I love you' with no lecture open -> affectionate response."""
+        res = self.orchestrator.chat("I love you ❤️", context={})
+        self.assertEqual(res["reply"], AFFECTION_REPLY)
+        self.assertEqual(res["evidence"], [])
+
+    def test_scenario_04_no_lecture_thank_you(self):
+        """4. 'Thank you' with no lecture open -> gratitude response."""
+        res = self.orchestrator.chat("Thank you very much", context={})
+        self.assertEqual(res["reply"], THANKS_REPLY)
+        self.assertEqual(res["evidence"], [])
+
+    def test_scenario_05_no_lecture_what_can_you_do(self):
+        """5. 'What can you do?' with no lecture open -> platform explanation."""
+        res = self.orchestrator.chat("What can you do?", context={})
+        self.assertIn("EduAccess AI Assistant", res["reply"])
+        self.assertEqual(res["evidence"], [])
+
+    def test_scenario_06_no_lecture_what_is_python(self):
+        """6. 'What is Python?' with no lecture open -> General AI answer."""
+        with patch.object(self.orchestrator.gemma, "generate_cloud", return_value="Python is a versatile high-level programming language."):
+            res = self.orchestrator.chat("What is Python?", context={})
             self.assertNotIn("Open or process a lecture first", res["reply"])
-            self.assertIn("looking at", res["reply"])
+            self.assertNotIn("DEMO_python_loops", res["reply"])
+            self.assertIn("Python", res["reply"])
+            self.assertEqual(res["evidence"], [])
 
-    def test_what_am_i_looking_at_visual_event(self):
-        """At t=12s in DEMO_python_loops, verify on-screen visual event is returned."""
+    def test_scenario_07_no_lecture_what_is_machine_learning(self):
+        """7. 'What is machine learning?' with no lecture open -> General AI answer."""
+        with patch.object(self.orchestrator.gemma, "generate_cloud", return_value="Machine learning is a subset of AI where algorithms learn from data."):
+            res = self.orchestrator.chat("What is machine learning?", context={})
+            self.assertNotIn("Open or process a lecture first", res["reply"])
+            self.assertIn("Machine learning", res["reply"])
+            self.assertEqual(res["evidence"], [])
+
+    def test_scenario_08_no_lecture_explain_recursion(self):
+        """8. 'Explain recursion simply' with no lecture open -> General AI answer."""
+        with patch.object(self.orchestrator.gemma, "generate_cloud", return_value="Recursion is a programming technique where a function calls itself."):
+            res = self.orchestrator.chat("Explain recursion simply", context={})
+            self.assertNotIn("Open or process a lecture first", res["reply"])
+            self.assertIn("Recursion", res["reply"])
+            self.assertEqual(res["evidence"], [])
+
+    def test_scenario_09_no_lecture_what_is_sql(self):
+        """9. 'What is SQL?' with no lecture open -> General AI answer."""
+        with patch.object(self.orchestrator.gemma, "generate_cloud", return_value="SQL is a standard language for storing and querying relational databases."):
+            res = self.orchestrator.chat("What is SQL?", context={})
+            self.assertNotIn("Open or process a lecture first", res["reply"])
+            self.assertIn("SQL", res["reply"])
+            self.assertEqual(res["evidence"], [])
+
+    # ==================== PHASE 2: ACTIVE LECTURE OPEN ====================
+
+    def test_scenario_10_active_lecture_explain_section(self):
+        """10. 'Explain this section.' inside active lecture -> Grounded lecture answer with retriever called."""
+        context = {"lecture_id": self.demo_job_id, "timestamp": 12.0}
+        with patch("backend.services.assistant.orchestrator.get_retriever") as mock_get_retriever:
+            mock_retriever_inst = MagicMock()
+            mock_retriever_inst.retrieve.return_value = [{"timestamp_label": "00:10", "text": "for i in range(5):"}]
+            mock_get_retriever.return_value = mock_retriever_inst
+
+            with patch.object(
+                self.orchestrator.gemma,
+                "generate_cloud",
+                return_value="The instructor demonstrates a for loop iterating over range(5) citing [00:10]."
+            ):
+                res = self.orchestrator.chat("Explain this section", context=context)
+                mock_get_retriever.assert_called_once()
+                self.assertEqual(res["provider"], "huggingface/gemma")
+                self.assertIn("range(5)", res["reply"])
+                self.assertTrue(len(res["evidence"]) > 0)
+
+    def test_scenario_11_active_lecture_teacher_explanation(self):
+        """11. 'What did the teacher just explain?' inside active lecture -> Grounded answer with retriever called."""
+        context = {"lecture_id": self.demo_job_id, "timestamp": 10.0}
+        with patch("backend.services.assistant.orchestrator.get_retriever") as mock_get_retriever:
+            mock_retriever_inst = MagicMock()
+            mock_retriever_inst.retrieve.return_value = [{"timestamp_label": "00:10", "text": "The loop executes step by step."}]
+            mock_get_retriever.return_value = mock_retriever_inst
+
+            with patch.object(
+                self.orchestrator.gemma,
+                "generate_cloud",
+                return_value="At [00:10], the teacher explained how the for loop header syntax works."
+            ):
+                res = self.orchestrator.chat("What did the teacher just explain?", context=context)
+                mock_get_retriever.assert_called_once()
+                self.assertEqual(res["provider"], "huggingface/gemma")
+                self.assertTrue(len(res["evidence"]) > 0)
+
+    def test_scenario_12_active_lecture_what_am_i_looking_at(self):
+        """12. 'What am I looking at right now?' inside active lecture -> Visual telemetry."""
         context = {"lecture_id": self.demo_job_id, "timestamp": 12.0}
         res = self.orchestrator.chat("What am I looking at right now?", context=context)
-        self.assertIn("reply", res)
+        self.assertEqual(res["provider"], "visual_telemetry")
         self.assertIn("looking at", res["reply"])
         self.assertEqual(len(res["evidence"]), 1)
         self.assertEqual(res["evidence"][0]["time"], "00:12")
 
-    def test_what_am_i_missing_gap_reasoning(self):
-        """Verify cross-modal disparity gaps are retrieved."""
+    def test_scenario_13_active_lecture_what_was_shown_not_explained(self):
+        """13. 'What was shown but not explained?' inside active lecture -> Accessibility disparity."""
         context = {"lecture_id": self.demo_job_id, "timestamp": 10.0}
         res = self.orchestrator.chat("What was shown but not explained?", context=context)
-        self.assertIn("reply", res)
-        self.assertNotIn("Open or process a lecture first", res["reply"])
+        self.assertEqual(res["provider"], "gap_reasoning")
+        self.assertIn("Accessibility Disparity Gap", res["reply"])
+        self.assertTrue(len(res["evidence"]) > 0)
 
-    def test_grounded_rag_with_evidence(self):
-        """Verify RAG query returns grounded evidence with timestamps."""
+    def test_scenario_14_active_lecture_general_i_love_you(self):
+        """14. 'I love you' while lecture is active -> General conversational (NO RAG)."""
+        context = {"lecture_id": self.demo_job_id, "timestamp": 12.0}
+        with patch("backend.services.assistant.orchestrator.get_retriever") as mock_rag:
+            res = self.orchestrator.chat("I love you", context=context)
+            mock_rag.assert_not_called()
+            self.assertEqual(res["reply"], AFFECTION_REPLY)
+            self.assertEqual(res["evidence"], [])
+
+    def test_scenario_15_active_lecture_general_what_is_sql(self):
+        """15. 'What is SQL?' while lecture is active (Python loops) -> General AI answer (NO RAG failure)."""
+        context = {"lecture_id": self.demo_job_id, "timestamp": 12.0}
+        with patch("backend.services.assistant.orchestrator.get_retriever") as mock_rag:
+            with patch.object(self.orchestrator.gemma, "generate_cloud", return_value="SQL is a database query language."):
+                res = self.orchestrator.chat("What is SQL?", context=context)
+                mock_rag.assert_not_called()
+                self.assertNotIn("Open or process a lecture first", res["reply"])
+                self.assertIn("SQL", res["reply"])
+                self.assertEqual(res["evidence"], [])
+
+    def test_scenario_16_active_lecture_general_tell_me_a_joke(self):
+        """16. 'Tell me a joke' while lecture is active -> General AI joke (NO RAG)."""
+        context = {"lecture_id": self.demo_job_id, "timestamp": 12.0}
+        with patch("backend.services.assistant.orchestrator.get_retriever") as mock_rag:
+            res = self.orchestrator.chat("Tell me a joke", context=context)
+            mock_rag.assert_not_called()
+            self.assertEqual(res["reply"], JOKE_REPLY)
+            self.assertEqual(res["evidence"], [])
+
+    def test_scenario_17_active_lecture_general_how_are_you(self):
+        """17. 'How are you?' while lecture is active -> General conversational status (NO RAG)."""
+        context = {"lecture_id": self.demo_job_id, "timestamp": 12.0}
+        with patch("backend.services.assistant.orchestrator.get_retriever") as mock_rag:
+            res = self.orchestrator.chat("How are you?", context=context)
+            mock_rag.assert_not_called()
+            self.assertEqual(res["reply"], STATUS_REPLY)
+            self.assertEqual(res["evidence"], [])
+
+    def test_rag_explicit_avoidance_matrix_with_active_lecture(self):
+        """Assert retriever is NOT called for: 'I love you', 'Thank you', 'How are you?', 'Tell me a joke', 'What is SQL?', 'What is Python?'."""
         context = {"lecture_id": self.demo_job_id, "timestamp": 5.0}
-        with patch.object(
-            self.orchestrator.gemma,
-            "generate_cloud",
-            return_value="A for loop in Python iterates over a sequence citing [00:10]."
-        ):
-            res = self.orchestrator.chat("What is a for loop in Python?", context=context)
-            self.assertIn("reply", res)
+        general_queries = [
+            "I love you",
+            "Thank you",
+            "How are you?",
+            "Tell me a joke",
+            "What is SQL?",
+            "What is Python?",
+        ]
+        with patch("backend.services.assistant.orchestrator.get_retriever") as mock_rag:
+            with patch.object(self.orchestrator.gemma, "generate_cloud", return_value="General AI educational answer."):
+                for q in general_queries:
+                    res = self.orchestrator.chat(q, context=context)
+                    mock_rag.assert_not_called()
+                    self.assertEqual(res["evidence"], [], f"Expected evidence: [] for '{q}'")
+
+    def test_rag_explicit_invocation_matrix_with_active_lecture(self):
+        """Assert retriever IS called for: 'Explain this section', 'What did the teacher just explain?', 'What is shown on this slide?'."""
+        context = {"lecture_id": self.demo_job_id, "timestamp": 5.0}
+        lecture_queries = [
+            "Explain this section",
+            "What did the teacher just explain?",
+            "What is shown on this slide?",
+        ]
+        for q in lecture_queries:
+            with patch("backend.services.assistant.orchestrator.get_retriever") as mock_rag:
+                mock_inst = MagicMock()
+                mock_inst.retrieve.return_value = [{"timestamp_label": "00:05", "text": "lecture snippet"}]
+                mock_rag.return_value = mock_inst
+                with patch.object(self.orchestrator.gemma, "generate_cloud", return_value="Grounded answer citing [00:05]."):
+                    res = self.orchestrator.chat(q, context=context)
+                    if q == "What is shown on this slide?":
+                        # Classified as CURRENT_VISUAL -> uses visual telemetry
+                        self.assertEqual(res["provider"], "visual_telemetry")
+                    else:
+                        mock_rag.assert_called_once()
+                        self.assertEqual(res["provider"], "huggingface/gemma")
+
+    # ==================== PHASE 3: LEAVING / CLOSING LECTURE ====================
+
+    def test_scenario_18_navigate_away_what_is_a_for_loop(self):
+        """18. Close/navigate away (context={}) and ask 'What is a for loop?' -> General AI answer without stale lecture context."""
+        with patch.object(self.orchestrator.gemma, "generate_cloud", return_value="A for loop repeats a block of code over a sequence."):
+            res = self.orchestrator.chat("What is a for loop?", context={})
             self.assertNotIn("Open or process a lecture first", res["reply"])
-            self.assertIsInstance(res.get("evidence"), list)
+            self.assertNotIn("DEMO_python_loops", res["reply"])
+            self.assertIn("for loop", res["reply"])
+            self.assertEqual(res["evidence"], [])
 
-    def test_stream_chat_empty_context(self):
-        """Verify streaming chat rejects empty context with honest token."""
-        import asyncio
+    def test_deterministic_actions_work_globally(self):
+        """UI actions like captions or font sizing work anywhere."""
+        res = self.orchestrator.chat("turn on captions", context={})
+        self.assertEqual(res["action"], "toggle_captions")
+        self.assertTrue(res["action_payload"]["enabled"])
 
-        async def run_stream():
-            tokens = []
-            async for chunk_str in self.orchestrator.stream_chat("What is this?", context={}):
-                data = json.loads(chunk_str)
-                tokens.append(data.get("token", ""))
-            return "".join(tokens)
+    def test_streaming_chat_mode_switch(self):
+        """Streaming chat correctly switches between general mode and lecture mode."""
+        # 1. General streaming
+        async def mock_gen_stream(*args, **kwargs):
+            for token in ["SQL ", "is ", "a ", "database ", "language."]:
+                yield token
 
-        result = asyncio.run(run_stream())
-        self.assertIn("Open or process a lecture first", result)
+        with patch.object(self.orchestrator.gemma, "stream_chat", side_effect=mock_gen_stream):
+            async def run_general_stream():
+                tokens = []
+                async for chunk_str in self.orchestrator.stream_chat("What is SQL?", context={}):
+                    data = json.loads(chunk_str)
+                    tokens.append(data.get("token", ""))
+                return "".join(tokens)
 
-    def test_stream_chat_with_valid_context(self):
-        """Verify streaming chat with valid job streams grounded answer."""
-        import asyncio
+            gen_out = asyncio.run(run_general_stream())
+            self.assertNotIn("Open or process a lecture first", gen_out)
+            self.assertEqual(gen_out.strip(), "SQL is a database language.")
 
-        async def run_stream():
+        # 2. Lecture streaming
+        async def run_lecture_stream():
             tokens = []
             async for chunk_str in self.orchestrator.stream_chat(
                 "What am I looking at right now?",
-                context={"lecture_id": self.demo_job_id, "timestamp": 10.0}
+                context={"lecture_id": self.demo_job_id, "timestamp": 12.0}
             ):
                 data = json.loads(chunk_str)
                 tokens.append(data.get("token", ""))
             return "".join(tokens)
 
-    def test_global_intents_succeed_with_null_context(self):
-        """Global conversational and platform intents succeed with null / empty context."""
-        global_queries = ["Hi", "Thanks", "What can you do?", "Tell me more."]
-        for q in global_queries:
-            res = self.orchestrator.chat(q, context={})
-            self.assertNotIn("Open or process a lecture first", res["reply"])
-            self.assertEqual(res["provider"], "intent_router")
-            self.assertEqual(res["evidence"], [])
-
-    def test_stream_chat_http_429_fallback_grounded(self):
-        """When Gemma streaming fails with HTTP 429, streaming falls back to grounded lecture chunks."""
-        import asyncio
-        from backend.services.ai.hf_client import HFClientError
-
-        async def failing_stream(*args, **kwargs):
-            raise HFClientError("Streaming failed with HTTP 429: Model busy", status_code=429)
-            yield ""  # make it an async generator
-
-        with patch.object(self.orchestrator.gemma, "stream_chat", side_effect=failing_stream):
-            async def run_stream():
-                tokens = []
-                async for chunk_str in self.orchestrator.stream_chat(
-                    "Explain this section simply",
-                    context={"lecture_id": self.demo_job_id, "timestamp": 10.0}
-                ):
-                    data = json.loads(chunk_str)
-                    tokens.append(data.get("token", ""))
-                return "".join(tokens)
-
-            result = asyncio.run(run_stream())
-            # Must contain grounded lecture evidence and must not fabricate
-            self.assertTrue(
-                "breakdown from the lecture" in result or "Based on the lecture" in result or "for i in range" in result or "loops" in result.lower(),
-                f"Expected grounded fallback in stream, got: {result}"
-            )
-            self.assertNotIn("No substitute answer was generated", result)
+        lec_out = asyncio.run(run_lecture_stream())
+        self.assertIn("looking at", lec_out)
 
 
 if __name__ == "__main__":

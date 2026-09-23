@@ -2,7 +2,13 @@
 
 Coordinates intent classification, deterministic action matching, multimodal
 visual telemetry, accessibility disparity analysis, grounded RAG retrieval,
-and adaptive learning assistance for the global AI assistant.
+and general AI assistance across the platform.
+
+Architecture:
+- GENERAL AI ASSISTANT by default across the entire website.
+- OPTIONAL CURRENT LECTURE CONTEXT when an active lecture is open and the user's
+  query is lecture-specific.
+- NEVER defaults to or injects DEMO_python_loops when outside a lecture context.
 """
 from __future__ import annotations
 
@@ -13,11 +19,32 @@ from typing import Any, AsyncGenerator
 
 from backend import config, storage
 from backend.services.ai.gemma_service import get_gemma_service
-from backend.services.assistant.intent import AssistantIntent, classify_intent
+from backend.services.assistant.intent import AssistantIntent, classify_intent, is_lecture_specific
 from backend.services.assistant.tools import execute_tool, ASSISTANT_TOOL_DEFINITIONS
 from backend.services.rag import get_retriever
 
 logger = logging.getLogger("eduaccess.ai.assistant.orchestrator")
+
+GENERAL_AI_SYSTEM_PROMPT = (
+    "You are EduAccess AI, an intelligent, accessible, and friendly educational AI assistant.\n"
+    "You provide clear, accurate, concise, and helpful answers across programming, data science, AI/ML, math, science, and general education.\n"
+    "When explaining concepts, break them down simply, provide intuitive examples where helpful, and keep answers accessible for learners of all backgrounds.\n"
+    "You are not restricted to any single lecture. Answer general questions naturally and directly."
+)
+
+LECTURE_TUTOR_SYSTEM_PROMPT = (
+    "You are EduAccess AI, an educational accessibility learning tutor.\n"
+    "The student needs a simplified, beginner-friendly explanation, breakdown, or intuitive example.\n"
+    "Explain the concept clearly and simply using the provided lecture evidence.\n"
+    "Do not just copy or dump raw lecture transcript. Break it down step by step with clear intuition.\n"
+    "When relevant, cite the timestamp (e.g. [01:24]).\n"
+)
+
+LECTURE_GROUNDED_SYSTEM_PROMPT = (
+    "You are EduAccess AI, a helpful, accessible learning assistant.\n"
+    "Answer the student's question accurately using the provided lecture context.\n"
+    "Be clear, concise, and educational. When relevant, cite the timestamp (e.g. [01:24]).\n"
+)
 
 
 class AssistantOrchestrator:
@@ -26,18 +53,39 @@ class AssistantOrchestrator:
     def __init__(self):
         self.gemma = get_gemma_service()
 
+    def _general_fallback(self, clean_msg: str) -> str:
+        """Deterministic educational explanation when cloud AI is unreachable."""
+        lower = clean_msg.lower()
+        if "python" in lower:
+            return "Python is a high-level, interpreted programming language known for its clear syntax and versatility across web development, data science, automation, and AI."
+        if "for loop" in lower or "حلقة" in lower:
+            return "A for loop is a control flow statement used to iterate over a sequence (such as a list, string, or range) and execute a block of code for each element."
+        if "while loop" in lower:
+            return "A while loop executes a block of code repeatedly as long as a given boolean condition evaluates to True."
+        if "machine learning" in lower or "ml" in lower:
+            return "Machine learning is a field of artificial intelligence focused on building algorithms that learn patterns from data to make predictions or decisions."
+        if "sql" in lower:
+            return "SQL (Structured Query Language) is the standard language for storing, retrieving, and manipulating data in relational databases."
+        if "recursion" in lower:
+            return "Recursion is a programming technique where a function calls itself to solve smaller instances of the same problem until a base condition is met."
+        if "neural network" in lower:
+            return "Neural networks are computational models inspired by biological neural networks, consisting of layers of nodes that process data to recognize patterns."
+        if "data science" in lower:
+            return "Data science is an interdisciplinary field that uses statistical and computational methods to extract meaningful insights and knowledge from data."
+        return f"I am EduAccess AI, your accessible learning companion. I'm here to help explain concepts, write code examples, and assist with your studies. Let me know what you'd like to explore!"
+
     def chat(
         self,
         message: str,
         context: dict[str, Any],
         history: list[dict[str, str]] | None = None,
     ) -> dict[str, Any]:
-        """Process an assistant message, routing by intent."""
+        """Process an assistant message, routing by intent and context awareness."""
         clean_msg = message.strip()
         classification = classify_intent(clean_msg)
         intent = classification.intent
 
-        # 1. Deterministic UI actions (captions, audio descriptions, font size)
+        # 1. Deterministic UI actions (captions, audio descriptions, font size, open quiz)
         if intent == AssistantIntent.DETERMINISTIC_ACTION:
             return {
                 "reply": classification.direct_reply or "Action executed.",
@@ -56,7 +104,7 @@ class AssistantOrchestrator:
                 "provider": "intent_router",
             }
 
-        # 3. Extract and normalize lecture context
+        # 3. Extract and normalize lecture context (if active)
         job_id = (
             context.get("lecture_id")
             or context.get("job_id")
@@ -64,6 +112,7 @@ class AssistantOrchestrator:
             or context.get("job")
             or ""
         )
+        has_active_lecture = bool(job_id and storage.job_exists(job_id))
         timestamp = float(context.get("timestamp") or 0.0)
 
         # 4. Learning Progress / Next Best Action
@@ -93,24 +142,24 @@ class AssistantOrchestrator:
                 else:
                     reply = (
                         "You haven't completed any quizzes yet. "
-                        "Complete a quiz on this lecture in the Studio to diagnose your learning gaps and get personalized study recommendations!"
+                        "Complete a quiz on a lecture in the Studio to diagnose your learning gaps and get personalized study recommendations!"
                     )
             except Exception as exc:
                 logger.warning("Error building personal learning agent: %s", exc)
-                reply = "Complete a quiz on this lecture in the Studio to see your personalized learning progress and study recommendations!"
+                reply = "Complete a quiz on a lecture in the Studio to see your personalized learning progress and study recommendations!"
 
             return {
                 "reply": reply,
-                "action": "open_learning" if job_id else None,
+                "action": "open_learning" if has_active_lecture else None,
                 "evidence": [],
                 "provider": "learning_agent",
             }
 
         # 5. Quiz & Practice Intent
         if intent == AssistantIntent.QUIZ:
-            if not job_id or not storage.job_exists(job_id):
+            if not has_active_lecture:
                 return {
-                    "reply": "Open or process a lecture first to practice with interactive quizzes!",
+                    "reply": "Open or process a lecture first to practice with interactive quizzes, or ask me any topic to test your knowledge!",
                     "action": None,
                     "evidence": [],
                     "provider": "none",
@@ -151,9 +200,9 @@ class AssistantOrchestrator:
 
         # 6. Current Visual Intent ("What am I looking at right now?")
         if intent == AssistantIntent.CURRENT_VISUAL:
-            if not job_id or not storage.job_exists(job_id):
+            if not has_active_lecture:
                 return {
-                    "reply": "Open or process a lecture first to inspect on-screen visuals.",
+                    "reply": "Please open or select a lecture video first to inspect on-screen visuals.",
                     "action": None,
                     "evidence": [],
                     "provider": "none",
@@ -183,9 +232,9 @@ class AssistantOrchestrator:
 
         # 7. Accessibility Intent ("What was shown but not explained?")
         if intent == AssistantIntent.ACCESSIBILITY:
-            if not job_id or not storage.job_exists(job_id):
+            if not has_active_lecture:
                 return {
-                    "reply": "Open or process a lecture first to analyze accessibility gaps.",
+                    "reply": "Please open or select a lecture video first to analyze accessibility gaps.",
                     "action": None,
                     "evidence": [],
                     "provider": "none",
@@ -238,93 +287,110 @@ class AssistantOrchestrator:
                 "provider": "gap_reasoning",
             }
 
-        # 8. Content-related intents (LEARNING_HELP or LECTURE_CONTENT)
-        if not job_id or not storage.job_exists(job_id):
+        # 8. Check if query is explicitly or contextually lecture-specific
+        lecture_ref = is_lecture_specific(clean_msg)
+
+        # 8A. Query is lecture-specific
+        if lecture_ref:
+            if not has_active_lecture:
+                return {
+                    "reply": "Please open or select a lecture video first to ask questions about a specific lecture or on-screen content.",
+                    "action": None,
+                    "evidence": [],
+                    "provider": "none",
+                }
+
+            job = storage.get_job(job_id)
+            stem = Path(job.get("video_path", "")).stem or job_id
+
+            current_segment = execute_tool("get_current_segment", {}, context)
+            current_visual = execute_tool("get_current_visual_event", {}, context)
+
+            retriever = get_retriever(job_id, stem)
+            chunks = retriever.retrieve(clean_msg, top_k=config.MAX_RAG_CHUNKS)
+            rag_context = ""
+            evidence_list = []
+            if chunks:
+                rag_context = "\n---\n".join(f"{c.get('timestamp_label', '')}: {c.get('text', '')}" for c in chunks)
+                evidence_list = [
+                    {"time": c.get("timestamp_label"), "snippet": c.get("text", "")[:120]}
+                    for c in chunks[:3]
+                ]
+
+            if intent == AssistantIntent.LEARNING_HELP:
+                system_prompt = LECTURE_TUTOR_SYSTEM_PROMPT
+                user_prompt = f"Student Request: {clean_msg}\n\n"
+            else:
+                system_prompt = LECTURE_GROUNDED_SYSTEM_PROMPT
+                user_prompt = f"Student Question: {clean_msg}\n\n"
+
+            if rag_context:
+                user_prompt += f"Relevant Lecture Evidence:\n{rag_context}\n\n"
+            if current_segment.get("text") and current_segment.get("text") not in ("No speech detected at this exact second.", "No active lecture selected."):
+                user_prompt += f"Current Speech ({int(timestamp//60):02d}:{int(timestamp%60):02d}): {current_segment.get('text')}\n"
+            if current_visual.get("description") and current_visual.get("description") not in ("No active lecture selected.",):
+                user_prompt += f"Current Visual ({current_visual.get('type')}): {current_visual.get('description')}\n"
+
+            if not rag_context and not current_segment.get("text") and not current_visual.get("description"):
+                return {
+                    "reply": "I could not find verified evidence in this lecture for that question. Please ask a question related to the lecture content.",
+                    "action": None,
+                    "evidence": [],
+                    "provider": "none",
+                }
+
+            try:
+                reply = self.gemma.generate_cloud(user_prompt, system_prompt=system_prompt, history=history, max_new_tokens=300)
+                provider = "huggingface/gemma"
+            except Exception as exc:
+                logger.warning("Learner-facing Gemma cloud call failed: %s; using grounded fallback.", exc)
+                if chunks:
+                    top = chunks[0]
+                    if intent == AssistantIntent.LEARNING_HELP:
+                        reply = (
+                            f"Here is a simple breakdown from the lecture at [{top.get('timestamp_label', '')}]:\n\n"
+                            f"• **Key Concept**: {top.get('text', '')}\n"
+                            f"• **Intuition**: The instructor explains and demonstrates this step by step."
+                        )
+                    else:
+                        reply = f"Based on the lecture at [{top.get('timestamp_label', '')}]: {top.get('text', '')}"
+                        if len(chunks) > 1:
+                            reply += f"\n\nAdditional context at [{chunks[1].get('timestamp_label', '')}]: {chunks[1].get('text', '')}"
+                    provider = "grounded_evidence"
+                elif current_segment.get("text"):
+                    reply = f"At [{int(timestamp//60):02d}:{int(timestamp%60):02d}], the instructor explains: {current_segment.get('text')}"
+                    provider = "transcript_segment"
+                else:
+                    reply = f"I could not reach cloud AI: {exc}. Grounded evidence was cited where available."
+                    provider = "unavailable"
+
             return {
-                "reply": "Open or process a lecture first to use the content-aware Assistant.",
+                "reply": reply,
                 "action": None,
-                "evidence": [],
-                "provider": "none",
+                "evidence": evidence_list,
+                "provider": provider,
             }
 
-        job = storage.get_job(job_id)
-        stem = Path(job.get("video_path", "")).stem or job_id
-
-        current_segment = execute_tool("get_current_segment", {}, context)
-        current_visual = execute_tool("get_current_visual_event", {}, context)
-
-        retriever = get_retriever(job_id, stem)
-        chunks = retriever.retrieve(clean_msg, top_k=config.MAX_RAG_CHUNKS)
-        rag_context = ""
-        evidence_list = []
-        if chunks:
-            rag_context = "\n---\n".join(f"{c.get('timestamp_label', '')}: {c.get('text', '')}" for c in chunks)
-            evidence_list = [
-                {"time": c.get("timestamp_label"), "snippet": c.get("text", "")[:120]}
-                for c in chunks[:3]
-            ]
-
-        if intent == AssistantIntent.LEARNING_HELP:
-            system_prompt = (
-                "You are EduAccess AI, an educational accessibility learning tutor.\n"
-                "The student needs a simplified, beginner-friendly explanation, breakdown, or intuitive example.\n"
-                "Explain the concept clearly and simply using the provided lecture evidence.\n"
-                "Do not just copy or dump raw lecture transcript. Break it down step by step with clear intuition.\n"
-                "When relevant, cite the timestamp.\n"
-            )
-            user_prompt = f"Student Request: {clean_msg}\n\n"
-        else:
-            system_prompt = (
-                "You are EduAccess AI, a helpful, accessible learning assistant.\n"
-                "Answer the student's question accurately using the provided lecture context.\n"
-                "Be clear, concise, and educational. When relevant, cite the timestamp.\n"
-            )
-            user_prompt = f"Student Question: {clean_msg}\n\n"
-
-        if rag_context:
-            user_prompt += f"Relevant Lecture Evidence:\n{rag_context}\n\n"
-        if current_segment.get("text") and current_segment.get("text") not in ("No speech detected at this exact second.", "No active lecture selected."):
-            user_prompt += f"Current Speech ({int(timestamp//60):02d}:{int(timestamp%60):02d}): {current_segment.get('text')}\n"
-        if current_visual.get("description") and current_visual.get("description") not in ("No active lecture selected.",):
-            user_prompt += f"Current Visual ({current_visual.get('type')}): {current_visual.get('description')}\n"
-
-        if not rag_context and not current_segment.get("text") and not current_visual.get("description"):
-            return {
-                "reply": "I could not find verified evidence in this lecture for that question. Please ask a question related to the lecture content.",
-                "action": None,
-                "evidence": [],
-                "provider": "none",
-            }
-
+        # 8B. Query is GENERAL (General AI Mode across website)
+        # Even if a lecture is open, general questions like "What is SQL?", "What is Python?",
+        # "Explain recursion simply", or "What is machine learning?" route to General AI.
         try:
-            reply = self.gemma.generate_cloud(user_prompt, system_prompt=system_prompt, history=history, max_new_tokens=300)
+            reply = self.gemma.generate_cloud(
+                clean_msg,
+                system_prompt=GENERAL_AI_SYSTEM_PROMPT,
+                history=history,
+                max_new_tokens=400,
+            )
             provider = "huggingface/gemma"
         except Exception as exc:
-            logger.warning("Learner-facing Gemma cloud call failed: %s; using grounded fallback.", exc)
-            if chunks:
-                top = chunks[0]
-                if intent == AssistantIntent.LEARNING_HELP:
-                    reply = (
-                        f"Here is a simple breakdown from the lecture at [{top.get('timestamp_label', '')}]:\n\n"
-                        f"• **Key Concept**: {top.get('text', '')}\n"
-                        f"• **Intuition**: The instructor explains and demonstrates this step by step."
-                    )
-                else:
-                    reply = f"Based on the lecture at [{top.get('timestamp_label', '')}]: {top.get('text', '')}"
-                    if len(chunks) > 1:
-                        reply += f"\n\nAdditional context at [{chunks[1].get('timestamp_label', '')}]: {chunks[1].get('text', '')}"
-                provider = "grounded_evidence"
-            elif current_segment.get("text"):
-                reply = f"At [{int(timestamp//60):02d}:{int(timestamp%60):02d}], the instructor explains: {current_segment.get('text')}"
-                provider = "transcript_segment"
-            else:
-                reply = f"I could not reach cloud AI: {exc}. Grounded evidence was cited where available."
-                provider = "unavailable"
+            logger.warning("General AI Gemma cloud call failed: %s; using general fallback.", exc)
+            reply = self._general_fallback(clean_msg)
+            provider = "general_ai"
 
         return {
             "reply": reply,
             "action": None,
-            "evidence": evidence_list,
+            "evidence": [],
             "provider": provider,
         }
 
@@ -366,6 +432,7 @@ class AssistantOrchestrator:
             or context.get("job")
             or ""
         )
+        has_active_lecture = bool(job_id and storage.job_exists(job_id))
         timestamp = float(context.get("timestamp") or 0.0)
 
         # 3. Non-generative intents (Visual, Accessibility, Quiz, Progress)
@@ -381,76 +448,85 @@ class AssistantOrchestrator:
             yield json.dumps({"token": "", "action": action, "action_payload": action_payload, "done": True})
             return
 
-        # 4. Content and Learning Help intents
-        if not job_id or not storage.job_exists(job_id):
-            yield json.dumps({"token": "Open or process a lecture first to use the content-aware Assistant.", "done": True})
+        # 4. Check if lecture-specific
+        lecture_ref = is_lecture_specific(clean_msg)
+
+        # 4A. Lecture-specific streaming
+        if lecture_ref:
+            if not has_active_lecture:
+                yield json.dumps({"token": "Please open or select a lecture video first to ask questions about a specific lecture or on-screen content.", "done": True})
+                return
+
+            job = storage.get_job(job_id)
+            stem = Path(job.get("video_path", "")).stem or job_id
+
+            current_segment = execute_tool("get_current_segment", {}, context)
+            current_visual = execute_tool("get_current_visual_event", {}, context)
+
+            retriever = get_retriever(job_id, stem)
+            chunks = retriever.retrieve(clean_msg, top_k=config.MAX_RAG_CHUNKS)
+            rag_context = ""
+            if chunks:
+                rag_context = "\n---\n".join(f"{c.get('timestamp_label', '')}: {c.get('text', '')}" for c in chunks)
+
+            if intent == AssistantIntent.LEARNING_HELP:
+                system_prompt = LECTURE_TUTOR_SYSTEM_PROMPT
+                user_prompt = f"Student Request: {clean_msg}\n\n"
+            else:
+                system_prompt = LECTURE_GROUNDED_SYSTEM_PROMPT
+                user_prompt = f"Student Question: {clean_msg}\n\n"
+
+            if rag_context:
+                user_prompt += f"Relevant Lecture Evidence:\n{rag_context}\n\n"
+            if current_segment.get("text") and current_segment.get("text") not in ("No speech detected at this exact second.", "No active lecture selected."):
+                user_prompt += f"Current Speech ({int(timestamp//60):02d}:{int(timestamp%60):02d}): {current_segment.get('text')}\n"
+            if current_visual.get("description") and current_visual.get("description") not in ("No active lecture selected.",):
+                user_prompt += f"Current Visual ({current_visual.get('type')}): {current_visual.get('description')}\n"
+
+            try:
+                async for token in self.gemma.stream_chat(user_prompt, system_prompt=system_prompt, history=history):
+                    yield json.dumps({"token": token, "done": False})
+            except Exception as exc:
+                logger.warning("Gemma streaming failed: %s; falling back to grounded chunks.", exc)
+                if chunks:
+                    top = chunks[0]
+                    if intent == AssistantIntent.LEARNING_HELP:
+                        fb_text = (
+                            f"Here is a simple breakdown from the lecture at [{top.get('timestamp_label', '')}]:\n\n"
+                            f"• **Key Concept**: {top.get('text', '')}\n"
+                            f"• **Intuition**: The instructor explains and demonstrates this step by step."
+                        )
+                    else:
+                        fb_text = f"Based on the lecture at [{top.get('timestamp_label', '')}]: {top.get('text', '')}"
+                        if len(chunks) > 1:
+                            fb_text += f"\n\nAdditional context at [{chunks[1].get('timestamp_label', '')}]: {chunks[1].get('text', '')}"
+                    words = fb_text.split(" ")
+                    for i in range(0, len(words), 3):
+                        chunk = " ".join(words[i:i+3]) + (" " if i + 3 < len(words) else "")
+                        yield json.dumps({"token": chunk, "done": False})
+                elif current_segment.get("text") and current_segment.get("text") not in ("No speech detected at this exact second.", "No active lecture selected."):
+                    fb_text = f"At [{int(timestamp//60):02d}:{int(timestamp%60):02d}], the instructor explains: {current_segment.get('text')}"
+                    words = fb_text.split(" ")
+                    for i in range(0, len(words), 3):
+                        chunk = " ".join(words[i:i+3]) + (" " if i + 3 < len(words) else "")
+                        yield json.dumps({"token": chunk, "done": False})
+                else:
+                    yield json.dumps({"token": f"Cloud AI unavailable: {exc}. Grounded evidence was cited where available.", "done": False})
+
+            yield json.dumps({"token": "", "done": True})
             return
 
-        job = storage.get_job(job_id)
-        stem = Path(job.get("video_path", "")).stem or job_id
-
-        current_segment = execute_tool("get_current_segment", {}, context)
-        current_visual = execute_tool("get_current_visual_event", {}, context)
-
-        retriever = get_retriever(job_id, stem)
-        chunks = retriever.retrieve(clean_msg, top_k=config.MAX_RAG_CHUNKS)
-        rag_context = ""
-        if chunks:
-            rag_context = "\n---\n".join(f"{c.get('timestamp_label', '')}: {c.get('text', '')}" for c in chunks)
-
-        if intent == AssistantIntent.LEARNING_HELP:
-            system_prompt = (
-                "You are EduAccess AI, an educational accessibility learning tutor.\n"
-                "The student needs a simplified, beginner-friendly explanation, breakdown, or intuitive example.\n"
-                "Explain the concept clearly and simply using the provided lecture evidence.\n"
-                "Do not just copy or dump raw lecture transcript. Break it down step by step with clear intuition.\n"
-                "When relevant, cite the timestamp.\n"
-            )
-            user_prompt = f"Student Request: {clean_msg}\n\n"
-        else:
-            system_prompt = (
-                "You are EduAccess AI, a helpful, accessible learning assistant.\n"
-                "Answer the student's question accurately using the provided lecture context.\n"
-                "Be clear, concise, and educational. When relevant, cite the timestamp.\n"
-            )
-            user_prompt = f"Student Question: {clean_msg}\n\n"
-
-        if rag_context:
-            user_prompt += f"Relevant Lecture Evidence:\n{rag_context}\n\n"
-        if current_segment.get("text") and current_segment.get("text") not in ("No speech detected at this exact second.", "No active lecture selected."):
-            user_prompt += f"Current Speech ({int(timestamp//60):02d}:{int(timestamp%60):02d}): {current_segment.get('text')}\n"
-        if current_visual.get("description") and current_visual.get("description") not in ("No active lecture selected.",):
-            user_prompt += f"Current Visual ({current_visual.get('type')}): {current_visual.get('description')}\n"
-
+        # 4B. General AI streaming mode
         try:
-            async for token in self.gemma.stream_chat(user_prompt, system_prompt=system_prompt, history=history):
+            async for token in self.gemma.stream_chat(clean_msg, system_prompt=GENERAL_AI_SYSTEM_PROMPT, history=history, max_new_tokens=400):
                 yield json.dumps({"token": token, "done": False})
         except Exception as exc:
-            logger.warning("Gemma streaming failed: %s; falling back to grounded chunks.", exc)
-            if chunks:
-                top = chunks[0]
-                if intent == AssistantIntent.LEARNING_HELP:
-                    fb_text = (
-                        f"Here is a simple breakdown from the lecture at [{top.get('timestamp_label', '')}]:\n\n"
-                        f"• **Key Concept**: {top.get('text', '')}\n"
-                        f"• **Intuition**: The instructor explains and demonstrates this step by step."
-                    )
-                else:
-                    fb_text = f"Based on the lecture at [{top.get('timestamp_label', '')}]: {top.get('text', '')}"
-                    if len(chunks) > 1:
-                        fb_text += f"\n\nAdditional context at [{chunks[1].get('timestamp_label', '')}]: {chunks[1].get('text', '')}"
-                words = fb_text.split(" ")
-                for i in range(0, len(words), 3):
-                    chunk = " ".join(words[i:i+3]) + (" " if i + 3 < len(words) else "")
-                    yield json.dumps({"token": chunk, "done": False})
-            elif current_segment.get("text") and current_segment.get("text") not in ("No speech detected at this exact second.", "No active lecture selected."):
-                fb_text = f"At [{int(timestamp//60):02d}:{int(timestamp%60):02d}], the instructor explains: {current_segment.get('text')}"
-                words = fb_text.split(" ")
-                for i in range(0, len(words), 3):
-                    chunk = " ".join(words[i:i+3]) + (" " if i + 3 < len(words) else "")
-                    yield json.dumps({"token": chunk, "done": False})
-            else:
-                yield json.dumps({"token": f"Cloud AI unavailable: {exc}. Grounded evidence was cited where available.", "done": False})
+            logger.warning("Gemma streaming failed for general chat: %s; using general fallback.", exc)
+            fb_text = self._general_fallback(clean_msg)
+            words = fb_text.split(" ")
+            for i in range(0, len(words), 3):
+                chunk = " ".join(words[i:i+3]) + (" " if i + 3 < len(words) else "")
+                yield json.dumps({"token": chunk, "done": False})
 
         yield json.dumps({"token": "", "done": True})
 

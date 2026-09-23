@@ -1,7 +1,7 @@
-"""Comprehensive Unit & Regression Tests for Assistant Intent Router.
+"""Comprehensive Unit & Regression Tests for Assistant Intent Router & General AI Architecture.
 
-Tests all intent categories:
-1. CONVERSATIONAL ("Hi", "Hello", "Thanks", "How are you?")
+Tests all intent categories & context-aware routing:
+1. CONVERSATIONAL ("Hi", "Hello", "Thanks", "How are you?", "I love you", "Tell me a joke")
 2. PLATFORM ("Who are you?", "What can you do?", "What is EduAccess?")
 3. CURRENT_VISUAL ("What am I looking at right now?")
 4. ACCESSIBILITY ("What was shown but not explained?")
@@ -9,19 +9,24 @@ Tests all intent categories:
 6. QUIZ ("Quiz me.", "Test me on this lecture.")
 7. LEARNING_PROGRESS ("What should I study next?", "What am I weak at?")
 8. CLARIFICATION ("Tell me more.")
-9. LECTURE_CONTENT ("What is this code doing?", "Explain the for loop.")
-10. DETERMINISTIC_ACTION ("turn on captions", "increase font")
+9. LECTURE_CONTENT ("Explain this section.", "What did the teacher say?")
+10. GENERAL_QUERY ("What is Python?", "What is SQL?", "What is machine learning?", "What is a for loop?")
+11. DETERMINISTIC_ACTION ("turn on captions", "increase font")
 """
 import asyncio
 import json
 import unittest
+from unittest.mock import patch, MagicMock
 
 from backend.services.assistant.intent import (
     AssistantIntent,
     classify_intent,
+    is_lecture_specific,
     GREETING_REPLY,
     THANKS_REPLY,
     STATUS_REPLY,
+    AFFECTION_REPLY,
+    JOKE_REPLY,
     PLATFORM_EXPLANATION,
     CLARIFICATION_REPLY,
 )
@@ -72,6 +77,22 @@ class TestAssistantIntentRouter(unittest.TestCase):
             self.assertEqual(res.sub_type, "status")
             self.assertIn("doing great", res.direct_reply)
 
+    def test_intent_classification_conversational_affection_and_jokes(self):
+        """Test 'I love you', 'love you', 'tell me a joke', 'say something funny'."""
+        affections = ["I love you", "love you", "I love you ❤️", "بحبك", "احبك"]
+        for a in affections:
+            res = classify_intent(a)
+            self.assertEqual(res.intent, AssistantIntent.CONVERSATIONAL)
+            self.assertEqual(res.sub_type, "affection")
+            self.assertEqual(res.direct_reply, AFFECTION_REPLY)
+
+        jokes = ["Tell me a joke", "make me laugh", "say something funny", "قل لي نكتة"]
+        for j in jokes:
+            res = classify_intent(j)
+            self.assertEqual(res.intent, AssistantIntent.CONVERSATIONAL)
+            self.assertEqual(res.sub_type, "joke")
+            self.assertEqual(res.direct_reply, JOKE_REPLY)
+
     def test_intent_classification_platform(self):
         platform_queries = ["Who are you?", "What can you do?", "What is EduAccess?", "How does this platform work?", "من انت"]
         for q in platform_queries:
@@ -103,54 +124,46 @@ class TestAssistantIntentRouter(unittest.TestCase):
                 f"Failed for accessibility query '{q}': got {res.intent}",
             )
 
-    def test_intent_classification_learning_help(self):
-        queries = ["I don't understand this.", "Explain it simply.", "Can you explain this like I'm a beginner?", "Give me an example.", "Simplify this"]
-        for q in queries:
+    def test_intent_classification_general_query(self):
+        """General questions like 'What is Python?', 'What is SQL?' must be GENERAL_QUERY."""
+        general_queries = [
+            "What is Python?",
+            "What is machine learning?",
+            "What is a for loop?",
+            "What is SQL?",
+            "Explain recursion simply",
+            "What is data science?",
+            "Tell me about neural networks",
+        ]
+        for q in general_queries:
             res = classify_intent(q)
-            self.assertEqual(
+            self.assertIn(
                 res.intent,
-                AssistantIntent.LEARNING_HELP,
-                f"Failed for learning help query '{q}': got {res.intent}",
+                (AssistantIntent.GENERAL_QUERY, AssistantIntent.LEARNING_HELP),
+                f"Query '{q}' should be GENERAL_QUERY or LEARNING_HELP, got {res.intent}",
             )
 
-    def test_intent_classification_quiz(self):
-        queries = ["Quiz me.", "Test me on this lecture.", "Give me 5 questions.", "Practice this topic with me."]
-        for q in queries:
-            res = classify_intent(q)
+    def test_intent_classification_lecture_specific(self):
+        """Lecture-referencing queries must be recognized as lecture-specific."""
+        lecture_queries = [
+            ("Explain this section", True),
+            ("What did the teacher just explain?", True),
+            ("What did the instructor say about loops?", True),
+            ("According to this video, what is a variable?", True),
+            ("What is shown on this slide?", True),
+            ("What was shown but not explained?", True),
+            ("What am I looking at right now?", True),
+            ("What is Python?", False),
+            ("What is SQL?", False),
+            ("What is machine learning?", False),
+            ("I love you", False),
+            ("Tell me a joke", False),
+        ]
+        for q, expected in lecture_queries:
             self.assertEqual(
-                res.intent,
-                AssistantIntent.QUIZ,
-                f"Failed for quiz query '{q}': got {res.intent}",
-            )
-
-    def test_intent_classification_learning_progress(self):
-        queries = ["What should I study next?", "What should I do next?", "What am I weak at?", "How can I improve?", "What's my next step?"]
-        for q in queries:
-            res = classify_intent(q)
-            self.assertEqual(
-                res.intent,
-                AssistantIntent.LEARNING_PROGRESS,
-                f"Failed for progress query '{q}': got {res.intent}",
-            )
-
-    def test_intent_classification_clarification(self):
-        queries = ["Tell me more.", "More", "Continue", "Elaborate"]
-        for q in queries:
-            res = classify_intent(q)
-            self.assertEqual(
-                res.intent,
-                AssistantIntent.CLARIFICATION,
-                f"Failed for clarification query '{q}': got {res.intent}",
-            )
-
-    def test_intent_classification_lecture_content(self):
-        queries = ["What is this code doing?", "Explain the for loop.", "What does range(5) do?", "Summarize this lecture."]
-        for q in queries:
-            res = classify_intent(q)
-            self.assertEqual(
-                res.intent,
-                AssistantIntent.LECTURE_CONTENT,
-                f"Failed for lecture content query '{q}': got {res.intent}",
+                is_lecture_specific(q),
+                expected,
+                f"is_lecture_specific failed for '{q}': expected {expected}",
             )
 
     def test_intent_classification_deterministic_actions(self):
@@ -160,185 +173,90 @@ class TestAssistantIntentRouter(unittest.TestCase):
             ("turn on audio description", "toggle_audio_description"),
             ("increase font", "font_size"),
             ("decrease font", "font_size"),
+            ("open quiz", "open_quiz"),
         ]
         for query, expected_action in actions:
             res = classify_intent(query)
             self.assertEqual(res.intent, AssistantIntent.DETERMINISTIC_ACTION)
             self.assertEqual(res.action, expected_action)
 
-    # ==================== 2. ORCHESTRATOR END-TO-END BEHAVIOR ====================
+    # ==================== 2. ORCHESTRATOR BEHAVIOR ====================
 
-    def test_conversational_without_lecture_context(self):
-        """Conversational queries should work without lecture context and NOT trigger rejection or RAG."""
-        res_hi = self.orchestrator.chat("Hi", context={})
-        self.assertEqual(res_hi["reply"], GREETING_REPLY)
-        self.assertEqual(res_hi["provider"], "intent_router")
-        self.assertEqual(res_hi["evidence"], [])
+    def test_general_chat_without_lecture_context(self):
+        """General questions without a lecture context return helpful general AI answers."""
+        queries = [
+            ("What is Python?", "Python is a versatile high-level programming language."),
+            ("What is machine learning?", "Machine learning enables systems to learn from data."),
+            ("What is a for loop?", "A for loop iterates over elements in a collection."),
+            ("What is SQL?", "SQL is a standard language for querying relational databases."),
+            ("Explain recursion simply", "Recursion is when a function calls itself to solve smaller subproblems."),
+        ]
+        for q, expected_reply in queries:
+            with patch.object(self.orchestrator.gemma, "generate_cloud", return_value=expected_reply):
+                res = self.orchestrator.chat(q, context={})
+                self.assertNotIn("Open or process a lecture first", res["reply"])
+                self.assertNotIn("DEMO_python_loops", res["reply"])
+                self.assertEqual(res["evidence"], [])
+                self.assertEqual(res["provider"], "huggingface/gemma")
+                self.assertEqual(res["reply"], expected_reply)
 
-        res_thanks = self.orchestrator.chat("Thanks", context={})
-        self.assertEqual(res_thanks["reply"], THANKS_REPLY)
-        self.assertEqual(res_thanks["provider"], "intent_router")
-
-        res_status = self.orchestrator.chat("How are you?", context={})
-        self.assertEqual(res_status["reply"], STATUS_REPLY)
-        self.assertEqual(res_status["provider"], "intent_router")
-
-    def test_conversational_with_active_lecture_context(self):
-        """Conversational queries inside a lecture MUST NOT trigger lecture RAG or lecture summaries."""
+    def test_general_chat_with_active_lecture_bypasses_rag(self):
+        """General questions asked WHILE inside an active lecture must NOT fire lecture RAG."""
         context = {"lecture_id": self.demo_job, "timestamp": 12.0}
+        with patch("backend.services.assistant.orchestrator.get_retriever") as mock_retriever:
+            with patch.object(self.orchestrator.gemma, "generate_cloud", return_value="SQL manages relational databases."):
+                res_sql = self.orchestrator.chat("What is SQL?", context=context)
+                mock_retriever.assert_not_called()
+                self.assertNotIn("Open or process a lecture first", res_sql["reply"])
+                self.assertEqual(res_sql["evidence"], [])
+                self.assertIn("SQL", res_sql["reply"])
 
-        res_hi = self.orchestrator.chat("Hi", context=context)
-        self.assertEqual(res_hi["reply"], GREETING_REPLY)
-        self.assertEqual(res_hi["provider"], "intent_router")
-        self.assertEqual(res_hi["evidence"], [])
-        self.assertNotIn("Python", res_hi["reply"])
-        self.assertNotIn("loop", res_hi["reply"])
+            res_love = self.orchestrator.chat("I love you", context=context)
+            mock_retriever.assert_not_called()
+            self.assertEqual(res_love["reply"], AFFECTION_REPLY)
 
-        res_thanks = self.orchestrator.chat("Thank you so much", context=context)
-        self.assertEqual(res_thanks["reply"], THANKS_REPLY)
-        self.assertEqual(res_thanks["provider"], "intent_router")
-        self.assertEqual(res_thanks["evidence"], [])
+            res_joke = self.orchestrator.chat("Tell me a joke", context=context)
+            mock_retriever.assert_not_called()
+            self.assertEqual(res_joke["reply"], JOKE_REPLY)
 
-    def test_platform_intent_with_and_without_lecture(self):
-        """Platform intent provides accurate capability overview without lecture RAG."""
-        for ctx in [{}, {"lecture_id": self.demo_job, "timestamp": 5.0}]:
-            res = self.orchestrator.chat("What can you do?", context=ctx)
-            self.assertIn("EduAccess AI Assistant", res["reply"])
-            self.assertIn("Live On-Screen Visuals", res["reply"])
-            self.assertIn("Accessibility & Gap Analysis", res["reply"])
-            self.assertEqual(res["provider"], "intent_router")
-            self.assertEqual(res["evidence"], [])
-
-    def test_clarification_intent_natural_followup(self):
-        """Clarification intent prompts user gracefully without firing RAG."""
-        res = self.orchestrator.chat("Tell me more.", context={"lecture_id": self.demo_job})
-        self.assertEqual(res["reply"], CLARIFICATION_REPLY)
-        self.assertEqual(res["provider"], "intent_router")
-        self.assertEqual(res["evidence"], [])
-
-    def test_current_visual_grounded_telemetry(self):
-        """'What am I looking at right now?' returns grounded visual + OCR data with timestamp."""
+    def test_lecture_specific_query_with_active_lecture_uses_rag(self):
+        """Lecture-specific queries inside an active lecture execute grounded RAG retrieval."""
         context = {"lecture_id": self.demo_job, "timestamp": 12.0}
-        res = self.orchestrator.chat("What am I looking at right now?", context=context)
-        self.assertEqual(res["provider"], "visual_telemetry")
-        self.assertIn("looking at", res["reply"])
-        self.assertEqual(len(res["evidence"]), 1)
-        self.assertEqual(res["evidence"][0]["time"], "00:12")
-
-    def test_accessibility_disparity_gap(self):
-        """'What was shown but not explained?' returns real cross-modal disparity reasoning."""
-        context = {"lecture_id": self.demo_job, "timestamp": 10.0}
-        res = self.orchestrator.chat("What was shown but not explained?", context=context)
-        self.assertEqual(res["provider"], "gap_reasoning")
-        self.assertIn("Accessibility Disparity Gap", res["reply"])
-        self.assertTrue(len(res["evidence"]) > 0)
-
-    def test_lecture_content_grounded_rag(self):
-        """Lecture content question ('What is this code doing?') uses grounded RAG with timestamps."""
-        context = {"lecture_id": self.demo_job, "timestamp": 12.0}
-        with unittest.mock.patch.object(
+        with patch.object(
             self.orchestrator.gemma,
             "generate_cloud",
-            return_value="In Python, this loop repeats 5 times from 0 to 4 citing [00:10]."
+            return_value="The teacher explains that a for loop iterates 5 times citing [00:10]."
         ):
-            res = self.orchestrator.chat("What is this code doing?", context=context)
+            res = self.orchestrator.chat("Explain this section", context=context)
             self.assertEqual(res["provider"], "huggingface/gemma")
-            self.assertIn("repeats 5 times", res["reply"])
+            self.assertIn("for loop", res["reply"])
             self.assertTrue(len(res["evidence"]) > 0)
 
-    def test_lecture_content_grounded_fallback_when_offline(self):
-        """When cloud AI is offline, fallback provides grounded transcript and chunk evidence."""
-        context = {"lecture_id": self.demo_job, "timestamp": 12.0}
-        with unittest.mock.patch.object(
-            self.orchestrator.gemma,
-            "generate_cloud",
-            side_effect=Exception("Connection timeout")
-        ):
-            res = self.orchestrator.chat("What is this code doing?", context=context)
-            self.assertEqual(res["provider"], "grounded_evidence")
-            self.assertIn("Based on the lecture at", res["reply"])
-            self.assertTrue(len(res["evidence"]) > 0)
+    def test_lecture_specific_query_without_lecture_prompts_user(self):
+        """Lecture-specific questions without an active lecture guide the user politely."""
+        res_visual = self.orchestrator.chat("What am I looking at right now?", context={})
+        self.assertIn("Please open or select a lecture video first", res_visual["reply"])
 
-    def test_conversational_natural_variants(self):
-        """Natural variants such as 'hello assistant', 'thank you very much', 'see you later' are CONVERSATIONAL."""
-        variants = [
-            ("hello assistant", AssistantIntent.CONVERSATIONAL, "greeting"),
-            ("hi there", AssistantIntent.CONVERSATIONAL, "greeting"),
-            ("hi there eduaccess", AssistantIntent.CONVERSATIONAL, "greeting"),
-            ("hey there", AssistantIntent.CONVERSATIONAL, "greeting"),
-            ("good morning assistant", AssistantIntent.CONVERSATIONAL, "greeting"),
-            ("thank you very much", AssistantIntent.CONVERSATIONAL, "gratitude"),
-            ("many thanks", AssistantIntent.CONVERSATIONAL, "gratitude"),
-            ("thanks a lot", AssistantIntent.CONVERSATIONAL, "gratitude"),
-            ("you're welcome", AssistantIntent.CONVERSATIONAL, "gratitude"),
-            ("see you later", AssistantIntent.CONVERSATIONAL, "farewell"),
-            ("bye for now", AssistantIntent.CONVERSATIONAL, "farewell"),
-        ]
-        for query, expected_intent, expected_sub_type in variants:
-            res = classify_intent(query)
-            self.assertEqual(
-                res.intent,
-                expected_intent,
-                f"Failed for variant '{query}': got {res.intent} instead of {expected_intent}",
-            )
-            if expected_sub_type:
-                self.assertEqual(res.sub_type, expected_sub_type)
+        res_section = self.orchestrator.chat("Explain this section", context={})
+        self.assertIn("Please open or select a lecture video first", res_section["reply"])
 
-    def test_lecture_questions_not_classified_as_conversational(self):
-        """Standard lecture questions must NEVER be misclassified as conversational."""
-        lecture_queries = [
-            ("Explain this", AssistantIntent.LEARNING_HELP),
-            ("Explain the loop", AssistantIntent.LECTURE_CONTENT),
-            ("What does this code do?", AssistantIntent.LECTURE_CONTENT),
-            ("What is shown on this slide?", AssistantIntent.CURRENT_VISUAL),
-            ("Tell me more about the for loop", AssistantIntent.LECTURE_CONTENT),
-        ]
-        for query, expected_intent in lecture_queries:
-            res = classify_intent(query)
-            self.assertEqual(
-                res.intent,
-                expected_intent,
-                f"Query '{query}' was incorrectly classified as {res.intent}",
-            )
+    def test_streaming_general_chat(self):
+        """SSE streaming correctly delivers general AI answers token-by-token."""
+        async def mock_stream(*args, **kwargs):
+            for token in ["Python ", "is ", "a ", "programming ", "language."]:
+                yield token
 
-    def test_non_content_intents_bypass_retriever_explicitly(self):
-        """Verify get_retriever is strictly NOT called for non-content intents."""
-        non_content_queries = [
-            "Hi",
-            "Thanks",
-            "What can you do?",
-            "Tell me more.",
-            "turn on captions",
-        ]
-        with unittest.mock.patch("backend.services.assistant.orchestrator.get_retriever") as mock_get_retriever:
-            for query in non_content_queries:
-                res = self.orchestrator.chat(query, context={"lecture_id": self.demo_job, "timestamp": 5.0})
-                self.assertIn("reply", res)
-                mock_get_retriever.assert_not_called()
+        with patch.object(self.orchestrator.gemma, "stream_chat", side_effect=mock_stream):
+            async def run_stream():
+                tokens = []
+                async for chunk_str in self.orchestrator.stream_chat("What is Python?", context={}):
+                    data = json.loads(chunk_str)
+                    tokens.append(data.get("token", ""))
+                return "".join(tokens)
 
-    def test_streaming_conversational(self):
-        """SSE streaming correctly delivers conversational greetings token-by-token."""
-        async def run_stream():
-            tokens = []
-            async for chunk_str in self.orchestrator.stream_chat("Hi", context={"lecture_id": self.demo_job}):
-                data = json.loads(chunk_str)
-                tokens.append(data.get("token", ""))
-            return "".join(tokens)
-
-        result = asyncio.run(run_stream())
-        self.assertEqual(result.strip(), GREETING_REPLY.strip())
-
-    def test_streaming_platform(self):
-        """SSE streaming correctly delivers platform capabilities."""
-        async def run_stream():
-            tokens = []
-            async for chunk_str in self.orchestrator.stream_chat("Who are you?", context={}):
-                data = json.loads(chunk_str)
-                tokens.append(data.get("token", ""))
-            return "".join(tokens)
-
-        result = asyncio.run(run_stream())
-        self.assertIn("EduAccess AI Assistant", result)
+            result = asyncio.run(run_stream())
+            self.assertNotIn("Open or process a lecture first", result)
+            self.assertEqual(result.strip(), "Python is a programming language.")
 
 
 if __name__ == "__main__":

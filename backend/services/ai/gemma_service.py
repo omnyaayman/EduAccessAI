@@ -300,15 +300,25 @@ class GemmaService:
         )
 
     def _default_fallback(self, prompt: str) -> str:
-        """Deterministic, grounded educational response when cloud AI is unreachable."""
+        """Deterministic educational response when cloud AI is unreachable."""
         lower = prompt.lower()
+        if "python" in lower:
+            return "Python is a high-level, interpreted programming language renowned for its clear, readable syntax and versatile applications across web development, data science, automation, and AI."
         if "for loop" in lower or "حلقة" in lower:
-            return "In Python, a for loop repeats a block of code a specific number of times, commonly used with range()."
+            return "A for loop repeats a block of code for each item in an iterable sequence (such as a range, list, or string)."
         if "while loop" in lower:
-            return "A while loop in Python continues repeating code as long as a boolean condition evaluates to True."
+            return "A while loop continues executing a block of code as long as a specified boolean condition remains True."
+        if "machine learning" in lower or "ml" in lower:
+            return "Machine learning is a subset of artificial intelligence where algorithms learn patterns from data to make predictions or decisions without being explicitly programmed."
+        if "sql" in lower:
+            return "SQL (Structured Query Language) is the standard language for querying, manipulating, and managing relational databases."
+        if "recursion" in lower:
+            return "Recursion is a programming technique where a function solves a problem by calling itself with smaller inputs until reaching a base condition."
+        if "neural network" in lower:
+            return "Neural networks are computational models inspired by biological brains, consisting of interconnected layers of nodes that learn complex representations."
         if "what am i looking at" in lower or "what is on screen" in lower or "visual" in lower:
-            return "The current screen displays educational code and visual diagrams corresponding to the instructor's explanation."
-        return "EduAccess AI is assisting with your lecture. Let me know if you need an explanation, quiz hint, or accessibility adjustment."
+            return "The current screen displays educational content and visual materials."
+        return "I am EduAccess AI, your accessible learning assistant. Let me know what concepts, code, or topics you'd like to explore!"
 
 
 # Global shared Gemma service instance

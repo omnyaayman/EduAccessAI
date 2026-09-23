@@ -47,27 +47,23 @@ function getClientSearchParams(): URLSearchParams | null {
 }
 
 function resolveActiveJob(pathname: string): string | null {
-  // 1. Path match: /lectures/:jobId
-  const routeMatch = pathname.match(/\/lectures\/([^\/?#]+)/);
+  // 1. Path match: /lectures/:jobId (excluding index, new, upload)
+  const routeMatch = pathname.match(/^\/lectures\/([^\/?#]+)/);
   if (routeMatch && routeMatch[1] && !["page", "new", "upload"].includes(routeMatch[1])) {
     return decodeURIComponent(routeMatch[1]);
   }
 
-  // 2. Query param: ?job=..., ?jobId=..., ?lecture_id=...
-  const searchParams = getClientSearchParams();
-  if (searchParams) {
-    const qJob =
-      searchParams.get("job") ||
-      searchParams.get("jobId") ||
-      searchParams.get("lecture_id") ||
-      searchParams.get("id");
-    if (qJob) return qJob;
-  }
-
-  // 3. Stored selection
-  if (typeof window !== "undefined") {
-    const stored = window.localStorage.getItem(SELECTED_LECTURE_STORAGE_KEY);
-    if (stored) return stored;
+  // 2. Query param ONLY when on lecture or quiz route: ?job=..., ?jobId=...
+  if (pathname.startsWith("/lectures") || pathname.startsWith("/quiz")) {
+    const searchParams = getClientSearchParams();
+    if (searchParams) {
+      const qJob =
+        searchParams.get("job") ||
+        searchParams.get("jobId") ||
+        searchParams.get("lecture_id") ||
+        searchParams.get("id");
+      if (qJob) return qJob;
+    }
   }
 
   return null;
@@ -88,7 +84,7 @@ export default function GlobalAssistant() {
       id: "welcome",
       role: "assistant",
       content:
-        "Hi! I'm EduAccess AI, your educational accessibility companion. Ask me anything about the lecture, what's on screen, or say 'Turn on captions' or 'Turn on audio descriptions'!",
+        "Hi! I'm EduAccess AI, your accessible learning companion. Ask me anything about educational topics, code, or your lectures!",
     },
   ]);
   const [inputValue, setInputValue] = useState("");
@@ -101,25 +97,13 @@ export default function GlobalAssistant() {
   const recognitionRef = useRef<any>(null);
   const handleSendRef = useRef<(customText?: string) => Promise<void>>(async () => {});
 
-  // Synchronize active job ID across navigation & events
+  // Synchronize active job ID dynamically across navigation:
+  // Clears to null when the user navigates away from a lecture to general pages.
   useEffect(() => {
     const resolved = resolveActiveJob(pathname);
-    if (resolved) {
-      setActiveJobId(resolved);
-    } else if (
-      pathname === "/lectures" ||
-      pathname.startsWith("/learning") ||
-      pathname.startsWith("/quiz")
-    ) {
-      // If in Studio or Learning with no explicit job, retrieve available lectures
-      listLectures()
-        .then((data) => {
-          if (data.lectures && data.lectures.length > 0) {
-            const firstId = data.lectures[0].job_id;
-            setActiveJobId((prev) => prev || firstId);
-          }
-        })
-        .catch(() => {});
+    setActiveJobId(resolved);
+    if (!resolved) {
+      setCurrentTime(0);
     }
   }, [pathname]);
 
@@ -128,8 +112,8 @@ export default function GlobalAssistant() {
     if (typeof window === "undefined") return;
 
     const onLectureChange = (e: Event) => {
-      const customEvent = e as CustomEvent<{ jobId?: string }>;
-      if (customEvent.detail?.jobId) {
+      const customEvent = e as CustomEvent<{ jobId?: string | null }>;
+      if (typeof customEvent.detail?.jobId !== "undefined") {
         setActiveJobId(customEvent.detail.jobId);
       }
     };
@@ -406,14 +390,14 @@ export default function GlobalAssistant() {
                     </span>
                   ) : (
                     <span className="rounded-full bg-[#F5EFE6] border border-[#DDD0C0] px-1.5 py-0.5 text-[10px] font-medium text-[#7A7067]">
-                      General
+                      General AI
                     </span>
                   )}
                 </p>
                 <p className="text-[10.5px] text-[#7A7067]">
                   {activeJobId
                     ? `Bound to active lecture context (${currentTime.toFixed(0)}s)`
-                    : "Context-aware educational companion"}
+                    : "General educational AI assistant"}
                 </p>
               </div>
             </div>
