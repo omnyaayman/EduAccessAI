@@ -230,26 +230,6 @@ export default function GlobalAssistant() {
 
     const activeJob = activeJobId || resolveActiveJob(pathname);
 
-    // If deterministic action requested (e.g. captions/narration), allow even with minimal context
-    const lowerText = textToSend.toLowerCase();
-    const isUiAction =
-      lowerText.includes("caption") ||
-      lowerText.includes("audio desc") ||
-      lowerText.includes("font") ||
-      lowerText.includes("quiz");
-
-    if (!activeJob && !isUiAction) {
-      const noContextMsg: Message = {
-        id: (Date.now() + 1).toString(),
-        role: "assistant",
-        content: "Open or process a lecture first to use the content-aware Assistant.",
-      };
-      setMessages((prev) => [...prev, noContextMsg]);
-      if (speechEnabled && noContextMsg.content) speakText(noContextMsg.content);
-      setIsLoading(false);
-      return;
-    }
-
     const contextPayload = {
       page: pathname,
       lecture_id: activeJob || undefined,

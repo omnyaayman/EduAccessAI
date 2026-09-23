@@ -198,13 +198,7 @@ class GemmaService:
     ) -> AsyncGenerator[str, None]:
         """Stream assistant response tokens via SSE."""
         if not self.is_cloud_ready():
-            # Fallback stream (chunks the fallback response)
-            fallback = self._default_fallback(prompt)
-            words = fallback.split(" ")
-            for i in range(0, len(words), 3):
-                chunk = " ".join(words[i:i+3]) + " "
-                yield chunk
-            return
+            raise HFClientError("Gemma cloud is unavailable because HF_TOKEN is not configured.", status_code=401, is_auth_error=True)
 
         messages = self._format_messages(system_prompt, prompt, history)
         payload = {
@@ -224,7 +218,7 @@ class GemmaService:
                 yield token
         except Exception as exc:
             logger.warning("Gemma streaming failed: %s", exc)
-            yield f"Gemma on Hugging Face is unavailable: {exc}. No substitute answer was generated."
+            raise
 
     def generate_json(
         self,

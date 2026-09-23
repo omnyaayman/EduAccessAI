@@ -259,6 +259,63 @@ class TestAssistantIntentRouter(unittest.TestCase):
             self.assertIn("Based on the lecture at", res["reply"])
             self.assertTrue(len(res["evidence"]) > 0)
 
+    def test_conversational_natural_variants(self):
+        """Natural variants such as 'hello assistant', 'thank you very much', 'see you later' are CONVERSATIONAL."""
+        variants = [
+            ("hello assistant", AssistantIntent.CONVERSATIONAL, "greeting"),
+            ("hi there", AssistantIntent.CONVERSATIONAL, "greeting"),
+            ("hi there eduaccess", AssistantIntent.CONVERSATIONAL, "greeting"),
+            ("hey there", AssistantIntent.CONVERSATIONAL, "greeting"),
+            ("good morning assistant", AssistantIntent.CONVERSATIONAL, "greeting"),
+            ("thank you very much", AssistantIntent.CONVERSATIONAL, "gratitude"),
+            ("many thanks", AssistantIntent.CONVERSATIONAL, "gratitude"),
+            ("thanks a lot", AssistantIntent.CONVERSATIONAL, "gratitude"),
+            ("you're welcome", AssistantIntent.CONVERSATIONAL, "gratitude"),
+            ("see you later", AssistantIntent.CONVERSATIONAL, "farewell"),
+            ("bye for now", AssistantIntent.CONVERSATIONAL, "farewell"),
+        ]
+        for query, expected_intent, expected_sub_type in variants:
+            res = classify_intent(query)
+            self.assertEqual(
+                res.intent,
+                expected_intent,
+                f"Failed for variant '{query}': got {res.intent} instead of {expected_intent}",
+            )
+            if expected_sub_type:
+                self.assertEqual(res.sub_type, expected_sub_type)
+
+    def test_lecture_questions_not_classified_as_conversational(self):
+        """Standard lecture questions must NEVER be misclassified as conversational."""
+        lecture_queries = [
+            ("Explain this", AssistantIntent.LEARNING_HELP),
+            ("Explain the loop", AssistantIntent.LECTURE_CONTENT),
+            ("What does this code do?", AssistantIntent.LECTURE_CONTENT),
+            ("What is shown on this slide?", AssistantIntent.CURRENT_VISUAL),
+            ("Tell me more about the for loop", AssistantIntent.LECTURE_CONTENT),
+        ]
+        for query, expected_intent in lecture_queries:
+            res = classify_intent(query)
+            self.assertEqual(
+                res.intent,
+                expected_intent,
+                f"Query '{query}' was incorrectly classified as {res.intent}",
+            )
+
+    def test_non_content_intents_bypass_retriever_explicitly(self):
+        """Verify get_retriever is strictly NOT called for non-content intents."""
+        non_content_queries = [
+            "Hi",
+            "Thanks",
+            "What can you do?",
+            "Tell me more.",
+            "turn on captions",
+        ]
+        with unittest.mock.patch("backend.services.assistant.orchestrator.get_retriever") as mock_get_retriever:
+            for query in non_content_queries:
+                res = self.orchestrator.chat(query, context={"lecture_id": self.demo_job, "timestamp": 5.0})
+                self.assertIn("reply", res)
+                mock_get_retriever.assert_not_called()
+
     def test_streaming_conversational(self):
         """SSE streaming correctly delivers conversational greetings token-by-token."""
         async def run_stream():

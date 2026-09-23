@@ -117,7 +117,6 @@ class TestHFClient(unittest.TestCase):
         mock_response = MagicMock()
         mock_response.status_code = 200
         mock_response.json.return_value = expected
-        # post_sync checks resp.headers.get("content-type") to decide json vs bytes
         mock_response.headers = {"content-type": "application/json"}
 
         client = HFClient(token="hf_test_token_123")
@@ -126,6 +125,49 @@ class TestHFClient(unittest.TestCase):
         result = client.post_sync("some/model", {"inputs": "What is a loop?"})
 
         self.assertEqual(result, expected)
+
+    def test_stream_text_async_retries_on_429(self):
+        """stream_text_async retries with backoff on HTTP 429 and yields tokens on eventual success."""
+        import asyncio
+
+        client = HFClient(token="hf_test_token_123", max_retries=2)
+        mock_429 = MagicMock()
+        mock_429.status_code = 429
+        async def fake_aread():
+            return b"Rate limited"
+        mock_429.aread = fake_aread
+
+        mock_200 = MagicMock()
+        mock_200.status_code = 200
+        async def fake_lines():
+            yield 'data: {"token": {"text": "Grounded "}}\n'
+            yield 'data: {"token": {"text": "answer"}}\n'
+            yield 'data: [DONE]\n'
+        mock_200.aiter_lines = fake_lines
+
+        attempts = [0]
+        class MockStreamCtx:
+            async def __aenter__(self):
+                attempts[0] += 1
+                if attempts[0] == 1:
+                    return mock_429
+                return mock_200
+            async def __aexit__(self, exc_type, exc_val, exc_tb):
+                pass
+
+        client._async_client = MagicMock()
+        client._async_client.stream = MagicMock(side_effect=lambda *args, **kwargs: MockStreamCtx())
+
+        async def run():
+            with patch("asyncio.sleep", return_value=None):
+                tokens = []
+                async for tok in client.stream_text_async("some/model", {"inputs": "hi"}):
+                    tokens.append(tok)
+                return tokens
+
+        result = asyncio.run(run())
+        self.assertEqual("".join(result), "Grounded answer")
+        self.assertEqual(attempts[0], 2)
 
 
 # ============================================================

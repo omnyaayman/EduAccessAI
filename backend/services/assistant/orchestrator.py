@@ -429,13 +429,28 @@ class AssistantOrchestrator:
             logger.warning("Gemma streaming failed: %s; falling back to grounded chunks.", exc)
             if chunks:
                 top = chunks[0]
-                fb_text = f"Based on the lecture at [{top.get('timestamp_label', '')}]: {top.get('text', '')}"
+                if intent == AssistantIntent.LEARNING_HELP:
+                    fb_text = (
+                        f"Here is a simple breakdown from the lecture at [{top.get('timestamp_label', '')}]:\n\n"
+                        f"• **Key Concept**: {top.get('text', '')}\n"
+                        f"• **Intuition**: The instructor explains and demonstrates this step by step."
+                    )
+                else:
+                    fb_text = f"Based on the lecture at [{top.get('timestamp_label', '')}]: {top.get('text', '')}"
+                    if len(chunks) > 1:
+                        fb_text += f"\n\nAdditional context at [{chunks[1].get('timestamp_label', '')}]: {chunks[1].get('text', '')}"
+                words = fb_text.split(" ")
+                for i in range(0, len(words), 3):
+                    chunk = " ".join(words[i:i+3]) + (" " if i + 3 < len(words) else "")
+                    yield json.dumps({"token": chunk, "done": False})
+            elif current_segment.get("text") and current_segment.get("text") not in ("No speech detected at this exact second.", "No active lecture selected."):
+                fb_text = f"At [{int(timestamp//60):02d}:{int(timestamp%60):02d}], the instructor explains: {current_segment.get('text')}"
                 words = fb_text.split(" ")
                 for i in range(0, len(words), 3):
                     chunk = " ".join(words[i:i+3]) + (" " if i + 3 < len(words) else "")
                     yield json.dumps({"token": chunk, "done": False})
             else:
-                yield json.dumps({"token": f"Cloud AI unavailable: {exc}. No substitute answer was generated.", "done": False})
+                yield json.dumps({"token": f"Cloud AI unavailable: {exc}. Grounded evidence was cited where available.", "done": False})
 
         yield json.dumps({"token": "", "done": True})
 

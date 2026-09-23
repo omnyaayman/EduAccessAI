@@ -210,47 +210,86 @@ class HFClient:
         headers = self._get_headers()
         payload = {**payload, "stream": True}
 
-        async with self._async_client.stream("POST", url, headers=headers, json=payload, timeout=timeout) as response:
-                if response.status_code != 200:
+        last_error = None
+        for attempt in range(self.max_retries + 1):
+            try:
+                async with self._async_client.stream("POST", url, headers=headers, json=payload, timeout=timeout) as response:
+                    if response.status_code == 200:
+                        async for line in response.aiter_lines():
+                            if not line:
+                                continue
+                            if line.startswith("data:"):
+                                raw_data = line[5:].strip()
+                                if raw_data == "[DONE]":
+                                    break
+                                try:
+                                    parsed = json.loads(raw_data)
+                                    token_text = ""
+                                    if isinstance(parsed, dict):
+                                        # Hugging Face's OpenAI-compatible chat endpoint
+                                        # streams text in ``choices[].delta.content``.  Its
+                                        # text-generation endpoints use ``token.text``;
+                                        # support both formats so callers always receive
+                                        # the generated response.
+                                        choices = parsed.get("choices", [])
+                                        if choices and isinstance(choices[0], dict):
+                                            delta = choices[0].get("delta", {})
+                                            if isinstance(delta, dict):
+                                                token_text = str(delta.get("content", "") or "")
+                                            if not token_text:
+                                                message = choices[0].get("message", {})
+                                                if isinstance(message, dict):
+                                                    token_text = str(message.get("content", "") or "")
+                                        if not token_text:
+                                            token = parsed.get("token", {})
+                                            token_text = (
+                                                token.get("text", "") if isinstance(token, dict) else ""
+                                            ) or parsed.get("generated_text", "")
+                                    elif isinstance(parsed, list) and parsed:
+                                        token_text = parsed[0].get("token", {}).get("text", "") or parsed[0].get("generated_text", "")
+                                    if token_text:
+                                        yield token_text
+                                except Exception:
+                                    yield raw_data
+                        return
+
                     body = await response.aread()
-                    raise HFClientError(f"Streaming failed with HTTP {response.status_code}: {body.decode(errors='ignore')[:200]}")
-                
-                async for line in response.aiter_lines():
-                    if not line:
-                        continue
-                    if line.startswith("data:"):
-                        raw_data = line[5:].strip()
-                        if raw_data == "[DONE]":
-                            break
+                    body_text = body.decode(errors="ignore")[:300]
+
+                    if response.status_code == 503:
                         try:
-                            parsed = json.loads(raw_data)
-                            token_text = ""
-                            if isinstance(parsed, dict):
-                                # Hugging Face's OpenAI-compatible chat endpoint
-                                # streams text in ``choices[].delta.content``.  Its
-                                # text-generation endpoints use ``token.text``;
-                                # support both formats so callers always receive
-                                # the generated response.
-                                choices = parsed.get("choices", [])
-                                if choices and isinstance(choices[0], dict):
-                                    delta = choices[0].get("delta", {})
-                                    if isinstance(delta, dict):
-                                        token_text = str(delta.get("content", "") or "")
-                                    if not token_text:
-                                        message = choices[0].get("message", {})
-                                        if isinstance(message, dict):
-                                            token_text = str(message.get("content", "") or "")
-                                if not token_text:
-                                    token = parsed.get("token", {})
-                                    token_text = (
-                                        token.get("text", "") if isinstance(token, dict) else ""
-                                    ) or parsed.get("generated_text", "")
-                            elif isinstance(parsed, list) and parsed:
-                                token_text = parsed[0].get("token", {}).get("text", "") or parsed[0].get("generated_text", "")
-                            if token_text:
-                                yield token_text
+                            detail = json.loads(body_text)
+                            estimated = detail.get("estimated_time", 5.0)
                         except Exception:
-                            yield raw_data
+                            estimated = 5.0
+                        wait_sec = min(float(estimated), 15.0)
+                        logger.info(f"Model {model_id} loading for streaming. Waiting {wait_sec}s (attempt {attempt + 1}/{self.max_retries})...")
+                        await asyncio.sleep(wait_sec)
+                        continue
+
+                    if response.status_code == 429:
+                        wait_sec = (2 ** attempt) * 2.0
+                        logger.warning(f"HF Rate limit hit for streaming {model_id}. Backing off {wait_sec}s (attempt {attempt + 1}/{self.max_retries})...")
+                        await asyncio.sleep(wait_sec)
+                        continue
+
+                    if response.status_code in (401, 403):
+                        raise HFClientError(f"Authentication failure on Hugging Face (HTTP {response.status_code}). Check HF_TOKEN.", status_code=response.status_code, is_auth_error=True)
+
+                    raise HFClientError(f"Streaming failed with HTTP {response.status_code}: {body_text}", status_code=response.status_code)
+
+            except httpx.RequestError as exc:
+                last_error = exc
+                if attempt < self.max_retries:
+                    wait_sec = (2 ** attempt) * 1.5
+                    logger.warning(f"Network error streaming HF ({exc}). Retrying in {wait_sec}s...")
+                    await asyncio.sleep(wait_sec)
+                else:
+                    raise HFClientError(f"Connection to Hugging Face streaming failed after {self.max_retries} retries: {exc}") from exc
+
+        if last_error:
+            raise HFClientError(f"HF streaming failed: {last_error}")
+        raise HFClientError(f"Streaming failed after {self.max_retries} retries.")
 
     def close(self) -> None:
         """Release the shared synchronous connection pool."""

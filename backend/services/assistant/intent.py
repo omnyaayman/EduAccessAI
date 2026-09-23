@@ -139,7 +139,10 @@ def classify_intent(message: str) -> IntentClassification:
     clean_joined = " ".join(clean_words)
 
     # Gratitude
-    if re.fullmatch(r"(thanks|thank you|thanks a lot|thank you so much|thx|thank u|many thanks|much appreciated|ty|شكرا|تسلم|مشكور|جزاك الله خيرا|يعطيك العافية)", clean_joined):
+    if re.fullmatch(
+        r"(thanks(\s+(a\s+lot|very\s+much|so\s+much|again))?|thank\s+you(\s+(very\s+much|so\s+much|a\s+lot|again))?|thx|thank\s+u|many\s+thanks|much\s+appreciated|ty|youre\s+welcome|you\s+are\s+welcome|your\s+welcome|شكرا(\s+جزيلا)?|تسلم|مشكور|جزاك\s+الله\s+خيرا|يعطيك\s+العافية|عفوا)(\s+(assistant|eduaccess(\s+ai)?|ai|bot|team))?",
+        clean_joined,
+    ):
         return IntentClassification(
             intent=AssistantIntent.CONVERSATIONAL,
             sub_type="gratitude",
@@ -147,10 +150,9 @@ def classify_intent(message: str) -> IntentClassification:
         )
 
     # Status / pleasantries
-    if clean_joined in (
-        "how are you", "how are you doing", "hows it going", "how is it going",
-        "how are u", "whats up", "what's up", "how do you do", "how are you today",
-        "كيف حالك", "كيفك", "عامل ايه", "شلونك"
+    if re.fullmatch(
+        r"(how\s+are\s+you(\s+doing|\s+today)?|hows\s+it\s+going|how\s+is\s+it\s+going|how\s+are\s+u|whats\s+up|what\s+is\s+up|how\s+do\s+you\s+do|how\s+have\s+you\s+been|كيف\s+حالك|كيفك|عامل\s+ايه|شلونك|اخبارك|كيف\s+الصحة)(\s+(assistant|eduaccess(\s+ai)?|ai|today))?",
+        clean_joined,
     ):
         return IntentClassification(
             intent=AssistantIntent.CONVERSATIONAL,
@@ -159,7 +161,10 @@ def classify_intent(message: str) -> IntentClassification:
         )
 
     # Greetings
-    if re.fullmatch(r"(hi|hello|hey|hiya|howdy|hi there|hello there|hey there|good morning|good afternoon|good evening|welcome|مرحبا|اهلا|السلام عليكم|صباح الخير|مساء الخير|هاي|هلا)", clean_joined):
+    if re.fullmatch(
+        r"(hi|hello|hey|hiya|howdy|good\s+morning|good\s+afternoon|good\s+evening|good\s+day|welcome|مرحبا|اهلا|السلام\s+عليكم|صباح\s+الخير|مساء\s+الخير|هاي|هلا|اهلين|تحياتي)(\s+(there|assistant|eduaccess(\s+ai)?|ai|bot|friend))?(\s+(there|assistant|eduaccess(\s+ai)?|ai|bot|friend))?",
+        clean_joined,
+    ):
         return IntentClassification(
             intent=AssistantIntent.CONVERSATIONAL,
             sub_type="greeting",
@@ -167,7 +172,10 @@ def classify_intent(message: str) -> IntentClassification:
         )
 
     # Acknowledgement
-    if re.fullmatch(r"(ok|okay|got it|great|cool|understood|alright|all right|perfect|sure|sounds good|nice|awesome|تمام|حسنا|فهمت|ممتاز|ماشي|اوكي)", clean_joined):
+    if re.fullmatch(
+        r"(ok|okay|got\s+it|great|cool|understood|alright|all\s+right|perfect|sure|sounds\s+good|nice|awesome|gotcha|تمام|حسنا|فهمت|ممتاز|ماشي|اوكي)(\s+(thanks|assistant|eduaccess(\s+ai)?|ai))?",
+        clean_joined,
+    ):
         return IntentClassification(
             intent=AssistantIntent.CONVERSATIONAL,
             sub_type="acknowledgement",
@@ -175,7 +183,10 @@ def classify_intent(message: str) -> IntentClassification:
         )
 
     # Farewells
-    if re.fullmatch(r"(bye|goodbye|good bye|see you|see you later|cya|take care|see ya|have a good day|have a nice day|مع السلامة|الى اللقاء|باي|وداعا)", clean_joined):
+    if re.fullmatch(
+        r"(bye(\s+for\s+now)?|goodbye|good\s+bye|see\s+you(\s+later|\s+soon|\s+around)?|see\s+ya|cya|take\s+care|have\s+a\s+(good|nice|great)\s+(day|evening|night)|مع\s+السلامة|الى\s+اللقاء|إلى\s+اللقاء|باي|وداعا|تصبح\s+على\s+خير)(\s+(assistant|eduaccess(\s+ai)?|ai|friend))?",
+        clean_joined,
+    ):
         return IntentClassification(
             intent=AssistantIntent.CONVERSATIONAL,
             sub_type="farewell",
@@ -243,7 +254,7 @@ def classify_intent(message: str) -> IntentClassification:
 
     # 8. LEARNING HELP / SIMPLIFICATION INTENT
     if any(p in msg for p in (
-        "i don't understand", "i dont understand", "explain it simply", "explain this simply",
+        "i don't understand", "i dont understand", "explain it simply", "explain this simply", "explain this", "explain that",
         "explain like i'm a beginner", "explain like im a beginner", "can you explain this like i'm a beginner",
         "can you explain this like im a beginner", "can you simplify", "give me an example",
         "why does this work", "can you explain that again", "explain that again",
