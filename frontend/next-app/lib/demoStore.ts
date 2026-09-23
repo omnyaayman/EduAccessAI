@@ -166,7 +166,6 @@ export function getDemoAudioDescription(jobId: string): AudioDescriptionResponse
   const job = getDemoJob(jobId);
   const res = job?.result || {};
   const events = (res.accessibility_events as any) || [];
-  const fullNarration = (res.narration_audio_path as string) || "/files/outputs/DEMO_python_loops_narration.wav";
   return {
     job_id: job?.job_id || jobId,
     events: events.map((e: any, idx: number) => ({
@@ -183,7 +182,7 @@ export function getDemoTranscript(jobId: string) {
   const res = job?.result || {};
   return {
     job_id: job?.job_id || jobId,
-    transcript_text: (res.transcript_text as string) || "Welcome to Python Loops introduction. Today we explore for loops.",
+    transcript_text: (res.transcript_text as string) || "",
     segments: (res.segments as any) || [],
   };
 }
@@ -359,8 +358,8 @@ export function getDemoQuizzes(): { quizzes: string[] } {
   return { quizzes: Object.keys(QUIZZES) };
 }
 
-export function getDemoQuiz(quizId: string): Quiz {
-  return QUIZZES[quizId] || QUIZZES["DEMO_python_loops_quiz"];
+export function getDemoQuiz(quizId: string): Quiz | null {
+  return QUIZZES[quizId] || null;
 }
 
 export function submitDemoQuiz(payload: {
@@ -370,6 +369,7 @@ export function submitDemoQuiz(payload: {
   student_id?: string;
 }): QuizSubmissionResponse {
   const quiz = getDemoQuiz(payload.quiz_id);
+  if (!quiz) throw new Error(`Demo quiz not found: ${payload.quiz_id}`);
   const questions = quiz.questions || [];
   let correctCount = 0;
   const gradedQuestions = questions.map((q: any, idx: number) => {

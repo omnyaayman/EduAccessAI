@@ -343,21 +343,12 @@ function dispatchDemoRequest_INTERNAL<T>(path: string, init?: RequestInit): T {
 
   // /upload
   if (cleanPath === "/upload") {
-    return {
-      job_id: "DEMO_python_loops",
-      filename: "DEMO_python_loops.mp4",
-      size_bytes: 444583,
-      content_hash: "demo_mode",
-      reused_from: null,
-    } as T;
+    throw new ApiError(503, "Uploads need the EduAccess backend and are unavailable in offline demo mode.");
   }
 
   // /process
   if (cleanPath === "/process") {
-    return {
-      job_id: "DEMO_python_loops",
-      status: "queued",
-    } as T;
+    throw new ApiError(503, "Lecture processing needs the EduAccess backend and is unavailable in offline demo mode.");
   }
 
   throw new ApiError(404, `Endpoint ${cleanPath} not found`);
