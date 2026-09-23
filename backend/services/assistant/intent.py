@@ -52,72 +52,79 @@ AFFECTION_REPLY = "Aww, thank you! ❤️ I'm here to help you learn and explore
 JOKE_REPLY = "Why do programmers prefer dark mode? Because light attracts bugs! 🐛😄 What concept or topic would you like to explore today?"
 
 PLATFORM_EXPLANATION = (
-    "I am the **EduAccess AI Assistant**, an educational accessibility companion built directly into this platform. Here is what I can help you with:\n\n"
-    "• 🧠 **General Educational AI**: Ask any question about Python, Machine Learning, Data Science, algorithms, math, or computer science concepts anytime.\n"
-    "• 🎥 **Live On-Screen Visuals**: When a video is open, ask *'What am I looking at right now?'* to understand on-screen slides, diagrams, and OCR code.\n"
-    "• 👁️ **Accessibility & Gap Analysis**: Ask *'What was shown but not explained?'* to discover visual information the teacher displayed without audio narration.\n"
-    "• 📖 **Grounded Lecture Q&A**: Ask lecture questions and get verified answers citing exact lecture timestamps and speech evidence.\n"
-    "• 💡 **Adaptive Learning Help**: Say *'Explain this simply'* or *'Give me an example'* to get beginner-friendly explanations.\n"
-    "• 📝 **Practice & Quizzes**: Say *'Quiz me'* or *'Test me on this lecture'* to practice interactive questions.\n"
-    "• 🎯 **Learning Progress & Next Steps**: Say *'What should I study next?'* to review your concept mastery and personalized study recommendations.\n"
-    "• 🎛️ **Accessibility Controls**: Say *'Turn on captions'* or *'Turn on audio descriptions'* to adjust playback controls."
+    "I am the EduAccess AI Assistant. EduAccess AI turns educational videos into accessible learning materials for blind, low-vision, deaf, hard-of-hearing, and cognitive-support learners. "
+    "The project documentation describes synchronized captions and transcripts, OCR and audio descriptions for visual content, speech-versus-visual accessibility gap analysis, timestamped lecture Q&A, accessibility reports, quizzes, and learning progress tools.\n\n"
+    "You can ask general educational questions at any time. When a lecture is open, you can also ask about its transcript, visuals, or a specific moment; those answers use available lecture evidence."
 )
-
 CLARIFICATION_REPLY = (
     "Sure — would you like me to explain a concept simply, describe what's on screen, or help you practice with a quiz?"
 )
 
 
 def is_lecture_specific(message: str) -> bool:
-    """Check if the query explicitly or contextually refers to lecture/video/slide/teacher/playback."""
-    msg = message.lower().strip()
+    """Check whether the request needs evidence from a particular lecture.
 
-    # 1. Explicit references to lecture/video/lesson/class/clip/recording
-    if re.search(r"\b(this|the|current)\s+(lecture|video|lesson|clip|recording|course|class|presentation)\b", msg):
+    Topic overlap and an open job alone are never sufficient. The request must
+    relate an explanation/question to a lecture artifact, speaker, or moment.
+    """
+    msg = re.sub(r"\s+", " ", message.lower().strip())
+    media = r"(?:lecture|video|lesson|clip|recording|class|presentation|section|part|slide|screen|board|diagram|flowchart|frame|scene|transcript|caption)"
+    if re.search(r"\bwhat am i (?:looking at|seeing)\b", msg):
         return True
-    if re.search(r"\b(in|from|during|according to)\s+(this|the)\s+(video|lecture|lesson|clip)\b", msg):
+    if re.search(rf"\b(?:this|that|the|current|last|previous)\s+{media}\b", msg):
         return True
-
-    # 2. References to teacher/instructor/speaker/presenter/professor
-    if re.search(r"\b(the|this)\s+(teacher|instructor|speaker|presenter|professor|narrator)\b", msg):
+    if re.search(rf"\b(?:in|from|during|according to|based on|within)\s+(?:this|that|the|current|last|previous)\s+{media}\b", msg):
         return True
-    if re.search(r"\bwhat did (the teacher|the instructor|he|she|they) (say|mean|explain|show|demonstrate|write|point at)\b", msg):
+    if re.search(r"\bwhat\s+(?:did|does|is|was|were|has)\s+(?:the\s+)?(?:teacher|instructor|speaker|presenter|professor|narrator)\b", msg):
         return True
-
-    # 3. References to slide/screen/visual/diagram/code on screen
-    if re.search(r"\b(this|the)\s+(slide|screen|diagram|flowchart|frame|scene)\b", msg):
+    if re.search(r"\b(?:what|which|where|how|why)\b.*\b(?:shown|displayed|visible|on screen|on the screen|on this slide|on the slide|in the video|in this lecture)\b", msg):
         return True
-    if re.search(r"\b(on|from)\s+(the|this)\s+(slide|screen|board)\b", msg):
+    if re.search(r"\b(?:what|how|why|explain|summari[sz]e|describe)\b.*\b(?:this|that)\s+(?:part|section|moment|example|step)\b", msg):
         return True
-    if re.search(r"\b(code|diagram|example|text)\s+(on|shown on|displayed on)\s+(screen|the screen|this slide|the slide)\b", msg):
+    if re.search(r"\bwhat\s+(?:i|we)\s+(?:just\s+)?(?:watched|saw|heard|learned)\b", msg):
         return True
-
-    # 4. Deictic / contextual references to "this section", "here", "right now", "just watched"
-    if re.search(r"\b(this|the)\s+section\b", msg):
+    if re.search(r"\b(?:in|during)\s+(?:the\s+)?part\s+(?:that\s+)?(?:i|we)\s+just\s+(?:watched|saw)\b", msg):
         return True
-    if re.search(r"\b(what am i looking at|what is on screen|what is on the screen|what is shown|what was shown|what did i miss)\b", msg):
+    # Arabic lecture references (written as escapes to keep this file encoding-safe).
+    arabic_lecture = r"(?:\u0647\u0630\u0627\s+(?:\u0627\u0644\u0645\u0642\u0637\u0639|\u0627\u0644\u0641\u064a\u062f\u064a\u0648|\u0627\u0644\u062f\u0631\u0633)|\u0647\u0630\u0647\s+\u0627\u0644\u0645\u062d\u0627\u0636\u0631\u0629|\u0641\u064a\s+(?:\u0647\u0630\u0627\s+)?(?:\u0627\u0644\u0641\u064a\u062f\u064a\u0648|\u0627\u0644\u0645\u062d\u0627\u0636\u0631\u0629)|\u0627\u0644\u0645\u062f\u0631\u0633|\u0627\u0644\u0645\u0639\u0644\u0645|\u0627\u0644\u0645\u062d\u0627\u0636\u0631|\u0627\u0644\u0634\u0631\u064a\u062d\u0629|\u0627\u0644\u0633\u0644\u0627\u064a\u062f|\u0639\u0644\u0649\s+\u0627\u0644\u0634\u0627\u0634\u0629|\u0641\u064a\s+\u0627\u0644\u0634\u0627\u0634\u0629|\u0645\u0627\u0630\u0627\s+\u0642\u0627\u0644|\u0645\u0627\s+\u0634\u0631\u062d\u0647)"
+    if re.search(arabic_lecture, msg):
         return True
-    if re.search(r"\bwhat was (shown|demonstrated|displayed|written)\b", msg):
-        return True
-    if re.search(r"\bwhat (i|we) just (watched|saw|heard|learned)\b", msg):
-        return True
-    if re.search(r"\b(at this timestamp|at this time|at this point|right now|at this moment)\b", msg):
-        return True
-    if re.search(r"\bexplain (this section|what happened|what just happened|what was explained)\b", msg):
-        return True
-
-    # 5. Arabic lecture cues
-    if re.search(r"(هذا المقطع|هذا الفيديو|هذه المحاضرة|هذا الدرس|في الفيديو|في المحاضرة|في هذا الفيديو)", msg):
-        return True
-    if re.search(r"(المدرس|المعلم|المحاضر|ماذا قال|ما قاله المدرس|ما شرحه)", msg):
-        return True
-    if re.search(r"(الشريحة|السلايد|على الشاشة|في الشاشة|المعروض|ما يظهر)", msg):
-        return True
-    if re.search(r"(في هذه اللحظة|الآن|ما تم عرضه|ما الذي فاتني|ماذا ارى)", msg):
-        return True
-
     return False
 
+
+def is_platform_query(message: str) -> bool:
+    """Recognize questions whose subject is EduAccess or this assistant."""
+    msg = message.lower().replace("what's", "what is")
+    msg = re.sub(r"\bwhats\b", "what is", msg)
+    msg = re.sub(r"[^\w\s]", " ", msg)
+    msg = re.sub(r"\s+", " ", msg).strip()
+    product = r"(?:eduaccess(?: ai)?|(?:this|the) platform|(?:this|the) app|(?:this|the) website|(?:this|the) service)"
+    about_verbs = r"(?:what is|what does|explain|describe|tell me about|give me an overview of|how does)"
+    request_prefix = r"(?:(?:please|could you|can you|would you)\s+)?"
+    if re.search(rf"\b{request_prefix}{about_verbs}\s+(?:the\s+)?{product}\b", msg):
+        return True
+    if re.search(r"\b(?:tell me|explain|describe)\s+(?:what|how)\s+(?:eduaccess(?: ai)?|(?:this|the) platform)\b", msg):
+        return True
+    arabic_platform = (
+        r"\u0645\u0646\s+\u0627\u0646\u062a|"
+        r"\u0645\u0627\s+\u0647\u0648\s+eduaccess|"
+        r"\u0645\u0627\u0630\u0627\s+\u064a\u0645\u0643\u0646\u0643\s+\u0627\u0646\s+\u062a\u0641\u0639\u0644|"
+        r"\u0643\u064a\u0641\s+\u062a\u0639\u0645\u0644\s+\u0647\u0630\u0647\s+\u0627\u0644\u0645\u0646\u0635\u0629|"
+        r"\u0628\u0645\u0627\u0630\u0627\s+\u062a\u0633\u0627\u0639\u062f\u0646\u064a|"
+        r"\u0645\u0627\s+\u0647\u064a\s+\u0645\u0645\u064a\u0632\u0627\u062a\u0643"
+    )
+    if re.search(arabic_platform, msg) or "help me understand eduaccess" in msg:
+        return True
+    return any(phrase in msg for phrase in (
+        "who are you", "what are you", "what can you do", "how do you work",
+        "what can you help me with", "what can i do here", "tell me about yourself",
+        "what features do you have", "introduce yourself",
+    ))
+
+
+def requires_lecture_context(message: str, intent: AssistantIntent) -> bool:
+    """Shared message-level decision used by both normal and streaming chat."""
+    return intent == AssistantIntent.CURRENT_VISUAL or is_lecture_specific(message)
 
 def classify_intent(message: str) -> IntentClassification:
     """Classify user query into appropriate intent category."""
@@ -268,31 +275,22 @@ def classify_intent(message: str) -> IntentClassification:
             direct_reply=FAREWELL_REPLY,
         )
 
-    # 3. PLATFORM CAPABILITY INTENTS
-    if any(p in msg for p in (
-        "who are you", "what are you", "what is eduaccess", "what is eduaccess ai",
-        "what can you do", "how do you work", "how does this platform work", "what can you help me with",
-        "what can i do here", "tell me about yourself", "what features do you have", "help me understand eduaccess",
-        "introduce yourself", "what is this platform",
-        "من انت", "ما هو eduaccess", "ماذا يمكنك ان تفعل", "كيف تعمل هذه المنصة", "بماذا تساعدني", "ما هي مميزاتك"
-    )):
+    # Product identity and capability questions are answered from the project facts above.
+    if is_platform_query(msg):
         return IntentClassification(
             intent=AssistantIntent.PLATFORM,
             direct_reply=PLATFORM_EXPLANATION,
         )
-
-    # 4. CURRENT VISUAL INTENT
+    # Visual intent is routed through lecture retrieval so speech, OCR, and visual context can be combined.
     if any(p in msg for p in (
         "what am i looking at", "what is on screen", "what is on the screen",
         "what is shown", "what is displayed", "describe this slide", "describe the screen",
         "describe what is on screen", "what code is shown", "what diagram is this",
         "show visual", "what is visible", "what am i seeing", "describe current screen",
-        "ماذا يظهر على الشاشة", "ما المعروض", "ماذا يوجد على الشاشة", "اشرح الشريحة", "ما هو الرسم", "ما الكود المعروض"
-    )):
+    )) or re.search(r"\b(?:what|describe|show|explain)\b.*\b(?:currently visible|on (?:this|the) screen|on (?:this|the) slide|in (?:this|the) frame|in the current video)\b", msg):
         return IntentClassification(
             intent=AssistantIntent.CURRENT_VISUAL,
         )
-
     # 5. ACCESSIBILITY & DISPARITY GAP INTENT
     if any(p in msg for p in (
         "what was shown but not explained", "what am i missing", "what did i miss",

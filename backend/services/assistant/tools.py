@@ -118,7 +118,7 @@ def execute_tool(name: str, args: dict[str, Any], context: dict[str, Any]) -> di
                     "start": ev.get("start"),
                     "end": ev.get("end"),
                 }
-        return {"description": "Standard video scene without notable slides or code."}
+        return {"description": "No visual event found at this timestamp."}
 
     if name == "search_lecture":
         query = args.get("query", "")

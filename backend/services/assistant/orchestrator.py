@@ -19,7 +19,7 @@ from typing import Any, AsyncGenerator
 
 from backend import config, storage
 from backend.services.ai.gemma_service import get_gemma_service
-from backend.services.assistant.intent import AssistantIntent, classify_intent, is_lecture_specific
+from backend.services.assistant.intent import AssistantIntent, classify_intent, requires_lecture_context
 from backend.services.assistant.tools import execute_tool, ASSISTANT_TOOL_DEFINITIONS
 from backend.services.rag import get_retriever
 
@@ -29,7 +29,8 @@ GENERAL_AI_SYSTEM_PROMPT = (
     "You are EduAccess AI, an intelligent, accessible, and friendly educational AI assistant.\n"
     "You provide clear, accurate, concise, and helpful answers across programming, data science, AI/ML, math, science, and general education.\n"
     "When explaining concepts, break them down simply, provide intuitive examples where helpful, and keep answers accessible for learners of all backgrounds.\n"
-    "You are not restricted to any single lecture. Answer general questions naturally and directly."
+    "You are not restricted to any single lecture. Answer general questions and ordinary conversation naturally and directly.\n"
+    "An open lecture is not evidence that a general question refers to it. Do not introduce lecture details, timestamps, or citations unless the user's request asks about lecture content."
 )
 
 LECTURE_TUTOR_SYSTEM_PROMPT = (
@@ -45,6 +46,43 @@ LECTURE_GROUNDED_SYSTEM_PROMPT = (
     "Answer the student's question accurately using the provided lecture context.\n"
     "Be clear, concise, and educational. When relevant, cite the timestamp (e.g. [01:24]).\n"
 )
+
+
+def _visual_description(visual: dict[str, Any]) -> str:
+    description = str(visual.get("description") or "").strip()
+    if description in (
+        "No active lecture selected.",
+        "No visual event found at this timestamp.",
+        "Standard video scene without notable slides or code.",
+    ):
+        return ""
+    return description
+
+
+def _lecture_evidence(
+    chunks: list[dict[str, Any]],
+    segment: dict[str, Any],
+    visual: dict[str, Any],
+    timestamp: float,
+) -> list[dict[str, str]]:
+    """Carry retrieved and current multimodal evidence in both response modes."""
+    evidence = [
+        {"time": str(c.get("timestamp_label") or ""), "snippet": str(c.get("text") or "")[:120]}
+        for c in chunks[:3]
+    ]
+    time_label = f"{int(timestamp // 60):02d}:{int(timestamp % 60):02d}"
+    speech = str(segment.get("text") or "").strip()
+    if speech and speech not in ("No speech detected at this exact second.", "No active lecture selected."):
+        evidence.append({"time": time_label, "type": "transcript", "snippet": speech[:120]})
+    description = _visual_description(visual)
+    ocr = str(visual.get("ocr_text") or "").strip()
+    if description or ocr:
+        evidence.append({
+            "time": time_label,
+            "type": str(visual.get("type") or "visual"),
+            "snippet": (description or ocr)[:120],
+        })
+    return evidence[:3]
 
 
 class AssistantOrchestrator:
@@ -198,38 +236,6 @@ class AssistantOrchestrator:
                 "provider": "quiz_service",
             }
 
-        # 6. Current Visual Intent ("What am I looking at right now?")
-        if intent == AssistantIntent.CURRENT_VISUAL:
-            if not has_active_lecture:
-                return {
-                    "reply": "Please open or select a lecture video first to inspect on-screen visuals.",
-                    "action": None,
-                    "evidence": [],
-                    "provider": "none",
-                }
-
-            current_segment = execute_tool("get_current_segment", {}, context)
-            current_visual = execute_tool("get_current_visual_event", {}, context)
-
-            vtype = current_visual.get("type", "scene")
-            vdesc = current_visual.get("description", "Standard lecture video scene.")
-            ocr = current_visual.get("ocr_text", "")
-            time_str = f"{int(timestamp//60):02d}:{int(timestamp%60):02d}"
-
-            reply = f"At [{time_str}], you are looking at a {vtype}: {vdesc}"
-            if ocr and ocr.strip():
-                reply += f"\n\nOn-screen text:\n{ocr.strip()}"
-            speech = current_segment.get("text")
-            if speech and speech not in ("No speech detected at this exact second.", "No active lecture selected."):
-                reply += f"\n\nInstructor speech at this moment: \"{speech.strip()}\""
-
-            return {
-                "reply": reply,
-                "action": None,
-                "evidence": [{"time": time_str, "type": vtype, "snippet": vdesc[:120]}],
-                "provider": "visual_telemetry",
-            }
-
         # 7. Accessibility Intent ("What was shown but not explained?")
         if intent == AssistantIntent.ACCESSIBILITY:
             if not has_active_lecture:
@@ -287,8 +293,8 @@ class AssistantOrchestrator:
                 "provider": "gap_reasoning",
             }
 
-        # 8. Check if query is explicitly or contextually lecture-specific
-        lecture_ref = is_lecture_specific(clean_msg)
+        # Lecture evidence is used only when the message itself requires lecture context.
+        lecture_ref = requires_lecture_context(clean_msg, intent)
 
         # 8A. Query is lecture-specific
         if lecture_ref:
@@ -309,13 +315,10 @@ class AssistantOrchestrator:
             retriever = get_retriever(job_id, stem)
             chunks = retriever.retrieve(clean_msg, top_k=config.MAX_RAG_CHUNKS)
             rag_context = ""
-            evidence_list = []
             if chunks:
                 rag_context = "\n---\n".join(f"{c.get('timestamp_label', '')}: {c.get('text', '')}" for c in chunks)
-                evidence_list = [
-                    {"time": c.get("timestamp_label"), "snippet": c.get("text", "")[:120]}
-                    for c in chunks[:3]
-                ]
+            evidence_list = _lecture_evidence(chunks, current_segment, current_visual, timestamp)
+            visual_description = _visual_description(current_visual)
 
             if intent == AssistantIntent.LEARNING_HELP:
                 system_prompt = LECTURE_TUTOR_SYSTEM_PROMPT
@@ -328,10 +331,12 @@ class AssistantOrchestrator:
                 user_prompt += f"Relevant Lecture Evidence:\n{rag_context}\n\n"
             if current_segment.get("text") and current_segment.get("text") not in ("No speech detected at this exact second.", "No active lecture selected."):
                 user_prompt += f"Current Speech ({int(timestamp//60):02d}:{int(timestamp%60):02d}): {current_segment.get('text')}\n"
-            if current_visual.get("description") and current_visual.get("description") not in ("No active lecture selected.",):
-                user_prompt += f"Current Visual ({current_visual.get('type')}): {current_visual.get('description')}\n"
+            if visual_description:
+                user_prompt += f"Current Visual ({current_visual.get('type')}): {visual_description}\n"
+            if current_visual.get("ocr_text"):
+                user_prompt += f"On-Screen OCR Text: {current_visual.get('ocr_text')}\n"
 
-            if not rag_context and not current_segment.get("text") and not current_visual.get("description"):
+            if not rag_context and not current_segment.get("text") and not visual_description and not current_visual.get("ocr_text"):
                 return {
                     "reply": "I could not find verified evidence in this lecture for that question. Please ask a question related to the lecture content.",
                     "action": None,
@@ -357,9 +362,15 @@ class AssistantOrchestrator:
                         if len(chunks) > 1:
                             reply += f"\n\nAdditional context at [{chunks[1].get('timestamp_label', '')}]: {chunks[1].get('text', '')}"
                     provider = "grounded_evidence"
-                elif current_segment.get("text"):
+                elif current_segment.get("text") and current_segment.get("text") not in ("No speech detected at this exact second.", "No active lecture selected."):
                     reply = f"At [{int(timestamp//60):02d}:{int(timestamp%60):02d}], the instructor explains: {current_segment.get('text')}"
                     provider = "transcript_segment"
+                elif visual_description or current_visual.get("ocr_text"):
+                    visible = visual_description or str(current_visual.get("ocr_text") or "").strip()
+                    reply = f"At [{int(timestamp//60):02d}:{int(timestamp%60):02d}], the visible {current_visual.get('type') or 'content'} shows: {visible}"
+                    if current_visual.get("ocr_text") and visual_description:
+                        reply += f"\nOn-screen text: {current_visual.get('ocr_text')}"
+                    provider = "visual_context"
                 else:
                     reply = f"I could not reach cloud AI: {exc}. Grounded evidence was cited where available."
                     provider = "unavailable"
@@ -445,11 +456,11 @@ class AssistantOrchestrator:
             for i in range(0, len(words), 3):
                 chunk = " ".join(words[i:i+3]) + (" " if i + 3 < len(words) else "")
                 yield json.dumps({"token": chunk, "done": False})
-            yield json.dumps({"token": "", "action": action, "action_payload": action_payload, "done": True})
+            yield json.dumps({"token": "", "action": action, "action_payload": action_payload, "evidence": chat_res.get("evidence", []), "done": True})
             return
 
-        # 4. Check if lecture-specific
-        lecture_ref = is_lecture_specific(clean_msg)
+        # Use the same message-level lecture-context decision as chat().
+        lecture_ref = requires_lecture_context(clean_msg, intent)
 
         # 4A. Lecture-specific streaming
         if lecture_ref:
@@ -468,6 +479,7 @@ class AssistantOrchestrator:
             rag_context = ""
             if chunks:
                 rag_context = "\n---\n".join(f"{c.get('timestamp_label', '')}: {c.get('text', '')}" for c in chunks)
+            visual_description = _visual_description(current_visual)
 
             if intent == AssistantIntent.LEARNING_HELP:
                 system_prompt = LECTURE_TUTOR_SYSTEM_PROMPT
@@ -480,8 +492,14 @@ class AssistantOrchestrator:
                 user_prompt += f"Relevant Lecture Evidence:\n{rag_context}\n\n"
             if current_segment.get("text") and current_segment.get("text") not in ("No speech detected at this exact second.", "No active lecture selected."):
                 user_prompt += f"Current Speech ({int(timestamp//60):02d}:{int(timestamp%60):02d}): {current_segment.get('text')}\n"
-            if current_visual.get("description") and current_visual.get("description") not in ("No active lecture selected.",):
-                user_prompt += f"Current Visual ({current_visual.get('type')}): {current_visual.get('description')}\n"
+            if visual_description:
+                user_prompt += f"Current Visual ({current_visual.get('type')}): {visual_description}\n"
+            if current_visual.get("ocr_text"):
+                user_prompt += f"On-Screen OCR Text: {current_visual.get('ocr_text')}\n"
+
+            if not rag_context and not current_segment.get("text") and not visual_description and not current_visual.get("ocr_text"):
+                yield json.dumps({"token": "I could not find verified evidence in this lecture for that question. Please ask a question related to the lecture content.", "done": True})
+                return
 
             try:
                 async for token in self.gemma.stream_chat(user_prompt, system_prompt=system_prompt, history=history):
@@ -510,10 +528,19 @@ class AssistantOrchestrator:
                     for i in range(0, len(words), 3):
                         chunk = " ".join(words[i:i+3]) + (" " if i + 3 < len(words) else "")
                         yield json.dumps({"token": chunk, "done": False})
+                elif visual_description or current_visual.get("ocr_text"):
+                    visible = visual_description or str(current_visual.get("ocr_text") or "").strip()
+                    fb_text = f"At [{int(timestamp//60):02d}:{int(timestamp%60):02d}], the visible {current_visual.get('type') or 'content'} shows: {visible}"
+                    if current_visual.get("ocr_text") and visual_description:
+                        fb_text += f"\nOn-screen text: {current_visual.get('ocr_text')}"
+                    words = fb_text.split(" ")
+                    for i in range(0, len(words), 3):
+                        chunk = " ".join(words[i:i+3]) + (" " if i + 3 < len(words) else "")
+                        yield json.dumps({"token": chunk, "done": False})
                 else:
                     yield json.dumps({"token": f"Cloud AI unavailable: {exc}. Grounded evidence was cited where available.", "done": False})
 
-            yield json.dumps({"token": "", "done": True})
+            yield json.dumps({"token": "", "evidence": _lecture_evidence(chunks, current_segment, current_visual, timestamp), "done": True})
             return
 
         # 4B. General AI streaming mode

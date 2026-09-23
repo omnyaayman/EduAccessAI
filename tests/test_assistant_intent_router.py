@@ -259,5 +259,41 @@ class TestAssistantIntentRouter(unittest.TestCase):
             self.assertEqual(result.strip(), "Python is a programming language.")
 
 
+    def test_platform_intent_accepts_natural_paraphrases(self):
+        for query in (
+            "Explain EduAccess",
+            "Could you explain EduAccess AI?",
+            "Tell me about this platform",
+            "Give me an overview of the EduAccess platform",
+            "What does EduAccess do?",
+            "What's EduAccess?",
+            "Tell me what this platform does",
+        ):
+            with self.subTest(query=query):
+                self.assertEqual(classify_intent(query).intent, AssistantIntent.PLATFORM)
+
+    def test_lecture_intent_uses_relational_phrasing_not_topic_overlap(self):
+        lecture = (
+            "Could you walk me through the current section?",
+            "What did the teacher just explain?",
+            "Can you describe what is displayed on the current screen?",
+            "What did the instructor show on the slide?",
+            "What happened in the part we just watched?",
+        )
+        general = (
+            "What is Python?",
+            "How does SQL work?",
+            "Explain Pandas",
+            "I'm hungry",
+            "I'm a snake",
+        )
+        for query in lecture:
+            with self.subTest(query=query):
+                self.assertTrue(is_lecture_specific(query))
+        for query in general:
+            with self.subTest(query=query):
+                self.assertFalse(is_lecture_specific(query))
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

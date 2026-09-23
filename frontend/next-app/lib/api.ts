@@ -644,6 +644,7 @@ export interface AssistantChatPayload {
   context?: {
     page?: string;
     lecture_id?: string;
+    job_id?: string;
     timestamp?: number;
     current_segment?: string;
     current_concept?: string;
@@ -666,7 +667,7 @@ export async function assistantChat(payload: AssistantChatPayload): Promise<Assi
   });
 }
 
-export async function* assistantStream(payload: AssistantChatPayload): AsyncGenerator<{ token: string; done: boolean; action?: string; action_payload?: Record<string, unknown> }, void, unknown> {
+export async function* assistantStream(payload: AssistantChatPayload): AsyncGenerator<{ token: string; done: boolean; action?: string; action_payload?: Record<string, unknown>; evidence?: AssistantChatResponse["evidence"] }, void, unknown> {
   const { state, url } = resolveBackendState();
 
   if (state === "CONFIGURED_OK" && url) {

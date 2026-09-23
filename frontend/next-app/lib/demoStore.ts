@@ -111,8 +111,7 @@ export function getDemoLectures(): LectureRecord[] {
 export function getDemoJob(jobId: string): DemoJob | null {
   const norm = jobId.replace(/\.mp4$/i, "");
   const found = DEMO_JOBS[norm] || DEMO_JOBS[jobId];
-  if (found) return found;
-  return DEMO_JOBS["DEMO_python_loops"];
+  return found || null;
 }
 
 export function getDemoTimeline(jobId: string): TimelineResponse {
@@ -565,63 +564,17 @@ export function askDemoQuestion(jobId: string, question: string): AskResponse {
   } as unknown as AskResponse;
 }
 
-export function chatDemoAssistant(payload: {
+export function chatDemoAssistant(_payload: {
   message: string;
   context?: Record<string, any>;
   history?: Array<{ role: string; content: string }>;
 }) {
-  const msg = payload.message.toLowerCase();
-  const isArabic = /[\u0600-\u06FF]/.test(payload.message);
-
-  if (isArabic) {
-    if (msg.includes("فيديو") || msg.includes("شغل") || msg.includes("محاضرة") || msg.includes("كود")) {
-      return {
-        reply: "أهلاً بك! لقد قمت بتحديد المقطع الذي يحتوي على شرح الكود وحلقة التكرار. يمكنك النقر على الرابط للانتقال مباشرة إلى المقطع في الفيديو.",
-        action: "SEEK_VIDEO",
-        action_payload: { timestamp: 5, lecture_id: "DEMO_python_loops" },
-        evidence: [
-          { time: "00:05", type: "visual_event", snippet: "ظهور كود بايثون لحلقة for loop على الشاشة" },
-        ],
-      };
-    }
-    if (msg.includes("اختبار") || msg.includes("كويز") || msg.includes("اسئلة")) {
-      return {
-        reply: "بالتأكيد! يمكنك تجربة الاختبار التفاعلي التكيفي لتقييم فهمك للمفاهيم.",
-        action: "OPEN_QUIZ",
-        action_payload: { quiz_id: "DEMO_python_loops_quiz" },
-        evidence: [],
-      };
-    }
-    return {
-      reply: "مرحباً بك في EduAccess AI! أنا مساعدك التعليمي الذكي المدعوم بالذكاء الاصطناعي. يمكنني مساعدتك في استكشاف المحاضرات، شرح الأكواد المرئية بالصوت، حل الاختبارات التكيفية، والإجابة على أي سؤال من داخل الفيديو.",
-      action: null,
-      evidence: [],
-    };
-  }
-
-  // English
-  if (msg.includes("video") || msg.includes("play") || msg.includes("seek") || msg.includes("code")) {
-    return {
-      reply: "Here is the exact lecture segment where the Python loop syntax is demonstrated on screen!",
-      action: "SEEK_VIDEO",
-      action_payload: { timestamp: 5, lecture_id: "DEMO_python_loops" },
-      evidence: [
-        { time: "00:05", type: "visual_event", snippet: "Python for loop code block rendered on screen" },
-      ],
-    };
-  }
-  if (msg.includes("quiz") || msg.includes("test") || msg.includes("practice")) {
-    return {
-      reply: "I have prepared an adaptive quiz based on this lecture to test your comprehension!",
-      action: "OPEN_QUIZ",
-      action_payload: { quiz_id: "DEMO_python_loops_quiz" },
-      evidence: [],
-    };
-  }
-
+  // The offline demo has no language model. Keep this path honest and never
+  // manufacture lecture evidence or attach the demo job to a global chat.
   return {
-    reply: "Welcome to EduAccess AI! I am your multimodal learning assistant. I can navigate lectures, explain on-screen visual demonstrations through audio descriptions, trace concept knowledge graphs, and answer questions grounded strictly in video evidence.",
+    reply: "The assistant needs the EduAccess backend to answer. Start the backend service and try again.",
     action: null,
+    action_payload: undefined,
     evidence: [],
   };
 }

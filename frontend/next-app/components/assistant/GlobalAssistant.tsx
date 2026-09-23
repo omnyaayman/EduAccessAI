@@ -217,6 +217,7 @@ export default function GlobalAssistant() {
       let streamedContent = "";
       let finalAction: string | undefined;
       let finalActionPayload: Record<string, unknown> | undefined;
+      let finalEvidence: AssistantChatResponse["evidence"] = [];
 
       setMessages((prev) => [
         ...prev,
@@ -246,6 +247,7 @@ export default function GlobalAssistant() {
           finalAction = chunk.action;
           finalActionPayload = chunk.action_payload;
         }
+        if (chunk.evidence) finalEvidence = chunk.evidence;
       }
 
       setMessages((prev) =>
@@ -254,6 +256,7 @@ export default function GlobalAssistant() {
             ? {
                 ...msg,
                 content: streamedContent || "I could not retrieve an answer for that moment.",
+                evidence: finalEvidence,
                 isStreaming: false,
               }
             : msg

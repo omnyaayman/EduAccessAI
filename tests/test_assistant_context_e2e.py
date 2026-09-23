@@ -133,13 +133,21 @@ class TestAssistantContextEndToEnd(unittest.TestCase):
                 self.assertTrue(len(res["evidence"]) > 0)
 
     def test_scenario_12_active_lecture_what_am_i_looking_at(self):
-        """12. 'What am I looking at right now?' inside active lecture -> Visual telemetry."""
+        """12. Current visual questions use the active lecture's grounded evidence."""
         context = {"lecture_id": self.demo_job_id, "timestamp": 12.0}
-        res = self.orchestrator.chat("What am I looking at right now?", context=context)
-        self.assertEqual(res["provider"], "visual_telemetry")
-        self.assertIn("looking at", res["reply"])
-        self.assertEqual(len(res["evidence"]), 1)
-        self.assertEqual(res["evidence"][0]["time"], "00:12")
+        with patch("backend.services.assistant.orchestrator.get_retriever") as get_retriever:
+            retriever = MagicMock()
+            retriever.retrieve.return_value = [{"timestamp_label": "00:12", "text": "for i in range(5):"}]
+            get_retriever.return_value = retriever
+            with patch("backend.services.assistant.orchestrator.execute_tool", side_effect=[
+                {"text": "The teacher demonstrates a loop."},
+                {"type": "code", "description": "A Python loop is visible.", "ocr_text": "for i in range(5):"},
+            ]):
+                with patch.object(self.orchestrator.gemma, "generate_cloud", return_value="A Python loop is visible at [00:12]."):
+                    res = self.orchestrator.chat("What am I looking at right now?", context=context)
+        get_retriever.assert_called_once()
+        self.assertIn("Python loop", res["reply"])
+        self.assertTrue(res["evidence"])
 
     def test_scenario_13_active_lecture_what_was_shown_not_explained(self):
         """13. 'What was shown but not explained?' inside active lecture -> Accessibility disparity."""
@@ -220,12 +228,8 @@ class TestAssistantContextEndToEnd(unittest.TestCase):
                 mock_rag.return_value = mock_inst
                 with patch.object(self.orchestrator.gemma, "generate_cloud", return_value="Grounded answer citing [00:05]."):
                     res = self.orchestrator.chat(q, context=context)
-                    if q == "What is shown on this slide?":
-                        # Classified as CURRENT_VISUAL -> uses visual telemetry
-                        self.assertEqual(res["provider"], "visual_telemetry")
-                    else:
-                        mock_rag.assert_called_once()
-                        self.assertEqual(res["provider"], "huggingface/gemma")
+                    mock_rag.assert_called_once()
+                    self.assertEqual(res["provider"], "huggingface/gemma")
 
     # ==================== PHASE 3: LEAVING / CLOSING LECTURE ====================
 
@@ -263,19 +267,87 @@ class TestAssistantContextEndToEnd(unittest.TestCase):
             self.assertNotIn("Open or process a lecture first", gen_out)
             self.assertEqual(gen_out.strip(), "SQL is a database language.")
 
-        # 2. Lecture streaming
-        async def run_lecture_stream():
-            tokens = []
-            async for chunk_str in self.orchestrator.stream_chat(
-                "What am I looking at right now?",
-                context={"lecture_id": self.demo_job_id, "timestamp": 12.0}
-            ):
-                data = json.loads(chunk_str)
-                tokens.append(data.get("token", ""))
-            return "".join(tokens)
+        # 2. A lecture-specific stream carries retrieved evidence metadata.
+        async def mock_lecture_stream(*args, **kwargs):
+            yield "Grounded lecture answer."
 
-        lec_out = asyncio.run(run_lecture_stream())
-        self.assertIn("looking at", lec_out)
+        with patch("backend.services.assistant.orchestrator.get_retriever") as get_retriever:
+            retriever = MagicMock()
+            retriever.retrieve.return_value = [{"timestamp_label": "00:12", "text": "loop evidence"}]
+            get_retriever.return_value = retriever
+            with patch("backend.services.assistant.orchestrator.execute_tool", side_effect=[{"text": "speech"}, {"type": "code", "description": "loop", "ocr_text": "for"}]):
+                with patch.object(self.orchestrator.gemma, "stream_chat", side_effect=mock_lecture_stream):
+                    async def run_lecture_stream():
+                        return [json.loads(chunk) async for chunk in self.orchestrator.stream_chat(
+                            "What am I looking at right now?",
+                            context={"lecture_id": self.demo_job_id, "timestamp": 12.0},
+                        )]
+                    lecture_events = asyncio.run(run_lecture_stream())
+        self.assertTrue(any(event.get("evidence") for event in lecture_events))
+
+    def test_general_semantic_categories_never_call_rag_with_active_job(self):
+        context = {"lecture_id": self.demo_job_id, "timestamp": 42.0}
+        general_queries = (
+            "I love you ❤️", "I'm hungry", "I'm tired", "I'm bored", "I'm a snake",
+            "Tell me a joke", "How are you?", "Thank you", "What is Python?",
+            "What is SQL?", "Explain machine learning", "Explain EduAccess",
+            "What is EduAccess?", "Tell me about this platform", "What can you do?",
+            "Who are you?", "Can you help me?",
+        )
+
+        async def fake_stream(*args, **kwargs):
+            yield "General answer."
+
+        with patch("backend.services.assistant.orchestrator.get_retriever") as get_retriever:
+            with patch.object(self.orchestrator.gemma, "generate_cloud", return_value="General answer."):
+                with patch.object(self.orchestrator.gemma, "stream_chat", side_effect=fake_stream):
+                    for query in general_queries:
+                        with self.subTest(mode="chat", query=query):
+                            result = self.orchestrator.chat(query, context=context)
+                            self.assertEqual(result["evidence"], [])
+                            self.assertNotIn("DEMO_python_loops", result["reply"])
+                            self.assertNotRegex(result["reply"], r"\[\d{2}:\d{2}\]")
+                        with self.subTest(mode="stream", query=query):
+                            async def collect():
+                                return [json.loads(item) async for item in self.orchestrator.stream_chat(query, context=context)]
+                            events = asyncio.run(collect())
+                            self.assertFalse(any(event.get("evidence") for event in events))
+                            self.assertNotIn("DEMO_python_loops", "".join(e.get("token", "") for e in events))
+            get_retriever.assert_not_called()
+
+    def test_semantic_lecture_variants_use_rag_in_chat_and_stream(self):
+        context = {"lecture_id": self.demo_job_id, "timestamp": 18.0}
+        lecture_queries = (
+            "Explain this section",
+            "What did the teacher just explain?",
+            "What is on this slide?",
+            "What did the teacher show?",
+            "What's happening in the current video?",
+            "Can you describe what is displayed on the current screen?",
+        )
+
+        async def fake_stream(*args, **kwargs):
+            yield "Grounded answer."
+
+        for query in lecture_queries:
+            with self.subTest(query=query):
+                with patch("backend.services.assistant.orchestrator.get_retriever") as get_retriever:
+                    retriever = MagicMock()
+                    retriever.retrieve.return_value = [{"timestamp_label": "00:18", "text": "Verified lecture evidence."}]
+                    get_retriever.return_value = retriever
+                    with patch("backend.services.assistant.orchestrator.execute_tool", side_effect=[
+                        {"text": "Current instructor speech."},
+                        {"type": "slide", "description": "A diagram is shown.", "ocr_text": "loop"},
+                    ] * 2):
+                        with patch.object(self.orchestrator.gemma, "generate_cloud", return_value="Grounded answer [00:18]."):
+                            chat_result = self.orchestrator.chat(query, context=context)
+                        with patch.object(self.orchestrator.gemma, "stream_chat", side_effect=fake_stream):
+                            async def collect():
+                                return [json.loads(item) async for item in self.orchestrator.stream_chat(query, context=context)]
+                            events = asyncio.run(collect())
+                    self.assertEqual(get_retriever.call_count, 2)
+                    self.assertTrue(chat_result["evidence"])
+                    self.assertTrue(any(event.get("evidence") for event in events))
 
 
 if __name__ == "__main__":
