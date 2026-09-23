@@ -11,7 +11,7 @@ import logging
 from pathlib import Path
 from typing import Any
 
-from backend import config
+from backend import config, storage
 from backend.services.ai.embeddings_service import get_embeddings_service
 
 logger = logging.getLogger("eduaccess.ai.rag.store")
@@ -40,6 +40,23 @@ class LectureVectorStore:
                     return True
             except Exception as e:
                 logger.warning(f"Failed to read existing RAG index: {e}")
+
+        # Dynamic construction if job exists in storage
+        if self.job_id and storage.job_exists(self.job_id):
+            try:
+                from backend.services.rag.chunker import chunk_lecture_data
+                from backend.services import lecture_data
+                job = storage.get_job(self.job_id)
+                res = job.get("result") or {}
+                segments = lecture_data.load_segments(job, res)
+                events = lecture_data.load_visual_events(job, res)
+                kg = job.get("knowledge_graph") or {}
+                chunks = chunk_lecture_data(self.job_id, segments, events, concepts=kg.get("concepts"))
+                if chunks:
+                    self.build_and_save(chunks)
+                    return True
+            except Exception as exc:
+                logger.warning(f"Failed to build RAG index dynamically for {self.job_id}: {exc}")
         return False
 
     def build_and_save(self, chunks: list[dict[str, Any]]) -> None:

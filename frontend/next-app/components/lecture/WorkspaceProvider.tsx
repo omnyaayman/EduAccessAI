@@ -80,6 +80,9 @@ export function WorkspaceProvider({
   useEffect(() => {
     if (selectedId && typeof window !== "undefined") {
       window.localStorage.setItem(SELECTED_LECTURE_STORAGE_KEY, selectedId);
+      window.dispatchEvent(
+        new CustomEvent("eduaccess:lecture-change", { detail: { jobId: selectedId } })
+      );
     }
   }, [selectedId]);
 
@@ -87,6 +90,9 @@ export function WorkspaceProvider({
     setSelectedIdState(id);
     if (typeof window !== "undefined") {
       window.localStorage.setItem(SELECTED_LECTURE_STORAGE_KEY, id);
+      window.dispatchEvent(
+        new CustomEvent("eduaccess:lecture-change", { detail: { jobId: id } })
+      );
     }
   }, []);
 

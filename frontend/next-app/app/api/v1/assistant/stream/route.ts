@@ -1,39 +1,33 @@
 import { NextRequest } from "next/server";
-import { chatDemoAssistant } from "@/lib/demoStore";
 
 export async function POST(req: NextRequest) {
-  let payload: any = {};
   try {
-    payload = await req.json();
-  } catch {
-    payload = { message: "Hello" };
-  }
+    const body = await req.json();
+    const backendUrl =
+      process.env.API_BASE_URL ||
+      process.env.NEXT_PUBLIC_API_BASE_URL ||
+      "http://127.0.0.1:8000";
 
-  const demoResp = chatDemoAssistant(payload);
-  const words = demoResp.reply.split(" ");
+    const res = await fetch(`${backendUrl}/api/v1/assistant/stream`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
 
-  const encoder = new TextEncoder();
-  const stream = new ReadableStream({
-    async start(controller) {
-      for (let i = 0; i < words.length; i++) {
-        const chunk = {
-          token: words[i] + (i < words.length - 1 ? " " : ""),
-          done: i === words.length - 1,
-          action: i === words.length - 1 ? (demoResp.action ?? null) : null,
-          action_payload: i === words.length - 1 ? (demoResp.action_payload ?? null) : null,
-        };
-        controller.enqueue(encoder.encode(`data: ${JSON.stringify(chunk)}\n\n`));
-        await new Promise((r) => setTimeout(r, 25));
+    return new Response(res.body, {
+      status: res.status,
+      headers: {
+        "Content-Type": "text/event-stream",
+        "Cache-Control": "no-cache",
+        Connection: "keep-alive",
+      },
+    });
+  } catch (e: any) {
+    return new Response(
+      `data: {"token": "Failed to connect to assistant stream: ${e.message}", "done": true}\n\n`,
+      {
+        headers: { "Content-Type": "text/event-stream" },
       }
-      controller.close();
-    },
-  });
-
-  return new Response(stream, {
-    headers: {
-      "Content-Type": "text/event-stream",
-      "Cache-Control": "no-cache",
-      Connection: "keep-alive",
-    },
-  });
+    );
+  }
 }

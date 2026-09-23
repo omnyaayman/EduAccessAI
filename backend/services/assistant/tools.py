@@ -82,7 +82,13 @@ ASSISTANT_TOOL_DEFINITIONS = [
 
 def execute_tool(name: str, args: dict[str, Any], context: dict[str, Any]) -> dict[str, Any]:
     """Execute a whitelisted tool against current context."""
-    job_id = context.get("lecture_id") or ""
+    job_id = (
+        context.get("lecture_id")
+        or context.get("job_id")
+        or context.get("lectureId")
+        or context.get("job")
+        or ""
+    )
     current_time = float(context.get("timestamp") or 0.0)
     student_id = context.get("student_id") or "default"
 

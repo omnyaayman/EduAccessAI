@@ -60,15 +60,31 @@ def update_job(job_id: str, **fields) -> dict:
 
 
 def get_job(job_id: str) -> dict:
-    path = _job_path(job_id)
+    clean_id = job_id.removesuffix(".mp4").removesuffix(".json")
+    path = _job_path(clean_id)
     if not path.exists():
+        path = _job_path(job_id)
+    if not path.exists():
+        # Case-insensitive fallback
+        for p in config.JOBS_DIR.glob("*.json"):
+            if p.stem.lower() == clean_id.lower() or p.stem.lower() == job_id.lower():
+                with _write_lock:
+                    return json.loads(p.read_text(encoding="utf-8"))
         raise FileNotFoundError(f"Job not found: {job_id}")
     with _write_lock:
         return json.loads(path.read_text(encoding="utf-8"))
 
 
 def job_exists(job_id: str) -> bool:
-    return _job_path(job_id).exists()
+    if not job_id:
+        return False
+    clean_id = job_id.removesuffix(".mp4").removesuffix(".json")
+    if _job_path(clean_id).exists() or _job_path(job_id).exists():
+        return True
+    for p in config.JOBS_DIR.glob("*.json"):
+        if p.stem.lower() == clean_id.lower() or p.stem.lower() == job_id.lower():
+            return True
+    return False
 
 
 def append_log(job_id: str, level: str, message: str) -> dict:

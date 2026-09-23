@@ -46,7 +46,7 @@ class EmbeddingsService:
         if self.is_cloud_ready():
             try:
                 payload = {"inputs": clean, "options": {"wait_for_model": True}}
-                res = self.hf_client.post_sync(self.model_id, payload=payload, timeout=20.0)
+                res = self.hf_client.post_sync(self.model_id, payload=payload, timeout=3.0)
                 if isinstance(res, list) and res and isinstance(res[0], (int, float)):
                     self._cache[cache_key] = res
                     return res

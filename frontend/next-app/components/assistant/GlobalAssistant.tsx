@@ -1,8 +1,8 @@
 "use client";
 
 import * as React from "react";
-import { useState, useRef, useEffect } from "react";
-import { usePathname, useRouter } from "next/navigation";
+import { useState, useRef, useEffect, useCallback } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
   MessageSquareText,
   X,
@@ -19,7 +19,7 @@ import {
   Maximize2,
   Minimize2,
 } from "lucide-react";
-import { assistantChat, assistantStream, type AssistantChatResponse } from "@/lib/api";
+import { assistantChat, assistantStream, listLectures, type AssistantChatResponse } from "@/lib/api";
 import { cn } from "@/lib/format";
 
 interface Message {
@@ -33,16 +33,56 @@ interface Message {
 const QUICK_PROMPTS = [
   "What am I looking at right now?",
   "Explain this section simply",
+  "What was shown but not explained?",
   "Give me a quiz hint",
   "Turn on captions",
   "Turn on audio descriptions",
 ];
+
+const SELECTED_LECTURE_STORAGE_KEY = "eduaccess:selected-lecture-id";
+
+function getClientSearchParams(): URLSearchParams | null {
+  if (typeof window === "undefined") return null;
+  return new URLSearchParams(window.location.search);
+}
+
+function resolveActiveJob(pathname: string): string | null {
+  // 1. Path match: /lectures/:jobId
+  const routeMatch = pathname.match(/\/lectures\/([^\/?#]+)/);
+  if (routeMatch && routeMatch[1] && !["page", "new", "upload"].includes(routeMatch[1])) {
+    return decodeURIComponent(routeMatch[1]);
+  }
+
+  // 2. Query param: ?job=..., ?jobId=..., ?lecture_id=...
+  const searchParams = getClientSearchParams();
+  if (searchParams) {
+    const qJob =
+      searchParams.get("job") ||
+      searchParams.get("jobId") ||
+      searchParams.get("lecture_id") ||
+      searchParams.get("id");
+    if (qJob) return qJob;
+  }
+
+  // 3. Stored selection
+  if (typeof window !== "undefined") {
+    const stored = window.localStorage.getItem(SELECTED_LECTURE_STORAGE_KEY);
+    if (stored) return stored;
+  }
+
+  return null;
+}
 
 export default function GlobalAssistant() {
   const pathname = usePathname() ?? "/";
   const router = useRouter();
 
   const [isOpen, setIsOpen] = useState(false);
+  const [activeJobId, setActiveJobId] = useState<string | null>(() =>
+    resolveActiveJob(pathname)
+  );
+  const [currentTime, setCurrentTime] = useState<number>(0);
+
   const [messages, setMessages] = useState<Message[]>([
     {
       id: "welcome",
@@ -60,6 +100,58 @@ export default function GlobalAssistant() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const recognitionRef = useRef<any>(null);
   const handleSendRef = useRef<(customText?: string) => Promise<void>>(async () => {});
+
+  // Synchronize active job ID across navigation & events
+  useEffect(() => {
+    const resolved = resolveActiveJob(pathname);
+    if (resolved) {
+      setActiveJobId(resolved);
+    } else if (
+      pathname === "/lectures" ||
+      pathname.startsWith("/learning") ||
+      pathname.startsWith("/quiz")
+    ) {
+      // If in Studio or Learning with no explicit job, retrieve available lectures
+      listLectures()
+        .then((data) => {
+          if (data.lectures && data.lectures.length > 0) {
+            const firstId = data.lectures[0].job_id;
+            setActiveJobId((prev) => prev || firstId);
+          }
+        })
+        .catch(() => {});
+    }
+  }, [pathname]);
+
+  // Window event listeners for real-time lecture changes & video time updates
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const onLectureChange = (e: Event) => {
+      const customEvent = e as CustomEvent<{ jobId?: string }>;
+      if (customEvent.detail?.jobId) {
+        setActiveJobId(customEvent.detail.jobId);
+      }
+    };
+
+    const onTimeUpdate = (e: Event) => {
+      const customEvent = e as CustomEvent<{ time?: number; jobId?: string }>;
+      if (typeof customEvent.detail?.time === "number") {
+        setCurrentTime(customEvent.detail.time);
+      }
+      if (customEvent.detail?.jobId) {
+        setActiveJobId(customEvent.detail.jobId);
+      }
+    };
+
+    window.addEventListener("eduaccess:lecture-change", onLectureChange);
+    window.addEventListener("eduaccess:timeupdate", onTimeUpdate);
+
+    return () => {
+      window.removeEventListener("eduaccess:lecture-change", onLectureChange);
+      window.removeEventListener("eduaccess:timeupdate", onTimeUpdate);
+    };
+  }, []);
 
   // Auto-scroll on new messages
   useEffect(() => {
@@ -136,23 +228,34 @@ export default function GlobalAssistant() {
     setInputValue("");
     setIsLoading(true);
 
-    const activeJob =
-      pathname.startsWith("/lectures/")
-        ? decodeURIComponent(pathname.split("/")[2] || "") || null
-        : null;
+    const activeJob = activeJobId || resolveActiveJob(pathname);
 
-    if (!activeJob) {
+    // If deterministic action requested (e.g. captions/narration), allow even with minimal context
+    const lowerText = textToSend.toLowerCase();
+    const isUiAction =
+      lowerText.includes("caption") ||
+      lowerText.includes("audio desc") ||
+      lowerText.includes("font") ||
+      lowerText.includes("quiz");
+
+    if (!activeJob && !isUiAction) {
       const noContextMsg: Message = {
         id: (Date.now() + 1).toString(),
         role: "assistant",
-        content:
-          "Please open or process a lecture first. Upload a video or open a compiled lecture from the Studio to ask me content-specific questions!",
+        content: "Open or process a lecture first to use the content-aware Assistant.",
       };
       setMessages((prev) => [...prev, noContextMsg]);
       if (speechEnabled && noContextMsg.content) speakText(noContextMsg.content);
       setIsLoading(false);
       return;
     }
+
+    const contextPayload = {
+      page: pathname,
+      lecture_id: activeJob || undefined,
+      job_id: activeJob || undefined,
+      timestamp: currentTime,
+    };
 
     try {
       // Streaming assistant response
@@ -173,7 +276,7 @@ export default function GlobalAssistant() {
 
       for await (const chunk of assistantStream({
         message: textToSend,
-        context: { page: pathname, lecture_id: activeJob },
+        context: contextPayload,
       })) {
         if (chunk.token) {
           streamedContent += chunk.token;
@@ -196,7 +299,7 @@ export default function GlobalAssistant() {
           msg.id === assistantId
             ? {
                 ...msg,
-                content: streamedContent,
+                content: streamedContent || "I could not retrieve an answer for that moment.",
                 isStreaming: false,
               }
             : msg
@@ -213,14 +316,9 @@ export default function GlobalAssistant() {
       }
     } catch {
       try {
-        const fallbackJob = activeJob;
-        if (!fallbackJob) {
-          setIsLoading(false);
-          return;
-        }
         const res = await assistantChat({
           message: textToSend,
-          context: { page: pathname, lecture_id: fallbackJob },
+          context: contextPayload,
         });
         const botMsg: Message = {
           id: (Date.now() + 1).toString(),
@@ -253,14 +351,24 @@ export default function GlobalAssistant() {
       if (payload?.path) router.push(payload.path);
     } else if (action === "seek") {
       if (typeof payload?.seconds === "number") {
-        window.dispatchEvent(new CustomEvent("eduaccess:seek", { detail: { seconds: payload.seconds } }));
+        window.dispatchEvent(
+          new CustomEvent("eduaccess:seek", { detail: { seconds: payload.seconds } })
+        );
       }
     } else if (action === "toggle_captions") {
-      window.dispatchEvent(new CustomEvent("eduaccess:toggle_captions", { detail: { enabled: payload?.enabled } }));
+      window.dispatchEvent(
+        new CustomEvent("eduaccess:toggle_captions", { detail: { enabled: payload?.enabled } })
+      );
     } else if (action === "toggle_audio_description") {
-      window.dispatchEvent(new CustomEvent("eduaccess:toggle_audio_description", { detail: { enabled: payload?.enabled } }));
+      window.dispatchEvent(
+        new CustomEvent("eduaccess:toggle_audio_description", {
+          detail: { enabled: payload?.enabled },
+        })
+      );
     } else if (action === "font_size") {
-      window.dispatchEvent(new CustomEvent("eduaccess:font_size", { detail: { delta: payload?.delta } }));
+      window.dispatchEvent(
+        new CustomEvent("eduaccess:font_size", { detail: { delta: payload?.delta } })
+      );
     } else if (action === "open_quiz") {
       const match = pathname.match(/\/lectures\/([^\/]+)/);
       if (match) {
@@ -312,11 +420,21 @@ export default function GlobalAssistant() {
               <div>
                 <p className="text-sm font-bold text-[#2F2924] flex items-center gap-1.5">
                   EduAccess Assistant
-                  <span className="rounded-full bg-[#E4F0E5] border border-[#B9D2BC] px-1.5 py-0.5 text-[10px] font-bold text-[#416A47]">
-                    Lecture-aware
-                  </span>
+                  {activeJobId ? (
+                    <span className="rounded-full bg-[#E4F0E5] border border-[#B9D2BC] px-1.5 py-0.5 text-[10px] font-bold text-[#416A47] font-mono truncate max-w-[120px]">
+                      {activeJobId}
+                    </span>
+                  ) : (
+                    <span className="rounded-full bg-[#F5EFE6] border border-[#DDD0C0] px-1.5 py-0.5 text-[10px] font-medium text-[#7A7067]">
+                      General
+                    </span>
+                  )}
                 </p>
-                <p className="text-[10.5px] text-[#7A7067]">Context-aware educational AI</p>
+                <p className="text-[10.5px] text-[#7A7067]">
+                  {activeJobId
+                    ? `Bound to active lecture context (${currentTime.toFixed(0)}s)`
+                    : "Context-aware educational companion"}
+                </p>
               </div>
             </div>
 
@@ -352,7 +470,7 @@ export default function GlobalAssistant() {
                 key={prompt}
                 onClick={() => handleSend(prompt)}
                 disabled={isLoading}
-                className="whitespace-nowrap rounded-full border border-[#DDD0C0] bg-[#FFFDFC] px-2.5 py-1 text-[11px] font-medium text-[#51483F] hover:border-[#B85C38] hover:text-[#B85C38] hover:bg-[#FFF8F4] transition shadow-2xs cursor-pointer"
+                className="whitespace-nowrap rounded-full border border-[#DDD0C0] bg-[#FFFDFC] px-2.5 py-1 text-[11px] font-medium text-[#51483F] hover:border-[#B85C38] hover:text-[#B85C38] hover:bg-[#FFF8F4] transition shadow-2xs cursor-pointer disabled:opacity-50"
               >
                 {prompt}
               </button>

@@ -218,6 +218,16 @@ function WorkspaceBody() {
   }, [seekTarget, videoReady]);
 
   useEffect(() => {
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(
+        new CustomEvent("eduaccess:timeupdate", {
+          detail: { time, jobId: selectedId },
+        })
+      );
+    }
+  }, [time, selectedId]);
+
+  useEffect(() => {
     if (!selectedId) return;
     setTime(0);
     let cancelled = false;

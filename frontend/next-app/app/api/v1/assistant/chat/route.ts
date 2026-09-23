@@ -1,12 +1,25 @@
 import { NextRequest, NextResponse } from "next/server";
-import { chatDemoAssistant } from "@/lib/demoStore";
 
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const result = chatDemoAssistant(body);
-    return NextResponse.json(result);
+    const backendUrl =
+      process.env.API_BASE_URL ||
+      process.env.NEXT_PUBLIC_API_BASE_URL ||
+      "http://127.0.0.1:8000";
+
+    const res = await fetch(`${backendUrl}/api/v1/assistant/chat`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+
+    const data = await res.json();
+    return NextResponse.json(data, { status: res.status });
   } catch (e: any) {
-    return NextResponse.json({ detail: e.message || "Chat failed" }, { status: 400 });
+    return NextResponse.json(
+      { detail: e.message || "Failed to reach assistant service" },
+      { status: 502 }
+    );
   }
 }
