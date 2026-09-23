@@ -1,4 +1,4 @@
-# EduAccess AI: Multimodal Lecture Intelligence & Accessibility Platform
+# EduAccess AI — The Accessibility Compiler for Education
 
 **EduAccess AI** turns any educational video lecture into an accessible, audited, and personalized learning experience for blind, low-vision, deaf, hard-of-hearing, and cognitive-support learners:
 
