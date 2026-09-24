@@ -1,18 +1,27 @@
 import { NextResponse } from "next/server";
-import { getDemoLectures } from "@/lib/demoStore";
-
-function demoEnabled(): boolean {
-  return process.env.NEXT_PUBLIC_ENABLE_DEMO_MODE === "1";
-}
 
 export async function GET() {
-  if (!demoEnabled()) {
+  const backendUrl =
+    process.env.API_BASE_URL ||
+    process.env.NEXT_PUBLIC_API_BASE_URL ||
+    "https://eduaccess-ai-backend.onrender.com";
+
+  try {
+    const res = await fetch(`${backendUrl}/lectures`, {
+      cache: "no-store",
+    });
+    if (!res.ok) {
+      return NextResponse.json(
+        { detail: `Backend returned status ${res.status}` },
+        { status: res.status }
+      );
+    }
+    const data = await res.json();
+    return NextResponse.json(data);
+  } catch (e: any) {
     return NextResponse.json(
-      { lectures: [], detail: "Demo fixtures are not enabled. Use the real backend API." },
-      { status: 501 }
+      { detail: e.message || "Failed to reach EduAccess backend" },
+      { status: 502 }
     );
   }
-  return NextResponse.json({
-    lectures: getDemoLectures(),
-  });
 }

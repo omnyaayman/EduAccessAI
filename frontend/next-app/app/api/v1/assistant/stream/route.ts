@@ -6,7 +6,9 @@ export async function POST(req: NextRequest) {
     const backendUrl =
       process.env.API_BASE_URL ||
       process.env.NEXT_PUBLIC_API_BASE_URL ||
-      "http://127.0.0.1:8000";
+      (process.env.NODE_ENV === "production"
+        ? "https://eduaccess-ai-backend.onrender.com"
+        : "http://127.0.0.1:8000");
 
     const res = await fetch(`${backendUrl}/api/v1/assistant/stream`, {
       method: "POST",

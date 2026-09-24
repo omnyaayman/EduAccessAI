@@ -27,15 +27,15 @@ app = FastAPI(
 import os
 
 cors_origins_raw = os.getenv("CORS_ORIGINS", "*")
-if cors_origins_raw == "*":
+if cors_origins_raw.strip() == "*":
     allowed_origins = ["*"]
 else:
-    allowed_origins = [origin.strip() for origin in cors_origins_raw.split(",") if origin.strip()]
+    allowed_origins = [origin.strip().rstrip("/") for origin in cors_origins_raw.split(",") if origin.strip()]
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=allowed_origins,
-    allow_credentials=True if cors_origins_raw != "*" else False,
+    allow_credentials=True if cors_origins_raw.strip() != "*" else False,
     allow_methods=["*"],
     allow_headers=["*"],
 )

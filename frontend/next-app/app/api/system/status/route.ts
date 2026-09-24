@@ -1,14 +1,27 @@
 import { NextResponse } from "next/server";
 
 export async function GET() {
-  return NextResponse.json({
-    status: "healthy",
-    model: "Gemini 2.5 Flash + Pro",
-    gemini_api_key_configured: true,
-    tts_engine: "Edge-TTS + Web Speech",
-    stt_engine: "Faster-Whisper",
-    total_lectures: 2,
-    total_quizzes: 2,
-    total_students: 3,
-  });
+  const backendUrl =
+    process.env.API_BASE_URL ||
+    process.env.NEXT_PUBLIC_API_BASE_URL ||
+    "https://eduaccess-ai-backend.onrender.com";
+
+  try {
+    const res = await fetch(`${backendUrl}/system/status`, {
+      cache: "no-store",
+    });
+    if (!res.ok) {
+      return NextResponse.json(
+        { detail: `Backend returned status ${res.status}` },
+        { status: res.status }
+      );
+    }
+    const data = await res.json();
+    return NextResponse.json(data);
+  } catch (e: any) {
+    return NextResponse.json(
+      { detail: e.message || "Failed to reach EduAccess backend" },
+      { status: 502 }
+    );
+  }
 }

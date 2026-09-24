@@ -38,7 +38,7 @@ export function resolveBackendState(): { state: BackendState; url: string | null
     }
   }
   if (!url) {
-    return { state: "UNCONFIGURED", url: null };
+    url = "https://eduaccess-ai-backend.onrender.com";
   }
   return { state: "CONFIGURED_OK", url };
 }
@@ -50,10 +50,16 @@ export const apiBase = (): string => {
 function readableFetchError(path: string, err: unknown): ApiError {
   if (err instanceof ApiError) return err;
   const msg = err instanceof Error ? err.message : String(err);
-  return new ApiError(503, `Backend unavailable. Please try again later. (${path} — ${msg})`);
+  if (msg.includes("Failed to fetch") || msg.includes("NetworkError") || msg.includes("503") || msg.includes("502") || msg.includes("504")) {
+    return new ApiError(
+      503,
+      "EduAccess AI backend is currently waking up on Render (~30-50s on initial load). Please wait a moment and retry."
+    );
+  }
+  return new ApiError(503, `EduAccess AI backend is unavailable or starting up (${path} — ${msg}). Please try again in a few seconds.`);
 }
 
-async function request<T>(path: string, init?: RequestInit): Promise<T> {
+async function request<T>(path: string, init?: RequestInit, retriesLeft = 2): Promise<T> {
   const { state, url } = resolveBackendState();
 
   if (state === "UNCONFIGURED") {
@@ -62,6 +68,8 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
     }
     throw new ApiError(500, "EduAccess AI processing service is not configured.");
   }
+
+  const isGet = !init?.method || init.method.toUpperCase() === "GET";
 
   try {
     const res = await fetch(`${url}${path}`, {
@@ -77,6 +85,12 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
       return (await res.json()) as T;
     }
 
+    // Auto-retry GET requests if Render is returning 502/503/504 during cold start
+    if ((res.status === 502 || res.status === 503 || res.status === 504) && isGet && retriesLeft > 0) {
+      await new Promise((r) => setTimeout(r, 2500));
+      return request<T>(path, init, retriesLeft - 1);
+    }
+
     let detail = res.statusText;
     try {
       const errBody = await res.json();
@@ -90,10 +104,17 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
     if (res.status === 415) throw new ApiError(415, detail || "Unsupported video format.");
     if (res.status === 400) throw new ApiError(400, detail || "Invalid request.");
     if (res.status === 404) throw new ApiError(404, detail || "Resource not found.");
+    if (res.status === 502 || res.status === 503 || res.status === 504) {
+      throw new ApiError(res.status, "EduAccess AI backend is starting up on Render (~30-50s). Please wait a moment and retry.");
+    }
     if (res.status >= 500) throw new ApiError(res.status, detail || "Backend server error. Please try again later.");
     throw new ApiError(res.status, detail || `Request failed (${res.status}).`);
   } catch (err) {
     if (err instanceof ApiError) throw err;
+    if (isGet && retriesLeft > 0) {
+      await new Promise((r) => setTimeout(r, 2500));
+      return request<T>(path, init, retriesLeft - 1);
+    }
     if (isDemoModeEnabled()) {
       return dispatchDemoRequest_INTERNAL<T>(path, init);
     }
