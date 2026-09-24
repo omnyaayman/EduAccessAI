@@ -1,0 +1,20 @@
+# Render blueprint for EduAccess AI (Caddy :8080 + FastAPI :8000 + Next.js :3000)
+# Free Web Service; no credit card required. Sign in with GitHub and click
+# "New + > Blueprint" pointing at this repo (omnyaayman/EduAccessAI).
+
+services:
+  - type: web
+    name: eduaccess-ai
+    runtime: docker
+    repo: https://github.com/omnyaayman/EduAccessAI
+    plan: free
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /api/system/status
+    envVars:
+      - key: PORT
+        value: "8080"
+      - key: CORS_ORIGINS
+        value: "*"
+    # Render free instances sleep after 15min of inactivity. Add a free
+    # uptime monitor (e.g. UptimeRobot) hitting https://eduaccess-ai.onrender.com
+    # every ~5 minutes to keep it warm.

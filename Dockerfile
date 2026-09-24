@@ -1,24 +1,59 @@
-FROM python:3.10-slim
+# syntax=docker/dockerfile:1.7
+# Dockerfile (root) — used by Render blueprint deploy.
+# Mirrors Dockerfile.fly (single app: Caddy + FastAPI + Next.js) with
+# Render-friendly defaults.
+
+# ============================ Builder: Next.js ==============================
+FROM node:20-alpine AS web-builder
+WORKDIR /web
+COPY frontend/next-app/package.json frontend/next-app/package-lock.json ./
+RUN npm ci
+COPY frontend/next-app/ ./
+ENV NEXT_TELEMETRY_DISABLED=1
+ENV NEXT_PUBLIC_API_BASE_URL=/api
+RUN npm run build
+
+# ============================ Runtime image =================================
+FROM caddy:2-alpine AS caddy-runtime
+
+FROM python:3.11-slim AS runtime
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PIP_NO_CACHE_DIR=1 \
+    HF_HOME=/app/.hf \
+    HOME=/app
+
+# System deps: ffmpeg (audio/frames), tesseract (OCR), espeak-ng (TTS),
+# libgl/glib (opencv-python-headless runtime)
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        ffmpeg \
+        tesseract-ocr \
+        espeak-ng \
+        libgl1 \
+        libglib2.0-0 \
+        curl \
+    && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
-# Install system dependencies for audio/video & OCR processing
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    ffmpeg \
-    tesseract-ocr \
-    curl \
-    && rm -rf /var/lib/apt/lists/*
+# Backend
+COPY requirements.deploy.txt ./
+RUN pip install --no-cache-dir -r requirements.deploy.txt
+COPY backend/ ./backend/
+COPY data/ ./data/
 
-# Install Python requirements
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+# Frontend (standalone runtime)
+COPY --from=web-builder /web/.next/standalone/ ./frontend/
+COPY --from=web-builder /web/.next/static ./frontend/.next/static
+COPY --from=web-builder /web/public ./frontend/public
 
-# Copy application code and fixtures
-COPY . .
+# Caddy reverse proxy
+COPY --from=caddy-runtime /usr/bin/caddy /usr/local/bin/caddy
+COPY deploy/Caddyfile /etc/caddy/Caddyfile
+COPY deploy/start.sh /usr/local/bin/start.sh
 
-ENV PORT=8000
-ENV PYTHONUNBUFFERED=1
+RUN chmod +x /usr/local/bin/start.sh
 
-EXPOSE 8000
-
-CMD ["sh", "-c", "uvicorn backend.main:app --host 0.0.0.0 --port ${PORT:-8000}"]
+# Render's platform router targets the port declared in render.yaml.
+EXPOSE 8080
+CMD ["/usr/local/bin/start.sh"]
