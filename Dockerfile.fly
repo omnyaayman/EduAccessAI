@@ -1,0 +1,58 @@
+# syntax=docker/dockerfile:1.7
+
+# ============================ Builder: Next.js ==============================
+FROM node:20-alpine AS web-builder
+WORKDIR /web
+COPY frontend/next-app/package.json frontend/next-app/package-lock.json ./
+RUN npm ci
+COPY frontend/next-app/ ./
+ENV NEXT_TELEMETRY_DISABLED=1
+ENV NEXT_PUBLIC_API_BASE_URL=/api
+RUN npm run build
+
+# ============================ Runtime image =================================
+FROM caddy:2-alpine AS caddy-runtime
+
+FROM python:3.11-slim AS runtime
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PIP_NO_CACHE_DIR=1 \
+    HF_HOME=/app/.hf \
+    HOME=/app
+
+# System deps: ffmpeg (audio/frames), tesseract (OCR), espeak-ng (TTS),
+# libgl/glib (opencv-python-headless runtime)
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        ffmpeg \
+        tesseract-ocr \
+        espeak-ng \
+        libgl1 \
+        libglib2.0-0 \
+        curl \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+# Backend
+COPY requirements.deploy.txt ./
+RUN pip install --no-cache-dir -r requirements.deploy.txt
+COPY backend/ ./backend/
+COPY data/ ./data/
+
+# Frontend (standalone runtime)
+COPY --from=web-builder /web/.next/standalone/ ./frontend/
+COPY --from=web-builder /web/.next/static ./frontend/.next/static
+COPY --from=web-builder /web/public ./frontend/public
+
+# Caddy reverse proxy
+COPY --from=caddy-runtime /usr/bin/caddy /usr/local/bin/caddy
+COPY deploy/Caddyfile /etc/caddy/Caddyfile
+COPY deploy/start.sh /usr/local/bin/start.sh
+
+RUN chmod +x /usr/local/bin/start.sh
+
+# Whisper is intentionally NOT installed here. If you later install
+# openai-whisper + torch and give the machine enough RAM, STT will light up.
+
+EXPOSE 8080
+CMD ["/usr/local/bin/start.sh"]

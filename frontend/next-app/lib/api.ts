@@ -1,5 +1,6 @@
 import type { AskResponse, LectureRecord, LearningProgress, MetricsResponse } from "@/types/backend";
 import { fileBaseName } from "@/lib/format";
+import { DEMO_BASE } from "./demoAssets";
 import * as demoStore from "./demoStore";
 
 export class ApiError extends Error {
@@ -26,6 +27,11 @@ export function isDemoModeEnabled(): boolean {
 }
 
 export function resolveBackendState(): { state: BackendState; url: string | null } {
+  // In demo-static mode we never touch the network: every request is served
+  // from the bundled fixture store so the site works instantly on any host.
+  if (process.env.NEXT_PUBLIC_ENABLE_DEMO_MODE === "1") {
+    return { state: "UNCONFIGURED", url: null };
+  }
   const envUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
   let url: string | null = null;
   if (envUrl && envUrl.trim()) {
@@ -38,7 +44,7 @@ export function resolveBackendState(): { state: BackendState; url: string | null
     }
   }
   if (!url) {
-    url = "https://eduaccess-ai-backend.onrender.com";
+    url = "/api";
   }
   return { state: "CONFIGURED_OK", url };
 }
@@ -53,7 +59,7 @@ function readableFetchError(path: string, err: unknown): ApiError {
   if (msg.includes("Failed to fetch") || msg.includes("NetworkError") || msg.includes("503") || msg.includes("502") || msg.includes("504")) {
     return new ApiError(
       503,
-      "EduAccess AI backend is currently waking up on Render (~30-50s on initial load). Please wait a moment and retry."
+      "EduAccess AI backend is currently unavailable (~30-50s on initial load). Please wait a moment and retry."
     );
   }
   return new ApiError(503, `EduAccess AI backend is unavailable or starting up (${path} — ${msg}). Please try again in a few seconds.`);
@@ -85,7 +91,7 @@ async function request<T>(path: string, init?: RequestInit, retriesLeft = 2): Pr
       return (await res.json()) as T;
     }
 
-    // Auto-retry GET requests if Render is returning 502/503/504 during cold start
+    // Auto-retry GET requests if the backend is returning 502/503/504 during cold start
     if ((res.status === 502 || res.status === 503 || res.status === 504) && isGet && retriesLeft > 0) {
       await new Promise((r) => setTimeout(r, 2500));
       return request<T>(path, init, retriesLeft - 1);
@@ -105,7 +111,7 @@ async function request<T>(path: string, init?: RequestInit, retriesLeft = 2): Pr
     if (res.status === 400) throw new ApiError(400, detail || "Invalid request.");
     if (res.status === 404) throw new ApiError(404, detail || "Resource not found.");
     if (res.status === 502 || res.status === 503 || res.status === 504) {
-      throw new ApiError(res.status, "EduAccess AI backend is starting up on Render (~30-50s). Please wait a moment and retry.");
+      throw new ApiError(res.status, "EduAccess AI backend is starting up (~30-50s). Please wait a moment and retry.");
     }
     if (res.status >= 500) throw new ApiError(res.status, detail || "Backend server error. Please try again later.");
     throw new ApiError(res.status, detail || `Request failed (${res.status}).`);
@@ -607,14 +613,16 @@ export function videoUrl(job: Record<string, unknown>): string | null {
   if (!videoPath) return null;
   const base = apiBase();
   const filename = fileBaseName(videoPath);
-  return base ? `${base}/files/videos/${filename}` : `/files/videos/${filename}`;
+  const prefix = base || DEMO_BASE;
+  return prefix ? `${prefix}/files/videos/${filename}` : `/files/videos/${filename}`;
 }
 
 export function narrationUrl(result: { narration_audio_path?: string } | undefined): string | null {
   if (!result?.narration_audio_path) return null;
   const base = apiBase();
   const filename = fileBaseName(result.narration_audio_path);
-  return base ? `${base}/files/outputs/${filename}` : `/files/outputs/${filename}`;
+  const prefix = base || DEMO_BASE;
+  return prefix ? `${prefix}/files/outputs/${filename}` : `/files/outputs/${filename}`;
 }
 
 export function eventAudioUrl(
@@ -628,7 +636,8 @@ export function eventAudioUrl(
   if (!ev?.narration_audio_path) return null;
   const base = apiBase();
   const filename = fileBaseName(ev.narration_audio_path);
-  return base ? `${base}/files/outputs/${filename}` : `/files/outputs/${filename}`;
+  const prefix = base || DEMO_BASE;
+  return prefix ? `${prefix}/files/outputs/${filename}` : `/files/outputs/${filename}`;
 }
 
 /**
@@ -639,7 +648,8 @@ export function resolveFileUrl(url: string | null | undefined): string | null {
   if (/^https?:\/\//i.test(url)) return url;
   const base = apiBase();
   const path = url.startsWith("/") ? url : `/${url}`;
-  return base ? `${base}${path}` : path;
+  const prefix = base || DEMO_BASE;
+  return prefix ? `${prefix}${path}` : path;
 }
 
 export async function checkBackend(): Promise<boolean> {

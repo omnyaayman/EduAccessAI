@@ -26,6 +26,12 @@ except ImportError:
     pass
 
 
+def is_whisper_available() -> bool:
+    """True if the openai-whisper package can be imported (its weights may
+    still need to be downloaded before the first transcription)."""
+    return _WHISPER_AVAILABLE
+
+
 def _get_whisper():
     import sys
     if "whisper" in sys.modules and sys.modules["whisper"] is not None:

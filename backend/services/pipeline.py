@@ -156,14 +156,18 @@ def run_pipeline(job_id: str, video_path: str, mode: str = "both", student_id: s
                 transcription = {"text": cache["transcript_text"], "segments": cache["segments"]}
                 t.mark(status="cached", note="Reused existing transcription.")
             else:
-                # Arabic is first-class: detect the language, force "ar" when
-                # confidently Arabic, and always transcribe (never translate).
-                language = speech.resolve_language(
-                    speech.detect_language(str(audio_path)))
-                transcription = speech.transcribe(str(audio_path), language=language)
-                # Record the effective STT language so downstream features
-                # (e.g. RTL captions) know what language the teacher spoke.
-                transcription.setdefault("language", language or "auto")
+                if not speech.is_whisper_available():
+                    transcription = {"text": "", "segments": [], "language": None}
+                    t.mark(status="partial", note="Whisper STT not installed in this deployment; transcription skipped. Install openai-whisper to enable speech-to-text.")
+                else:
+                    # Arabic is first-class: detect the language, force "ar" when
+                    # confidently Arabic, and always transcribe (never translate).
+                    language = speech.resolve_language(
+                        speech.detect_language(str(audio_path)))
+                    transcription = speech.transcribe(str(audio_path), language=language)
+                    # Record the effective STT language so downstream features
+                    # (e.g. RTL captions) know what language the teacher spoke.
+                    transcription.setdefault("language", language or "auto")
             transcript_path = speech.save_transcript(transcription, str(config.OUTPUTS_DIR / f"{stem}_transcript.txt"))
             srt_path = speech.save_srt(transcription["segments"], str(config.OUTPUTS_DIR / f"{stem}.srt"))
             # Persist segments + text so future jobs can skip transcription.

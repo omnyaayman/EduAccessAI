@@ -32,6 +32,7 @@ import type {
   ReplayResponse,
 } from "@/types/backend";
 import { fileBaseName } from "@/lib/format";
+import { DEMO_BASE } from "./demoAssets";
 
 export interface DemoJob {
   job_id: string;
@@ -171,8 +172,8 @@ export function getDemoAudioDescription(jobId: string): AudioDescriptionResponse
     events: events.map((e: any, idx: number) => ({
       ...e,
       narration_audio_url: e.narration_audio_path
-        ? `/files/outputs/${fileBaseName(e.narration_audio_path)}`
-        : `/files/outputs/DEMO_narration_${idx}.wav`,
+        ? `${DEMO_BASE}/files/outputs/${fileBaseName(e.narration_audio_path)}`
+        : `${DEMO_BASE}/files/outputs/DEMO_narration_${idx}.wav`,
     })),
   } as unknown as AudioDescriptionResponse;
 }

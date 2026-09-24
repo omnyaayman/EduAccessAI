@@ -1,6 +1,7 @@
 .venv/
 .venv*/
 venv/
+.backend-run/
 __pycache__/
 *.pyc
 .env
@@ -28,6 +29,14 @@ frontend/next-app/tsconfig.tsbuildinfo
 .vscode/
 scratch/
 WhatsApp*
+
+# Static-build artifacts (generated)
+.pages-build/
+.pages-build-live/
+.static-build/
+.static-build-live/
+demosite/
+docsite/
 
 # Generated data (keep folders & DEMO fixtures)
 data/videos/*

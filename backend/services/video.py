@@ -6,14 +6,30 @@ Two jobs:
 2. extract_frames() -> samples still frames every N seconds (for Vision)
 """
 
+import importlib
 import shutil
 import subprocess
 from pathlib import Path
 
-import cv2
-import numpy as np
-
 from backend import config
+
+
+def _cv2():
+    global _cv2_mod
+    if _cv2_mod is None:
+        _cv2_mod = importlib.import_module("cv2")
+    return _cv2_mod
+
+
+def _np():
+    global _np_mod
+    if _np_mod is None:
+        _np_mod = importlib.import_module("numpy")
+    return _np_mod
+
+
+_cv2_mod = None
+_np_mod = None
 
 
 def check_system_dependencies() -> dict[str, bool]:
@@ -38,6 +54,7 @@ def get_video_metadata(video_path: str) -> dict:
     if not video_path.exists():
         raise FileNotFoundError(f"Video not found: {video_path}")
 
+    cv2 = _cv2()
     video = cv2.VideoCapture(str(video_path))
     if not video.isOpened():
         raise RuntimeError(f"Could not open video: {video_path}")
@@ -95,6 +112,8 @@ def calculate_frame_difference(frame1, frame2) -> float:
     Calculate the mean absolute difference between two frames.
     Resizes frames to 64x64 and converts to grayscale for speed and noise reduction.
     """
+    cv2 = _cv2()
+    np = _np()
     gray1 = cv2.cvtColor(frame1, cv2.COLOR_BGR2GRAY)
     gray2 = cv2.cvtColor(frame2, cv2.COLOR_BGR2GRAY)
     resized1 = cv2.resize(gray1, (64, 64))
@@ -121,6 +140,7 @@ def extract_frames(video_path: str, output_folder: str | None = None,
     output_folder = Path(output_folder) if output_folder else (config.FRAMES_DIR / video_path.stem)
     output_folder.mkdir(parents=True, exist_ok=True)
 
+    cv2 = _cv2()
     video = cv2.VideoCapture(str(video_path))
     if not video.isOpened():
         raise RuntimeError(f"Could not open video: {video_path}")

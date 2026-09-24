@@ -1,0 +1,15 @@
+# EduAccess AI -- production (Fly.io) Python dependencies
+# Whisper/torch TTS are deliberately EXCLUDED: the container stays lean so it
+# boots on Fly's smallest free machine. Missing-whisper is handled gracefully
+# (see backend/services/pipeline.py + speech.is_whisper_available()).
+fastapi>=0.110
+uvicorn[standard]>=0.27
+python-multipart>=0.0.9
+pydantic>=2.6
+python-dotenv>=1.0
+httpx>=0.27
+requests>=2.31
+opencv-python-headless>=4.9
+pytesseract>=0.3.10
+pillow>=10.2
+pyttsx3>=2.90
