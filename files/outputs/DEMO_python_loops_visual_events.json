@@ -1,0 +1,138 @@
+{
+  "job_id": "DEMO_python_loops",
+  "events": [
+    {
+      "start": 0.0,
+      "end": 7.7,
+      "type": "slide",
+      "description": "OCR-only output: On-screen text detected:\nPython loops repeat a block of code\nThe for loop runs a fixed number of times\nToday: for loop syntax + visuals",
+      "transcript_context": "Welcome to this short lesson about Python loops. By the end, you will understand how a for loop repeats a block of code. Let us look at a simple for loop.",
+      "confidence": 0.7,
+      "source_frames": [
+        "frame_0000.jpg"
+      ],
+      "timestamp": 0.0,
+      "event_id": "event_001",
+      "source_refs": {
+        "visual_events": [
+          "event_001"
+        ],
+        "transcript_segments": []
+      }
+    },
+    {
+      "start": 7.7,
+      "end": 15.39,
+      "type": "slide",
+      "description": "OCR-only output: On-screen text detected:\nPython code editor -- editor.py\n,  foriin range(5):\n4 print (i)",
+      "transcript_context": "Let us look at a simple for loop. Notice the structure, the keyword for, the range function, and the body that repeats. Inside the code editor, you press the run button in the upper right corner.",
+      "confidence": 0.7,
+      "source_frames": [
+        "frame_0001.jpg"
+      ],
+      "timestamp": 7.7,
+      "event_id": "event_002",
+      "source_refs": {
+        "visual_events": [
+          "event_002"
+        ],
+        "transcript_segments": []
+      }
+    },
+    {
+      "start": 15.39,
+      "end": 19.24,
+      "type": "slide",
+      "description": "OCR-only output: On-screen text detected:\nPython code editor -- editor.py\n4 for iin range(5):\n» print (i)\nOutput:\nbhWNP OS\nPRWNP ®",
+      "transcript_context": "Inside the code editor, you press the run button in the upper right corner. The program then prints each number below.",
+      "confidence": 0.7,
+      "source_frames": [
+        "frame_0002.jpg"
+      ],
+      "timestamp": 15.39,
+      "event_id": "event_003",
+      "source_refs": {
+        "visual_events": [
+          "event_003"
+        ],
+        "transcript_segments": []
+      }
+    },
+    {
+      "start": 19.24,
+      "end": 26.94,
+      "type": "slide",
+      "description": "OCR-only output: On-screen text detected:\nHOW A FOR LOOP WORKS (",
+      "transcript_context": "The program then prints each number below. Think of the loop as a flow chart. It starts, checks a condition, runs the body, and repeats until the condition is false. A while loop is similar, but it checks the condition before each repetition, so it may",
+      "confidence": 0.7,
+      "source_frames": [
+        "frame_0003.jpg"
+      ],
+      "timestamp": 19.24,
+      "event_id": "event_004",
+      "source_refs": {
+        "visual_events": [
+          "event_004"
+        ],
+        "transcript_segments": []
+      }
+    },
+    {
+      "start": 26.94,
+      "end": 30.78,
+      "type": "code",
+      "description": "OCR-only output: On-screen text detected:\nCOMPARE\n® for: fixed number of repetitions\n® while: repeats while a condition is true\nfor iin range(5):\nruns exactly 5 times\nEduAccess Al - PYTHON LOOPS DEMO.",
+      "transcript_context": "A while loop is similar, but it checks the condition before each repetition, so it may run zero times.",
+      "confidence": 0.7,
+      "source_frames": [
+        "frame_0004.jpg"
+      ],
+      "timestamp": 26.94,
+      "event_id": "event_005",
+      "source_refs": {
+        "visual_events": [
+          "event_005"
+        ],
+        "transcript_segments": []
+      }
+    },
+    {
+      "start": 30.78,
+      "end": 34.63,
+      "type": "code",
+      "description": "OCR-only output: On-screen text detected:\nHOw MANY TIMES DOES EACH LOOP RUN?\n10\nrange(5) range(10) while (x<3)\nnumber of repetitions",
+      "transcript_context": "run zero times. This bar chart shows how many times each example loop runs.",
+      "confidence": 0.7,
+      "source_frames": [
+        "frame_0005.jpg"
+      ],
+      "timestamp": 30.78,
+      "event_id": "event_006",
+      "source_refs": {
+        "visual_events": [
+          "event_006"
+        ],
+        "transcript_segments": []
+      }
+    },
+    {
+      "start": 34.63,
+      "end": 38.48,
+      "type": "slide",
+      "description": "OCR-only output: On-screen text detected:\nYou heard the explanation\nThe screen shows exact syntax\nVisuals complement audio",
+      "transcript_context": "This bar chart shows how many times each example loop runs. This is the end of this demo lesson. Seeing the code on screen adds important detail.",
+      "confidence": 0.7,
+      "source_frames": [
+        "frame_0006.jpg"
+      ],
+      "timestamp": 34.63,
+      "event_id": "event_007",
+      "source_refs": {
+        "visual_events": [
+          "event_007"
+        ],
+        "transcript_segments": []
+      }
+    }
+  ]
+}

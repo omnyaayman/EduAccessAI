@@ -1,0 +1,71 @@
+{
+  "job_id": "test_integration_job",
+  "events": [
+    {
+      "lecture_id": "test_integration_job",
+      "event_id": "event_001",
+      "start": 0.0,
+      "end": 4.0,
+      "duration": 4.0,
+      "type": "slide",
+      "description": "Intro screen showing python course.",
+      "ocr_text": "",
+      "readable": true,
+      "has_visual_content": true,
+      "previous_event_id": null,
+      "next_event_id": "event_002",
+      "overlapping_transcript": "مرحباً بكم في درس اليوم",
+      "overlapping_segment_ids": [
+        "0"
+      ],
+      "source_frames": [
+        "frame_0000.jpg"
+      ],
+      "transcript_context": "",
+      "visual_complement_score": {
+        "score": "high",
+        "reason": "The screen shows slide content that the spoken transcript does not fully describe (most visible details are not said aloud)."
+      },
+      "importance": 0.77,
+      "source": "vision",
+      "trust": {
+        "trust": "VERIFIED",
+        "confidence": 0.9,
+        "reason": "The claim is grounded in detected on-screen evidence."
+      }
+    },
+    {
+      "lecture_id": "test_integration_job",
+      "event_id": "event_002",
+      "start": 4.0,
+      "end": 8.0,
+      "duration": 4.0,
+      "type": "code",
+      "description": "Code editor showing variable assignment.",
+      "ocr_text": "",
+      "readable": true,
+      "has_visual_content": true,
+      "previous_event_id": "event_001",
+      "next_event_id": null,
+      "overlapping_transcript": "حول المتغيرات في لغة بايثون",
+      "overlapping_segment_ids": [
+        "1"
+      ],
+      "source_frames": [
+        "frame_0001.jpg"
+      ],
+      "transcript_context": "",
+      "visual_complement_score": {
+        "score": "high",
+        "reason": "The screen shows code content that the spoken transcript does not fully describe (most visible details are not said aloud)."
+      },
+      "importance": 1.0,
+      "source": "vision",
+      "trust": {
+        "trust": "VERIFIED",
+        "confidence": 0.9,
+        "reason": "The claim is grounded in detected on-screen evidence."
+      }
+    }
+  ]
+}

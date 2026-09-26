@@ -1,0 +1,132 @@
+{
+  "job_id": "test_integration_job",
+  "concepts": [
+    {
+      "concept_id": "بايثون",
+      "label": "بايثون",
+      "slug": "بايثون",
+      "source": "vocabulary_matching",
+      "assessed": false,
+      "status": "EXPLAINED",
+      "status_reason": [
+        "Spoken in 1 transcript segment(s).",
+        "No readable on-screen detail was verified for this concept."
+      ],
+      "speech": [
+        {
+          "segment_id": "1",
+          "timestamp": 4.0,
+          "start": 4.0,
+          "end": 8.0,
+          "ts": "00:04",
+          "type": "speech",
+          "snippet": "حول المتغيرات في لغة بايثون",
+          "match_strength": "strong",
+          "matched_words": [
+            "بايثون"
+          ]
+        }
+      ],
+      "speech_count": 1,
+      "visual": [],
+      "visual_count": 0,
+      "assessment": [],
+      "assessment_count": 0,
+      "first_timestamp": 4.0,
+      "relationships": {
+        "demonstrated_by": [],
+        "prerequisites": [],
+        "related_to": [],
+        "shown_at": [],
+        "explained_at": [
+          {
+            "timestamp": 4.0,
+            "ts": "00:04",
+            "text": "",
+            "segment_id": "1"
+          }
+        ],
+        "assessed_by": []
+      }
+    }
+  ],
+  "nodes": [
+    {
+      "id": "concept:بايثون",
+      "type": "concept",
+      "label": "بايثون",
+      "concept_id": "بايثون",
+      "status": "EXPLAINED",
+      "assessed": false,
+      "timestamp": 4.0,
+      "relationships": {
+        "demonstrated_by": [],
+        "prerequisites": [],
+        "related_to": [],
+        "shown_at": [],
+        "explained_at": [
+          {
+            "timestamp": 4.0,
+            "ts": "00:04",
+            "text": "",
+            "segment_id": "1"
+          }
+        ],
+        "assessed_by": []
+      }
+    },
+    {
+      "id": "segment:0",
+      "type": "speech",
+      "label": "مرحباً بكم في درس اليوم",
+      "timestamp": 0.0
+    },
+    {
+      "id": "segment:1",
+      "type": "speech",
+      "label": "حول المتغيرات في لغة بايثون",
+      "timestamp": 4.0
+    },
+    {
+      "id": "event:event_001",
+      "type": "visual",
+      "label": "slide",
+      "timestamp": 0.0
+    },
+    {
+      "id": "event:event_002",
+      "type": "visual",
+      "label": "code",
+      "timestamp": 4.0
+    }
+  ],
+  "edges": [
+    {
+      "source": "concept:بايثون",
+      "target": "segment:1",
+      "rel": "spoken_in",
+      "timestamp": 4.0,
+      "evidence": "content-word overlap with transcript"
+    },
+    {
+      "source": "segment:0",
+      "target": "segment:1",
+      "rel": "followed_by",
+      "start": 0.0,
+      "timestamp": 0.0
+    },
+    {
+      "source": "event:event_001",
+      "target": "event:event_002",
+      "rel": "next_visual",
+      "start": 4.0,
+      "timestamp": 4.0
+    }
+  ],
+  "evidence": {
+    "segments": 2,
+    "visual_events": 2,
+    "quiz_questions": 0
+  },
+  "generated_at": "2026-09-09T16:21:15.433489+00:00"
+}

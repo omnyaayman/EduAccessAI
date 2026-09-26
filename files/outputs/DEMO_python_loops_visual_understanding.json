@@ -1,0 +1,340 @@
+{
+  "job_id": "DEMO_python_loops",
+  "records": [
+    {
+      "event_id": "event_001",
+      "start": 0.0,
+      "end": 7.7,
+      "source_frames": [
+        "frame_0000.jpg"
+      ],
+      "visual_type": "slide",
+      "scene_summary": "The screen also shows: Python loops repeat a block of code\nThe for loop runs a fixed number of times\nToday: for loop syntax + visuals",
+      "objects": [
+        "slide"
+      ],
+      "text": [
+        "Python loops repeat a block of code",
+        "The for loop runs a fixed number of times",
+        "Today: for loop syntax + visuals"
+      ],
+      "layout": "Title and supporting text appear on the slide.",
+      "actions": [],
+      "relationships": [],
+      "ocr_text": "Python loops repeat a block of code\nThe for loop runs a fixed number of times\nToday: for loop syntax + visuals",
+      "visual_claims": [
+        {
+          "claim": "An educational slide is visible with the title 'Python loops repeat a block of code'.",
+          "evidence": "OCR read the first line of the slide.",
+          "confidence": 0.7
+        }
+      ],
+      "speech_context": "Welcome to this short lesson about Python loops. By the end, you will understand how a for loop repeats a block of code. Let us look at a simple for loop.",
+      "complement_level": "COMPLEMENTARY",
+      "complement_reason": "The screen shows slide content that the spoken transcript does not fully describe (most visible details are not said aloud).",
+      "trust": {
+        "trust": "VERIFIED",
+        "confidence": 0.7,
+        "reason": "The claim is grounded in detected on-screen evidence."
+      },
+      "description": "OCR-only output: On-screen text detected:\nPython loops repeat a block of code\nThe for loop runs a fixed number of times\nToday: for loop syntax + visuals",
+      "accessibility_description": {
+        "short": "An educational slide is visible.",
+        "standard": "At 0s a slide is shown. Readable text includes: \"Python loops repeat a block of code The for loop runs a fixed number of times\"."
+      },
+      "limitations": [
+        "Details beyond the readable text could not be verified."
+      ],
+      "lecture_id": "DEMO_python_loops"
+    },
+    {
+      "event_id": "event_002",
+      "start": 7.7,
+      "end": 15.39,
+      "source_frames": [
+        "frame_0001.jpg"
+      ],
+      "visual_type": "code",
+      "scene_summary": "The screen also shows: Python code editor -- editor.py\n,  foriin range(5):\n4 print (i)",
+      "objects": [
+        "code block"
+      ],
+      "text": [
+        "Python code editor -- editor.py",
+        ",  foriin range(5):",
+        "4 print (i)"
+      ],
+      "layout": "A code block is the main on-screen content.",
+      "actions": [],
+      "relationships": [],
+      "ocr_text": "Python code editor -- editor.py\n,  foriin range(5):\n4 print (i)",
+      "visual_claims": [
+        {
+          "claim": "A code example is visible showing: 'Python code editor -- editor.py ,  foriin range(5): 4 print (i)'.",
+          "evidence": "OCR detected the visible code.",
+          "confidence": 0.7
+        }
+      ],
+      "speech_context": "Let us look at a simple for loop. Notice the structure, the keyword for, the range function, and the body that repeats. Inside the code editor, you press the run button in the upper right corner.",
+      "complement_level": "COMPLEMENTARY",
+      "complement_reason": "The screen shows slide content that the spoken transcript does not fully describe (most visible details are not said aloud).",
+      "trust": {
+        "trust": "VERIFIED",
+        "confidence": 0.7,
+        "reason": "The claim is grounded in detected on-screen evidence."
+      },
+      "description": "OCR-only output: On-screen text detected:\nPython code editor -- editor.py\n,  foriin range(5):\n4 print (i)",
+      "accessibility_description": {
+        "short": "Code is visible on screen.",
+        "standard": "At 8s, code content is shown. Near the top of the visible text: \"Python code editor -- editor.py ,  foriin range(5):\". The exact code appears only on screen and is not fully spoken."
+      },
+      "limitations": [],
+      "lecture_id": "DEMO_python_loops"
+    },
+    {
+      "event_id": "event_003",
+      "start": 15.39,
+      "end": 19.24,
+      "source_frames": [
+        "frame_0002.jpg"
+      ],
+      "visual_type": "code",
+      "scene_summary": "The screen also shows: Python code editor -- editor.py\n4 for iin range(5):\n» print (i)\nOutput:\nbhWNP OS\nPRWNP ®",
+      "objects": [
+        "code block"
+      ],
+      "text": [
+        "Python code editor -- editor.py",
+        "4 for iin range(5):",
+        "» print (i)",
+        "Output:",
+        "bhWNP OS",
+        "PRWNP ®"
+      ],
+      "layout": "A code block is the main on-screen content.",
+      "actions": [
+        "Program output is visible on screen."
+      ],
+      "relationships": [],
+      "ocr_text": "Python code editor -- editor.py\n4 for iin range(5):\n» print (i)\nOutput:\nbhWNP OS\nPRWNP ®",
+      "visual_claims": [
+        {
+          "claim": "A code example is visible showing: 'Python code editor -- editor.py 4 for iin range(5): » print (i) Output:'.",
+          "evidence": "OCR detected the visible code.",
+          "confidence": 0.7
+        },
+        {
+          "claim": "Program output is visible alongside the code.",
+          "evidence": "OCR detected an output region.",
+          "confidence": 0.7
+        }
+      ],
+      "speech_context": "Inside the code editor, you press the run button in the upper right corner. The program then prints each number below.",
+      "complement_level": "COMPLEMENTARY",
+      "complement_reason": "The screen shows slide content that the spoken transcript does not fully describe (most visible details are not said aloud).",
+      "trust": {
+        "trust": "VERIFIED",
+        "confidence": 0.7,
+        "reason": "The claim is grounded in detected on-screen evidence."
+      },
+      "description": "OCR-only output: On-screen text detected:\nPython code editor -- editor.py\n4 for iin range(5):\n» print (i)\nOutput:\nbhWNP OS\nPRWNP ®",
+      "accessibility_description": {
+        "short": "Code is visible on screen.",
+        "standard": "At 15s, code content is shown. Near the top of the visible text: \"Python code editor -- editor.py 4 for iin range(5):\". The exact code appears only on screen and is not fully spoken."
+      },
+      "limitations": [],
+      "lecture_id": "DEMO_python_loops"
+    },
+    {
+      "event_id": "event_004",
+      "start": 19.24,
+      "end": 26.94,
+      "source_frames": [
+        "frame_0003.jpg"
+      ],
+      "visual_type": "slide",
+      "scene_summary": "The screen also shows: HOW A FOR LOOP WORKS (",
+      "objects": [
+        "slide"
+      ],
+      "text": [
+        "HOW A FOR LOOP WORKS ("
+      ],
+      "layout": "Title and supporting text appear on the slide.",
+      "actions": [],
+      "relationships": [],
+      "ocr_text": "HOW A FOR LOOP WORKS (",
+      "visual_claims": [
+        {
+          "claim": "An educational slide is visible with the title 'HOW A FOR LOOP WORKS ('.",
+          "evidence": "OCR read the first line of the slide.",
+          "confidence": 0.7
+        }
+      ],
+      "speech_context": "The program then prints each number below. Think of the loop as a flow chart. It starts, checks a condition, runs the body, and repeats until the condition is false. A while loop is similar, but it checks the condition before each repetition, so it may",
+      "complement_level": "COMPLEMENTARY",
+      "complement_reason": "The screen shows slide content that the spoken transcript does not fully describe (most visible details are not said aloud).",
+      "trust": {
+        "trust": "VERIFIED",
+        "confidence": 0.7,
+        "reason": "The claim is grounded in detected on-screen evidence."
+      },
+      "description": "OCR-only output: On-screen text detected:\nHOW A FOR LOOP WORKS (",
+      "accessibility_description": {
+        "short": "An educational slide is visible.",
+        "standard": "At 19s a slide is shown. Readable text includes: \"HOW A FOR LOOP WORKS (\"."
+      },
+      "limitations": [
+        "Details beyond the readable text could not be verified."
+      ],
+      "lecture_id": "DEMO_python_loops"
+    },
+    {
+      "event_id": "event_005",
+      "start": 26.94,
+      "end": 30.78,
+      "source_frames": [
+        "frame_0004.jpg"
+      ],
+      "visual_type": "code",
+      "scene_summary": "The screen shows code that was not read aloud. OCR read from the screen: ```\nCOMPARE\n® for: fixed number of repetitions\n® while: repeats while a condition is true\nfor iin range(5):\nruns exactly 5 times\nEduAccess Al - PYTHON LOOPS DEMO.\n```",
+      "objects": [
+        "code block"
+      ],
+      "text": [
+        "COMPARE",
+        "® for: fixed number of repetitions",
+        "® while: repeats while a condition is true",
+        "for iin range(5):",
+        "runs exactly 5 times",
+        "EduAccess Al - PYTHON LOOPS DEMO."
+      ],
+      "layout": "A code block is the main on-screen content.",
+      "actions": [],
+      "relationships": [],
+      "ocr_text": "COMPARE\n® for: fixed number of repetitions\n® while: repeats while a condition is true\nfor iin range(5):\nruns exactly 5 times\nEduAccess Al - PYTHON LOOPS DEMO.",
+      "visual_claims": [
+        {
+          "claim": "A code example is visible showing: 'COMPARE ® for: fixed number of repetitions ® while: repeats while a condition is true for iin range(5):'.",
+          "evidence": "OCR detected the visible code.",
+          "confidence": 0.7
+        }
+      ],
+      "speech_context": "A while loop is similar, but it checks the condition before each repetition, so it may run zero times.",
+      "complement_level": "COMPLEMENTARY",
+      "complement_reason": "The screen shows code content that the spoken transcript does not fully describe (most visible details are not said aloud).",
+      "trust": {
+        "trust": "VERIFIED",
+        "confidence": 0.7,
+        "reason": "The claim is grounded in detected on-screen evidence."
+      },
+      "description": "OCR-only output: On-screen text detected:\nCOMPARE\n® for: fixed number of repetitions\n® while: repeats while a condition is true\nfor iin range(5):\nruns exactly 5 times\nEduAccess Al - PYTHON LOOPS DEMO.",
+      "accessibility_description": {
+        "short": "Code is visible on screen.",
+        "standard": "At 27s, code content is shown. Near the top of the visible text: \"COMPARE ® for: fixed number of repetitions\". The exact code appears only on screen and is not fully spoken."
+      },
+      "limitations": [],
+      "lecture_id": "DEMO_python_loops"
+    },
+    {
+      "event_id": "event_006",
+      "start": 30.78,
+      "end": 34.63,
+      "source_frames": [
+        "frame_0005.jpg"
+      ],
+      "visual_type": "chart",
+      "scene_summary": "The screen shows code that was not read aloud. OCR read from the screen: ```\nHOw MANY TIMES DOES EACH LOOP RUN?\n10\nrange(5) range(10) while (x<3)\nnumber of repetitions\n```",
+      "objects": [
+        "chart"
+      ],
+      "text": [
+        "HOw MANY TIMES DOES EACH LOOP RUN?",
+        "10",
+        "range(5) range(10) while (x<3)",
+        "number of repetitions"
+      ],
+      "layout": "A chart is the main on-screen content.",
+      "actions": [],
+      "relationships": [
+        "Value labels are partially readable; change/trajectory is not fully verified."
+      ],
+      "ocr_text": "HOw MANY TIMES DOES EACH LOOP RUN?\n10\nrange(5) range(10) while (x<3)\nnumber of repetitions",
+      "visual_claims": [
+        {
+          "claim": "A chart is visible.",
+          "evidence": "Chart-related content was detected (OCR values).",
+          "confidence": 0.7
+        },
+        {
+          "claim": "Labels are partially readable, but exact values cannot be fully verified.",
+          "evidence": "OCR read some labels.",
+          "confidence": 0.5
+        }
+      ],
+      "speech_context": "run zero times. This bar chart shows how many times each example loop runs.",
+      "complement_level": "COMPLEMENTARY",
+      "complement_reason": "The screen shows code content that the spoken transcript does not fully describe (most visible details are not said aloud).",
+      "trust": {
+        "trust": "VERIFIED",
+        "confidence": 0.7,
+        "reason": "The claim is grounded in detected on-screen evidence."
+      },
+      "description": "OCR-only output: On-screen text detected:\nHOw MANY TIMES DOES EACH LOOP RUN?\n10\nrange(5) range(10) while (x<3)\nnumber of repetitions",
+      "accessibility_description": {
+        "short": "A chart is visible on screen.",
+        "standard": "At 31s a chart is shown. Some labels are readable, but exact values cannot be fully verified."
+      },
+      "limitations": [
+        "The exact numerical values and trend of the chart cannot be fully verified."
+      ],
+      "lecture_id": "DEMO_python_loops"
+    },
+    {
+      "event_id": "event_007",
+      "start": 34.63,
+      "end": 38.48,
+      "source_frames": [
+        "frame_0006.jpg"
+      ],
+      "visual_type": "slide",
+      "scene_summary": "The screen also shows: You heard the explanation\nThe screen shows exact syntax\nVisuals complement audio",
+      "objects": [
+        "slide"
+      ],
+      "text": [
+        "You heard the explanation",
+        "The screen shows exact syntax",
+        "Visuals complement audio"
+      ],
+      "layout": "Title and supporting text appear on the slide.",
+      "actions": [],
+      "relationships": [],
+      "ocr_text": "You heard the explanation\nThe screen shows exact syntax\nVisuals complement audio",
+      "visual_claims": [
+        {
+          "claim": "An educational slide is visible with the title 'You heard the explanation'.",
+          "evidence": "OCR read the first line of the slide.",
+          "confidence": 0.7
+        }
+      ],
+      "speech_context": "This bar chart shows how many times each example loop runs. This is the end of this demo lesson. Seeing the code on screen adds important detail.",
+      "complement_level": "COMPLEMENTARY",
+      "complement_reason": "The screen shows slide content that the spoken transcript does not fully describe (most visible details are not said aloud).",
+      "trust": {
+        "trust": "VERIFIED",
+        "confidence": 0.7,
+        "reason": "The claim is grounded in detected on-screen evidence."
+      },
+      "description": "OCR-only output: On-screen text detected:\nYou heard the explanation\nThe screen shows exact syntax\nVisuals complement audio",
+      "accessibility_description": {
+        "short": "An educational slide is visible.",
+        "standard": "At 35s a slide is shown. Readable text includes: \"You heard the explanation The screen shows exact syntax\"."
+      },
+      "limitations": [
+        "Details beyond the readable text could not be verified."
+      ],
+      "lecture_id": "DEMO_python_loops"
+    }
+  ]
+}
