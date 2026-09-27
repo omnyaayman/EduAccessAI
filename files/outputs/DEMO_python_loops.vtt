@@ -1,0 +1,53 @@
+WEBVTT
+
+0
+00:00:00.000 --> 00:00:02.720
+Welcome to this short lesson about Python loops.
+
+1
+00:00:02.720 --> 00:00:06.520
+By the end, you will understand how a for loop repeats a block of code.
+
+2
+00:00:06.520 --> 00:00:08.440
+Let us look at a simple for loop.
+
+3
+00:00:08.440 --> 00:00:13.400
+Notice the structure, the keyword for, the range function, and the body that repeats.
+
+4
+00:00:13.400 --> 00:00:17.200
+Inside the code editor, you press the run button in the upper right corner.
+
+5
+00:00:17.200 --> 00:00:19.480
+The program then prints each number below.
+
+6
+00:00:19.480 --> 00:00:21.360
+Think of the loop as a flow chart.
+
+7
+00:00:21.360 --> 00:00:26.600
+It starts, checks a condition, runs the body, and repeats until the condition is false.
+
+8
+00:00:26.600 --> 00:00:30.560
+A while loop is similar, but it checks the condition before each repetition, so it may
+
+9
+00:00:30.560 --> 00:00:32.240
+run zero times.
+
+10
+00:00:32.240 --> 00:00:35.600
+This bar chart shows how many times each example loop runs.
+
+11
+00:00:35.600 --> 00:00:37.720
+This is the end of this demo lesson.
+
+12
+00:00:37.720 --> 00:00:39.640
+Seeing the code on screen adds important detail.

@@ -1,0 +1,27 @@
+{
+  "job_id": "test_integration_job",
+  "statuses": [
+    {
+      "event_id": "event_001",
+      "start": 0.0,
+      "end": 4.0,
+      "status": "PARTIALLY_MISSING",
+      "coverage": 0.0,
+      "complement": "high",
+      "trust": "VERIFIED",
+      "importance_rank": "MEDIUM",
+      "category": "slide"
+    },
+    {
+      "event_id": "event_002",
+      "start": 4.0,
+      "end": 8.0,
+      "status": "PARTIALLY_MISSING",
+      "coverage": 0.0,
+      "complement": "high",
+      "trust": "VERIFIED",
+      "importance_rank": "HIGH",
+      "category": "code"
+    }
+  ]
+}

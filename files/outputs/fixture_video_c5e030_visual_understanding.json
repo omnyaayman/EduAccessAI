@@ -1,0 +1,99 @@
+{
+  "job_id": "fixture_f9c925c2d0",
+  "records": [
+    {
+      "event_id": "event_001",
+      "start": 0.0,
+      "end": 4.0,
+      "source_frames": [
+        "frame_0000.jpg"
+      ],
+      "visual_type": "ui",
+      "scene_summary": "A code editor shows the assignment: name equals Omnya.",
+      "objects": [],
+      "text": [],
+      "layout": "",
+      "actions": [],
+      "relationships": [],
+      "ocr_text": "",
+      "visual_claims": [
+        {
+          "claim": "Ui content could not be verified.",
+          "evidence": "No readable on-screen text was detected.",
+          "confidence": 0.0
+        },
+        {
+          "claim": "Text on screen is not readable from the available frame.",
+          "evidence": "OCR returned no recognisable string.",
+          "confidence": 0.0
+        }
+      ],
+      "speech_context": "Now we create a Python variable.",
+      "complement_level": "AUDIO_ONLY",
+      "complement_reason": "The screen shows code content that the spoken transcript does not fully describe (most visible details are not said aloud).",
+      "trust": {
+        "trust": "VERIFIED",
+        "confidence": 0.92,
+        "reason": "The claim is grounded in detected on-screen evidence."
+      },
+      "description": "A code editor shows the assignment: name equals Omnya.",
+      "accessibility_description": {
+        "short": "Visual content could not be verified for this moment.",
+        "standard": "The on-screen content could not be reliably read or verified from the available frame, so no visual details are stated as fact."
+      },
+      "limitations": [
+        "No readable on-screen text could be recognised, so specific code, labels or values are not stated.",
+        "Color and clickability could not be verified from the available evidence."
+      ],
+      "lecture_id": "fixture_f9c925c2d0"
+    },
+    {
+      "event_id": "event_002",
+      "start": 4.5,
+      "end": 9.0,
+      "source_frames": [
+        "frame_0001.jpg"
+      ],
+      "visual_type": "diagram",
+      "scene_summary": "A stack diagram shows three elements, newest on top.",
+      "objects": [],
+      "text": [],
+      "layout": "",
+      "actions": [],
+      "relationships": [
+        "The diagram structure is visible, but its relationships cannot be fully verified."
+      ],
+      "ocr_text": "",
+      "visual_claims": [
+        {
+          "claim": "A diagram structure is visible, but its labels cannot be verified.",
+          "evidence": "Diagram-related content was detected (layout signals only).",
+          "confidence": 0.6
+        },
+        {
+          "claim": "Text on screen is not readable from the available frame.",
+          "evidence": "OCR returned no recognisable string.",
+          "confidence": 0.0
+        }
+      ],
+      "speech_context": "Loops repeat a block of code.",
+      "complement_level": "AUDIO_ONLY",
+      "complement_reason": "The screen shows diagram content that the spoken transcript does not fully describe (most visible details are not said aloud).",
+      "trust": {
+        "trust": "VERIFIED",
+        "confidence": 0.6,
+        "reason": "The claim is grounded in detected on-screen evidence."
+      },
+      "description": "A stack diagram shows three elements, newest on top.",
+      "accessibility_description": {
+        "short": "Visual content could not be verified for this moment.",
+        "standard": "The on-screen content could not be reliably read or verified from the available frame, so no visual details are stated as fact."
+      },
+      "limitations": [
+        "No readable on-screen text could be recognised, so specific code, labels or values are not stated.",
+        "The diagram's labels and relationships cannot be fully verified."
+      ],
+      "lecture_id": "fixture_f9c925c2d0"
+    }
+  ]
+}

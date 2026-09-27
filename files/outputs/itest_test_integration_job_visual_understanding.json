@@ -1,0 +1,96 @@
+{
+  "job_id": "test_integration_job",
+  "records": [
+    {
+      "event_id": "event_001",
+      "start": 0.0,
+      "end": 4.0,
+      "source_frames": [
+        "frame_0000.jpg"
+      ],
+      "visual_type": "slide",
+      "scene_summary": "Intro screen showing python course.",
+      "objects": [],
+      "text": [],
+      "layout": "",
+      "actions": [],
+      "relationships": [],
+      "ocr_text": "",
+      "visual_claims": [
+        {
+          "claim": "The slide content cannot be verified.",
+          "evidence": "No readable on-screen text was detected.",
+          "confidence": 0.0
+        },
+        {
+          "claim": "Text on screen is not readable from the available frame.",
+          "evidence": "OCR returned no recognisable string.",
+          "confidence": 0.0
+        }
+      ],
+      "speech_context": "مرحباً بكم في درس اليوم",
+      "complement_level": "AUDIO_ONLY",
+      "complement_reason": "The screen shows slide content that the spoken transcript does not fully describe (most visible details are not said aloud).",
+      "trust": {
+        "trust": "VERIFIED",
+        "confidence": 0.9,
+        "reason": "The claim is grounded in detected on-screen evidence."
+      },
+      "description": "Intro screen showing python course.",
+      "accessibility_description": {
+        "short": "Visual content could not be verified for this moment.",
+        "standard": "The on-screen content could not be reliably read or verified from the available frame, so no visual details are stated as fact."
+      },
+      "limitations": [
+        "No readable on-screen text could be recognised, so specific code, labels or values are not stated."
+      ],
+      "lecture_id": "test_integration_job"
+    },
+    {
+      "event_id": "event_002",
+      "start": 4.0,
+      "end": 8.0,
+      "source_frames": [
+        "frame_0001.jpg"
+      ],
+      "visual_type": "ui",
+      "scene_summary": "Code editor showing variable assignment.",
+      "objects": [],
+      "text": [],
+      "layout": "",
+      "actions": [],
+      "relationships": [],
+      "ocr_text": "",
+      "visual_claims": [
+        {
+          "claim": "Ui content could not be verified.",
+          "evidence": "No readable on-screen text was detected.",
+          "confidence": 0.0
+        },
+        {
+          "claim": "Text on screen is not readable from the available frame.",
+          "evidence": "OCR returned no recognisable string.",
+          "confidence": 0.0
+        }
+      ],
+      "speech_context": "حول المتغيرات في لغة بايثون",
+      "complement_level": "AUDIO_ONLY",
+      "complement_reason": "The screen shows code content that the spoken transcript does not fully describe (most visible details are not said aloud).",
+      "trust": {
+        "trust": "VERIFIED",
+        "confidence": 0.9,
+        "reason": "The claim is grounded in detected on-screen evidence."
+      },
+      "description": "Code editor showing variable assignment.",
+      "accessibility_description": {
+        "short": "Visual content could not be verified for this moment.",
+        "standard": "The on-screen content could not be reliably read or verified from the available frame, so no visual details are stated as fact."
+      },
+      "limitations": [
+        "No readable on-screen text could be recognised, so specific code, labels or values are not stated.",
+        "Color and clickability could not be verified from the available evidence."
+      ],
+      "lecture_id": "test_integration_job"
+    }
+  ]
+}

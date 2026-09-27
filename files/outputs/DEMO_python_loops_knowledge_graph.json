@@ -1,0 +1,2973 @@
+{
+  "job_id": "DEMO_python_loops",
+  "concepts": [
+    {
+      "concept_id": "loops",
+      "label": "loops",
+      "slug": "loops",
+      "source": "quiz",
+      "assessed": true,
+      "status": "PARTIALLY_EXPLAINED",
+      "status_reason": [
+        "The concept is explained in speech and concrete on-screen detail was verified, so the screen adds to the spoken idea."
+      ],
+      "speech": [
+        {
+          "segment_id": "0",
+          "timestamp": 0.0,
+          "start": 0.0,
+          "end": 2.72,
+          "ts": "00:00",
+          "type": "speech",
+          "snippet": "Welcome to this short lesson about Python loops.",
+          "match_strength": "strong",
+          "matched_words": [
+            "loops"
+          ]
+        }
+      ],
+      "speech_count": 1,
+      "visual": [
+        {
+          "event_id": "event_001",
+          "timestamp": 0.0,
+          "start": 0.0,
+          "end": 7.7,
+          "ts": "00:00",
+          "type": "visual",
+          "visual_type": "slide",
+          "snippet": "Python loops repeat a block of code\nThe for loop runs a fixed number of times\nToday: for loop syntax + visuals",
+          "trust": "VERIFIED",
+          "readable": true
+        },
+        {
+          "event_id": "event_005",
+          "timestamp": 26.94,
+          "start": 26.94,
+          "end": 30.78,
+          "ts": "00:26",
+          "type": "visual",
+          "visual_type": "code",
+          "snippet": "COMPARE\n® for: fixed number of repetitions\n® while: repeats while a condition is true\nfor iin range(5):\nruns exactly 5 times\nEduAccess Al - PYTHON LOOPS DEMO.",
+          "trust": "VERIFIED",
+          "readable": true
+        }
+      ],
+      "visual_count": 2,
+      "assessment": [
+        {
+          "question_id": "q1",
+          "question": "What is the main benefit of a loop?",
+          "type": "multiple_choice",
+          "timestamp": 0.0,
+          "source_refs": {
+            "transcript_segments": [
+              0
+            ],
+            "visual_events": []
+          }
+        }
+      ],
+      "assessment_count": 1,
+      "first_timestamp": 0.0,
+      "relationships": {
+        "demonstrated_by": [
+          "for loop",
+          "while loop"
+        ],
+        "prerequisites": [],
+        "related_to": [],
+        "shown_at": [
+          {
+            "timestamp": 0.0,
+            "ts": "00:00",
+            "snippet": "Python loops repeat a block of code\nThe for loop runs a fixed number of times\nToday: for loop syntax + visuals",
+            "event_id": "event_001"
+          },
+          {
+            "timestamp": 26.94,
+            "ts": "00:26",
+            "snippet": "COMPARE\n® for: fixed number of repetitions\n® while: repeats while a condition is true\nfor iin range(5):\nruns exactly 5 times\nEduAccess Al - PYTHON LOOPS DEMO.",
+            "event_id": "event_005"
+          }
+        ],
+        "explained_at": [
+          {
+            "timestamp": 0.0,
+            "ts": "00:00",
+            "text": "",
+            "segment_id": "0"
+          }
+        ],
+        "assessed_by": [
+          {
+            "question": "What is the main benefit of a loop?",
+            "question_id": "q1",
+            "timestamp": 0.0
+          }
+        ]
+      }
+    },
+    {
+      "concept_id": "general_programming",
+      "label": "general_programming",
+      "slug": "general_programming",
+      "source": "quiz",
+      "assessed": true,
+      "status": "ASSESSED",
+      "status_reason": [
+        "Referenced by an assessment question, but no lecture evidence was found that explains or shows it."
+      ],
+      "speech": [],
+      "speech_count": 0,
+      "visual": [],
+      "visual_count": 0,
+      "assessment": [
+        {
+          "question_id": "q1",
+          "question": "Briefly explain the main programming concept explained in this lesson.",
+          "type": "short_answer",
+          "timestamp": 0.0,
+          "source_refs": {
+            "transcript_segments": [
+              0
+            ],
+            "visual_events": []
+          }
+        }
+      ],
+      "assessment_count": 1,
+      "first_timestamp": null,
+      "relationships": {
+        "demonstrated_by": [],
+        "prerequisites": [],
+        "related_to": [],
+        "shown_at": [],
+        "explained_at": [],
+        "assessed_by": [
+          {
+            "question": "Briefly explain the main programming concept explained in this lesson.",
+            "question_id": "q1",
+            "timestamp": 0.0
+          }
+        ]
+      }
+    },
+    {
+      "concept_id": "loops_indexing",
+      "label": "loops_indexing",
+      "slug": "loops_indexing",
+      "source": "quiz",
+      "assessed": true,
+      "status": "ASSESSED",
+      "status_reason": [
+        "Referenced by an assessment question, but no lecture evidence was found that explains or shows it."
+      ],
+      "speech": [],
+      "speech_count": 0,
+      "visual": [],
+      "visual_count": 0,
+      "assessment": [
+        {
+          "question_id": "q1",
+          "question": "هل تبدأ الحلقات التكرارية دائماً بالقيمة 1 في بايثون؟",
+          "type": "true_false",
+          "timestamp": 0.0,
+          "source_refs": {
+            "transcript_segments": [
+              0
+            ],
+            "visual_events": []
+          }
+        }
+      ],
+      "assessment_count": 1,
+      "first_timestamp": null,
+      "relationships": {
+        "demonstrated_by": [
+          "for loop",
+          "while loop"
+        ],
+        "prerequisites": [],
+        "related_to": [],
+        "shown_at": [],
+        "explained_at": [],
+        "assessed_by": [
+          {
+            "question": "هل تبدأ الحلقات التكرارية دائماً بالقيمة 1 في بايثون؟",
+            "question_id": "q1",
+            "timestamp": 0.0
+          }
+        ]
+      }
+    },
+    {
+      "concept_id": "chart",
+      "label": "chart",
+      "slug": "chart",
+      "source": "vocabulary_matching",
+      "assessed": false,
+      "status": "EXPLAINED",
+      "status_reason": [
+        "Spoken in 2 transcript segment(s).",
+        "No readable on-screen detail was verified for this concept."
+      ],
+      "speech": [
+        {
+          "segment_id": "6",
+          "timestamp": 19.48,
+          "start": 19.48,
+          "end": 21.36,
+          "ts": "00:19",
+          "type": "speech",
+          "snippet": "Think of the loop as a flow chart.",
+          "match_strength": "strong",
+          "matched_words": [
+            "chart"
+          ]
+        },
+        {
+          "segment_id": "10",
+          "timestamp": 32.24,
+          "start": 32.24,
+          "end": 35.6,
+          "ts": "00:32",
+          "type": "speech",
+          "snippet": "This bar chart shows how many times each example loop runs.",
+          "match_strength": "strong",
+          "matched_words": [
+            "chart"
+          ]
+        }
+      ],
+      "speech_count": 2,
+      "visual": [],
+      "visual_count": 0,
+      "assessment": [],
+      "assessment_count": 0,
+      "first_timestamp": 19.48,
+      "relationships": {
+        "demonstrated_by": [],
+        "prerequisites": [],
+        "related_to": [],
+        "shown_at": [],
+        "explained_at": [
+          {
+            "timestamp": 19.48,
+            "ts": "00:19",
+            "text": "",
+            "segment_id": "6"
+          },
+          {
+            "timestamp": 32.24,
+            "ts": "00:32",
+            "text": "",
+            "segment_id": "10"
+          }
+        ],
+        "assessed_by": []
+      }
+    },
+    {
+      "concept_id": "code",
+      "label": "code",
+      "slug": "code",
+      "source": "vocabulary_matching",
+      "assessed": false,
+      "status": "PARTIALLY_EXPLAINED",
+      "status_reason": [
+        "The concept is explained in speech and concrete on-screen detail was verified, so the screen adds to the spoken idea."
+      ],
+      "speech": [
+        {
+          "segment_id": "1",
+          "timestamp": 2.72,
+          "start": 2.72,
+          "end": 6.52,
+          "ts": "00:02",
+          "type": "speech",
+          "snippet": "By the end, you will understand how a for loop repeats a block of code.",
+          "match_strength": "strong",
+          "matched_words": [
+            "code"
+          ]
+        },
+        {
+          "segment_id": "4",
+          "timestamp": 13.4,
+          "start": 13.4,
+          "end": 17.2,
+          "ts": "00:13",
+          "type": "speech",
+          "snippet": "Inside the code editor, you press the run button in the upper right corner.",
+          "match_strength": "strong",
+          "matched_words": [
+            "code"
+          ]
+        },
+        {
+          "segment_id": "12",
+          "timestamp": 37.72,
+          "start": 37.72,
+          "end": 39.64,
+          "ts": "00:37",
+          "type": "speech",
+          "snippet": "Seeing the code on screen adds important detail.",
+          "match_strength": "strong",
+          "matched_words": [
+            "code"
+          ]
+        }
+      ],
+      "speech_count": 3,
+      "visual": [
+        {
+          "event_id": "event_001",
+          "timestamp": 0.0,
+          "start": 0.0,
+          "end": 7.7,
+          "ts": "00:00",
+          "type": "visual",
+          "visual_type": "slide",
+          "snippet": "Python loops repeat a block of code\nThe for loop runs a fixed number of times\nToday: for loop syntax + visuals",
+          "trust": "VERIFIED",
+          "readable": true
+        },
+        {
+          "event_id": "event_002",
+          "timestamp": 7.7,
+          "start": 7.7,
+          "end": 15.39,
+          "ts": "00:07",
+          "type": "visual",
+          "visual_type": "slide",
+          "snippet": "Python code editor -- editor.py\n,  foriin range(5):\n4 print (i)",
+          "trust": "VERIFIED",
+          "readable": true
+        },
+        {
+          "event_id": "event_003",
+          "timestamp": 15.39,
+          "start": 15.39,
+          "end": 19.24,
+          "ts": "00:15",
+          "type": "visual",
+          "visual_type": "slide",
+          "snippet": "Python code editor -- editor.py\n4 for iin range(5):\n» print (i)\nOutput:\nbhWNP OS\nPRWNP ®",
+          "trust": "VERIFIED",
+          "readable": true
+        },
+        {
+          "event_id": "event_005",
+          "timestamp": 26.94,
+          "start": 26.94,
+          "end": 30.78,
+          "ts": "00:26",
+          "type": "visual",
+          "visual_type": "code",
+          "snippet": "COMPARE\n® for: fixed number of repetitions\n® while: repeats while a condition is true\nfor iin range(5):\nruns exactly 5 times\nEduAccess Al - PYTHON LOOPS DEMO.",
+          "trust": "VERIFIED",
+          "readable": true
+        },
+        {
+          "event_id": "event_006",
+          "timestamp": 30.78,
+          "start": 30.78,
+          "end": 34.63,
+          "ts": "00:30",
+          "type": "visual",
+          "visual_type": "code",
+          "snippet": "HOw MANY TIMES DOES EACH LOOP RUN?\n10\nrange(5) range(10) while (x<3)\nnumber of repetitions",
+          "trust": "VERIFIED",
+          "readable": true
+        }
+      ],
+      "visual_count": 5,
+      "assessment": [],
+      "assessment_count": 0,
+      "first_timestamp": 0.0,
+      "relationships": {
+        "demonstrated_by": [],
+        "prerequisites": [],
+        "related_to": [],
+        "shown_at": [
+          {
+            "timestamp": 0.0,
+            "ts": "00:00",
+            "snippet": "Python loops repeat a block of code\nThe for loop runs a fixed number of times\nToday: for loop syntax + visuals",
+            "event_id": "event_001"
+          },
+          {
+            "timestamp": 7.7,
+            "ts": "00:07",
+            "snippet": "Python code editor -- editor.py\n,  foriin range(5):\n4 print (i)",
+            "event_id": "event_002"
+          },
+          {
+            "timestamp": 15.39,
+            "ts": "00:15",
+            "snippet": "Python code editor -- editor.py\n4 for iin range(5):\n» print (i)\nOutput:\nbhWNP OS\nPRWNP ®",
+            "event_id": "event_003"
+          },
+          {
+            "timestamp": 26.94,
+            "ts": "00:26",
+            "snippet": "COMPARE\n® for: fixed number of repetitions\n® while: repeats while a condition is true\nfor iin range(5):\nruns exactly 5 times\nEduAccess Al - PYTHON LOOPS DEMO.",
+            "event_id": "event_005"
+          },
+          {
+            "timestamp": 30.78,
+            "ts": "00:30",
+            "snippet": "HOw MANY TIMES DOES EACH LOOP RUN?\n10\nrange(5) range(10) while (x<3)\nnumber of repetitions",
+            "event_id": "event_006"
+          }
+        ],
+        "explained_at": [
+          {
+            "timestamp": 2.72,
+            "ts": "00:02",
+            "text": "",
+            "segment_id": "1"
+          },
+          {
+            "timestamp": 13.4,
+            "ts": "00:13",
+            "text": "",
+            "segment_id": "4"
+          },
+          {
+            "timestamp": 37.72,
+            "ts": "00:37",
+            "text": "",
+            "segment_id": "12"
+          }
+        ],
+        "assessed_by": []
+      }
+    },
+    {
+      "concept_id": "condition",
+      "label": "condition",
+      "slug": "condition",
+      "source": "vocabulary_matching",
+      "assessed": false,
+      "status": "PARTIALLY_EXPLAINED",
+      "status_reason": [
+        "The concept is explained in speech and concrete on-screen detail was verified, so the screen adds to the spoken idea."
+      ],
+      "speech": [
+        {
+          "segment_id": "7",
+          "timestamp": 21.36,
+          "start": 21.36,
+          "end": 26.6,
+          "ts": "00:21",
+          "type": "speech",
+          "snippet": "It starts, checks a condition, runs the body, and repeats until the condition is false.",
+          "match_strength": "strong",
+          "matched_words": [
+            "condition"
+          ]
+        },
+        {
+          "segment_id": "8",
+          "timestamp": 26.6,
+          "start": 26.6,
+          "end": 30.56,
+          "ts": "00:26",
+          "type": "speech",
+          "snippet": "A while loop is similar, but it checks the condition before each repetition, so it may",
+          "match_strength": "strong",
+          "matched_words": [
+            "condition"
+          ]
+        }
+      ],
+      "speech_count": 2,
+      "visual": [
+        {
+          "event_id": "event_005",
+          "timestamp": 26.94,
+          "start": 26.94,
+          "end": 30.78,
+          "ts": "00:26",
+          "type": "visual",
+          "visual_type": "code",
+          "snippet": "COMPARE\n® for: fixed number of repetitions\n® while: repeats while a condition is true\nfor iin range(5):\nruns exactly 5 times\nEduAccess Al - PYTHON LOOPS DEMO.",
+          "trust": "VERIFIED",
+          "readable": true
+        }
+      ],
+      "visual_count": 1,
+      "assessment": [],
+      "assessment_count": 0,
+      "first_timestamp": 21.36,
+      "relationships": {
+        "demonstrated_by": [],
+        "prerequisites": [],
+        "related_to": [],
+        "shown_at": [
+          {
+            "timestamp": 26.94,
+            "ts": "00:26",
+            "snippet": "COMPARE\n® for: fixed number of repetitions\n® while: repeats while a condition is true\nfor iin range(5):\nruns exactly 5 times\nEduAccess Al - PYTHON LOOPS DEMO.",
+            "event_id": "event_005"
+          }
+        ],
+        "explained_at": [
+          {
+            "timestamp": 21.36,
+            "ts": "00:21",
+            "text": "",
+            "segment_id": "7"
+          },
+          {
+            "timestamp": 26.6,
+            "ts": "00:26",
+            "text": "",
+            "segment_id": "8"
+          }
+        ],
+        "assessed_by": []
+      }
+    },
+    {
+      "concept_id": "for_loop",
+      "label": "for loop",
+      "slug": "for_loop",
+      "source": "vocabulary_matching",
+      "assessed": false,
+      "status": "PARTIALLY_EXPLAINED",
+      "status_reason": [
+        "The concept is explained in speech and concrete on-screen detail was verified, so the screen adds to the spoken idea."
+      ],
+      "speech": [
+        {
+          "segment_id": "1",
+          "timestamp": 2.72,
+          "start": 2.72,
+          "end": 6.52,
+          "ts": "00:02",
+          "type": "speech",
+          "snippet": "By the end, you will understand how a for loop repeats a block of code.",
+          "match_strength": "strong",
+          "matched_words": [
+            "loop"
+          ]
+        },
+        {
+          "segment_id": "2",
+          "timestamp": 6.52,
+          "start": 6.52,
+          "end": 8.44,
+          "ts": "00:06",
+          "type": "speech",
+          "snippet": "Let us look at a simple for loop.",
+          "match_strength": "strong",
+          "matched_words": [
+            "loop"
+          ]
+        },
+        {
+          "segment_id": "6",
+          "timestamp": 19.48,
+          "start": 19.48,
+          "end": 21.36,
+          "ts": "00:19",
+          "type": "speech",
+          "snippet": "Think of the loop as a flow chart.",
+          "match_strength": "partial",
+          "matched_words": [
+            "loop"
+          ]
+        },
+        {
+          "segment_id": "8",
+          "timestamp": 26.6,
+          "start": 26.6,
+          "end": 30.56,
+          "ts": "00:26",
+          "type": "speech",
+          "snippet": "A while loop is similar, but it checks the condition before each repetition, so it may",
+          "match_strength": "partial",
+          "matched_words": [
+            "loop"
+          ]
+        },
+        {
+          "segment_id": "10",
+          "timestamp": 32.24,
+          "start": 32.24,
+          "end": 35.6,
+          "ts": "00:32",
+          "type": "speech",
+          "snippet": "This bar chart shows how many times each example loop runs.",
+          "match_strength": "partial",
+          "matched_words": [
+            "loop"
+          ]
+        }
+      ],
+      "speech_count": 5,
+      "visual": [
+        {
+          "event_id": "event_001",
+          "timestamp": 0.0,
+          "start": 0.0,
+          "end": 7.7,
+          "ts": "00:00",
+          "type": "visual",
+          "visual_type": "slide",
+          "snippet": "Python loops repeat a block of code\nThe for loop runs a fixed number of times\nToday: for loop syntax + visuals",
+          "trust": "VERIFIED",
+          "readable": true
+        },
+        {
+          "event_id": "event_004",
+          "timestamp": 19.24,
+          "start": 19.24,
+          "end": 26.94,
+          "ts": "00:19",
+          "type": "visual",
+          "visual_type": "slide",
+          "snippet": "HOW A FOR LOOP WORKS (",
+          "trust": "VERIFIED",
+          "readable": true
+        },
+        {
+          "event_id": "event_006",
+          "timestamp": 30.78,
+          "start": 30.78,
+          "end": 34.63,
+          "ts": "00:30",
+          "type": "visual",
+          "visual_type": "code",
+          "snippet": "HOw MANY TIMES DOES EACH LOOP RUN?\n10\nrange(5) range(10) while (x<3)\nnumber of repetitions",
+          "trust": "VERIFIED",
+          "readable": true
+        }
+      ],
+      "visual_count": 3,
+      "assessment": [],
+      "assessment_count": 0,
+      "first_timestamp": 0.0,
+      "relationships": {
+        "demonstrated_by": [],
+        "prerequisites": [
+          "range"
+        ],
+        "related_to": [
+          "while loop"
+        ],
+        "shown_at": [
+          {
+            "timestamp": 0.0,
+            "ts": "00:00",
+            "snippet": "Python loops repeat a block of code\nThe for loop runs a fixed number of times\nToday: for loop syntax + visuals",
+            "event_id": "event_001"
+          },
+          {
+            "timestamp": 19.24,
+            "ts": "00:19",
+            "snippet": "HOW A FOR LOOP WORKS (",
+            "event_id": "event_004"
+          },
+          {
+            "timestamp": 30.78,
+            "ts": "00:30",
+            "snippet": "HOw MANY TIMES DOES EACH LOOP RUN?\n10\nrange(5) range(10) while (x<3)\nnumber of repetitions",
+            "event_id": "event_006"
+          }
+        ],
+        "explained_at": [
+          {
+            "timestamp": 2.72,
+            "ts": "00:02",
+            "text": "",
+            "segment_id": "1"
+          },
+          {
+            "timestamp": 6.52,
+            "ts": "00:06",
+            "text": "",
+            "segment_id": "2"
+          },
+          {
+            "timestamp": 19.48,
+            "ts": "00:19",
+            "text": "",
+            "segment_id": "6"
+          },
+          {
+            "timestamp": 26.6,
+            "ts": "00:26",
+            "text": "",
+            "segment_id": "8"
+          },
+          {
+            "timestamp": 32.24,
+            "ts": "00:32",
+            "text": "",
+            "segment_id": "10"
+          }
+        ],
+        "assessed_by": []
+      }
+    },
+    {
+      "concept_id": "function",
+      "label": "function",
+      "slug": "function",
+      "source": "vocabulary_matching",
+      "assessed": false,
+      "status": "EXPLAINED",
+      "status_reason": [
+        "Spoken in 1 transcript segment(s).",
+        "No readable on-screen detail was verified for this concept."
+      ],
+      "speech": [
+        {
+          "segment_id": "3",
+          "timestamp": 8.44,
+          "start": 8.44,
+          "end": 13.4,
+          "ts": "00:08",
+          "type": "speech",
+          "snippet": "Notice the structure, the keyword for, the range function, and the body that repeats.",
+          "match_strength": "strong",
+          "matched_words": [
+            "function"
+          ]
+        }
+      ],
+      "speech_count": 1,
+      "visual": [],
+      "visual_count": 0,
+      "assessment": [],
+      "assessment_count": 0,
+      "first_timestamp": 8.44,
+      "relationships": {
+        "demonstrated_by": [],
+        "prerequisites": [],
+        "related_to": [],
+        "shown_at": [],
+        "explained_at": [
+          {
+            "timestamp": 8.44,
+            "ts": "00:08",
+            "text": "",
+            "segment_id": "3"
+          }
+        ],
+        "assessed_by": []
+      }
+    },
+    {
+      "concept_id": "loop",
+      "label": "loop",
+      "slug": "loop",
+      "source": "vocabulary_matching",
+      "assessed": false,
+      "status": "PARTIALLY_EXPLAINED",
+      "status_reason": [
+        "The concept is explained in speech and concrete on-screen detail was verified, so the screen adds to the spoken idea."
+      ],
+      "speech": [
+        {
+          "segment_id": "1",
+          "timestamp": 2.72,
+          "start": 2.72,
+          "end": 6.52,
+          "ts": "00:02",
+          "type": "speech",
+          "snippet": "By the end, you will understand how a for loop repeats a block of code.",
+          "match_strength": "strong",
+          "matched_words": [
+            "loop"
+          ]
+        },
+        {
+          "segment_id": "2",
+          "timestamp": 6.52,
+          "start": 6.52,
+          "end": 8.44,
+          "ts": "00:06",
+          "type": "speech",
+          "snippet": "Let us look at a simple for loop.",
+          "match_strength": "strong",
+          "matched_words": [
+            "loop"
+          ]
+        },
+        {
+          "segment_id": "6",
+          "timestamp": 19.48,
+          "start": 19.48,
+          "end": 21.36,
+          "ts": "00:19",
+          "type": "speech",
+          "snippet": "Think of the loop as a flow chart.",
+          "match_strength": "strong",
+          "matched_words": [
+            "loop"
+          ]
+        },
+        {
+          "segment_id": "8",
+          "timestamp": 26.6,
+          "start": 26.6,
+          "end": 30.56,
+          "ts": "00:26",
+          "type": "speech",
+          "snippet": "A while loop is similar, but it checks the condition before each repetition, so it may",
+          "match_strength": "strong",
+          "matched_words": [
+            "loop"
+          ]
+        },
+        {
+          "segment_id": "10",
+          "timestamp": 32.24,
+          "start": 32.24,
+          "end": 35.6,
+          "ts": "00:32",
+          "type": "speech",
+          "snippet": "This bar chart shows how many times each example loop runs.",
+          "match_strength": "strong",
+          "matched_words": [
+            "loop"
+          ]
+        }
+      ],
+      "speech_count": 5,
+      "visual": [
+        {
+          "event_id": "event_001",
+          "timestamp": 0.0,
+          "start": 0.0,
+          "end": 7.7,
+          "ts": "00:00",
+          "type": "visual",
+          "visual_type": "slide",
+          "snippet": "Python loops repeat a block of code\nThe for loop runs a fixed number of times\nToday: for loop syntax + visuals",
+          "trust": "VERIFIED",
+          "readable": true
+        },
+        {
+          "event_id": "event_004",
+          "timestamp": 19.24,
+          "start": 19.24,
+          "end": 26.94,
+          "ts": "00:19",
+          "type": "visual",
+          "visual_type": "slide",
+          "snippet": "HOW A FOR LOOP WORKS (",
+          "trust": "VERIFIED",
+          "readable": true
+        },
+        {
+          "event_id": "event_006",
+          "timestamp": 30.78,
+          "start": 30.78,
+          "end": 34.63,
+          "ts": "00:30",
+          "type": "visual",
+          "visual_type": "code",
+          "snippet": "HOw MANY TIMES DOES EACH LOOP RUN?\n10\nrange(5) range(10) while (x<3)\nnumber of repetitions",
+          "trust": "VERIFIED",
+          "readable": true
+        }
+      ],
+      "visual_count": 3,
+      "assessment": [],
+      "assessment_count": 0,
+      "first_timestamp": 0.0,
+      "relationships": {
+        "demonstrated_by": [
+          "for loop",
+          "while loop"
+        ],
+        "prerequisites": [],
+        "related_to": [],
+        "shown_at": [
+          {
+            "timestamp": 0.0,
+            "ts": "00:00",
+            "snippet": "Python loops repeat a block of code\nThe for loop runs a fixed number of times\nToday: for loop syntax + visuals",
+            "event_id": "event_001"
+          },
+          {
+            "timestamp": 19.24,
+            "ts": "00:19",
+            "snippet": "HOW A FOR LOOP WORKS (",
+            "event_id": "event_004"
+          },
+          {
+            "timestamp": 30.78,
+            "ts": "00:30",
+            "snippet": "HOw MANY TIMES DOES EACH LOOP RUN?\n10\nrange(5) range(10) while (x<3)\nnumber of repetitions",
+            "event_id": "event_006"
+          }
+        ],
+        "explained_at": [
+          {
+            "timestamp": 2.72,
+            "ts": "00:02",
+            "text": "",
+            "segment_id": "1"
+          },
+          {
+            "timestamp": 6.52,
+            "ts": "00:06",
+            "text": "",
+            "segment_id": "2"
+          },
+          {
+            "timestamp": 19.48,
+            "ts": "00:19",
+            "text": "",
+            "segment_id": "6"
+          },
+          {
+            "timestamp": 26.6,
+            "ts": "00:26",
+            "text": "",
+            "segment_id": "8"
+          },
+          {
+            "timestamp": 32.24,
+            "ts": "00:32",
+            "text": "",
+            "segment_id": "10"
+          }
+        ],
+        "assessed_by": []
+      }
+    },
+    {
+      "concept_id": "output",
+      "label": "output",
+      "slug": "output",
+      "source": "vocabulary_matching",
+      "assessed": false,
+      "status": "VISUALLY_SHOWN",
+      "status_reason": [
+        "No spoken explanation was found for this concept."
+      ],
+      "speech": [],
+      "speech_count": 0,
+      "visual": [
+        {
+          "event_id": "event_003",
+          "timestamp": 15.39,
+          "start": 15.39,
+          "end": 19.24,
+          "ts": "00:15",
+          "type": "visual",
+          "visual_type": "slide",
+          "snippet": "Python code editor -- editor.py\n4 for iin range(5):\n» print (i)\nOutput:\nbhWNP OS\nPRWNP ®",
+          "trust": "VERIFIED",
+          "readable": true
+        }
+      ],
+      "visual_count": 1,
+      "assessment": [],
+      "assessment_count": 0,
+      "first_timestamp": 15.39,
+      "relationships": {
+        "demonstrated_by": [],
+        "prerequisites": [],
+        "related_to": [],
+        "shown_at": [
+          {
+            "timestamp": 15.39,
+            "ts": "00:15",
+            "snippet": "Python code editor -- editor.py\n4 for iin range(5):\n» print (i)\nOutput:\nbhWNP OS\nPRWNP ®",
+            "event_id": "event_003"
+          }
+        ],
+        "explained_at": [],
+        "assessed_by": []
+      }
+    },
+    {
+      "concept_id": "print",
+      "label": "print",
+      "slug": "print",
+      "source": "vocabulary_matching",
+      "assessed": false,
+      "status": "VISUALLY_SHOWN",
+      "status_reason": [
+        "No spoken explanation was found for this concept."
+      ],
+      "speech": [],
+      "speech_count": 0,
+      "visual": [
+        {
+          "event_id": "event_002",
+          "timestamp": 7.7,
+          "start": 7.7,
+          "end": 15.39,
+          "ts": "00:07",
+          "type": "visual",
+          "visual_type": "slide",
+          "snippet": "Python code editor -- editor.py\n,  foriin range(5):\n4 print (i)",
+          "trust": "VERIFIED",
+          "readable": true
+        },
+        {
+          "event_id": "event_003",
+          "timestamp": 15.39,
+          "start": 15.39,
+          "end": 19.24,
+          "ts": "00:15",
+          "type": "visual",
+          "visual_type": "slide",
+          "snippet": "Python code editor -- editor.py\n4 for iin range(5):\n» print (i)\nOutput:\nbhWNP OS\nPRWNP ®",
+          "trust": "VERIFIED",
+          "readable": true
+        }
+      ],
+      "visual_count": 2,
+      "assessment": [],
+      "assessment_count": 0,
+      "first_timestamp": 7.7,
+      "relationships": {
+        "demonstrated_by": [],
+        "prerequisites": [],
+        "related_to": [],
+        "shown_at": [
+          {
+            "timestamp": 7.7,
+            "ts": "00:07",
+            "snippet": "Python code editor -- editor.py\n,  foriin range(5):\n4 print (i)",
+            "event_id": "event_002"
+          },
+          {
+            "timestamp": 15.39,
+            "ts": "00:15",
+            "snippet": "Python code editor -- editor.py\n4 for iin range(5):\n» print (i)\nOutput:\nbhWNP OS\nPRWNP ®",
+            "event_id": "event_003"
+          }
+        ],
+        "explained_at": [],
+        "assessed_by": []
+      }
+    },
+    {
+      "concept_id": "python",
+      "label": "python",
+      "slug": "python",
+      "source": "vocabulary_matching",
+      "assessed": false,
+      "status": "PARTIALLY_EXPLAINED",
+      "status_reason": [
+        "The concept is explained in speech and concrete on-screen detail was verified, so the screen adds to the spoken idea."
+      ],
+      "speech": [
+        {
+          "segment_id": "0",
+          "timestamp": 0.0,
+          "start": 0.0,
+          "end": 2.72,
+          "ts": "00:00",
+          "type": "speech",
+          "snippet": "Welcome to this short lesson about Python loops.",
+          "match_strength": "strong",
+          "matched_words": [
+            "python"
+          ]
+        }
+      ],
+      "speech_count": 1,
+      "visual": [
+        {
+          "event_id": "event_001",
+          "timestamp": 0.0,
+          "start": 0.0,
+          "end": 7.7,
+          "ts": "00:00",
+          "type": "visual",
+          "visual_type": "slide",
+          "snippet": "Python loops repeat a block of code\nThe for loop runs a fixed number of times\nToday: for loop syntax + visuals",
+          "trust": "VERIFIED",
+          "readable": true
+        },
+        {
+          "event_id": "event_002",
+          "timestamp": 7.7,
+          "start": 7.7,
+          "end": 15.39,
+          "ts": "00:07",
+          "type": "visual",
+          "visual_type": "slide",
+          "snippet": "Python code editor -- editor.py\n,  foriin range(5):\n4 print (i)",
+          "trust": "VERIFIED",
+          "readable": true
+        },
+        {
+          "event_id": "event_003",
+          "timestamp": 15.39,
+          "start": 15.39,
+          "end": 19.24,
+          "ts": "00:15",
+          "type": "visual",
+          "visual_type": "slide",
+          "snippet": "Python code editor -- editor.py\n4 for iin range(5):\n» print (i)\nOutput:\nbhWNP OS\nPRWNP ®",
+          "trust": "VERIFIED",
+          "readable": true
+        },
+        {
+          "event_id": "event_005",
+          "timestamp": 26.94,
+          "start": 26.94,
+          "end": 30.78,
+          "ts": "00:26",
+          "type": "visual",
+          "visual_type": "code",
+          "snippet": "COMPARE\n® for: fixed number of repetitions\n® while: repeats while a condition is true\nfor iin range(5):\nruns exactly 5 times\nEduAccess Al - PYTHON LOOPS DEMO.",
+          "trust": "VERIFIED",
+          "readable": true
+        }
+      ],
+      "visual_count": 4,
+      "assessment": [],
+      "assessment_count": 0,
+      "first_timestamp": 0.0,
+      "relationships": {
+        "demonstrated_by": [],
+        "prerequisites": [],
+        "related_to": [],
+        "shown_at": [
+          {
+            "timestamp": 0.0,
+            "ts": "00:00",
+            "snippet": "Python loops repeat a block of code\nThe for loop runs a fixed number of times\nToday: for loop syntax + visuals",
+            "event_id": "event_001"
+          },
+          {
+            "timestamp": 7.7,
+            "ts": "00:07",
+            "snippet": "Python code editor -- editor.py\n,  foriin range(5):\n4 print (i)",
+            "event_id": "event_002"
+          },
+          {
+            "timestamp": 15.39,
+            "ts": "00:15",
+            "snippet": "Python code editor -- editor.py\n4 for iin range(5):\n» print (i)\nOutput:\nbhWNP OS\nPRWNP ®",
+            "event_id": "event_003"
+          },
+          {
+            "timestamp": 26.94,
+            "ts": "00:26",
+            "snippet": "COMPARE\n® for: fixed number of repetitions\n® while: repeats while a condition is true\nfor iin range(5):\nruns exactly 5 times\nEduAccess Al - PYTHON LOOPS DEMO.",
+            "event_id": "event_005"
+          }
+        ],
+        "explained_at": [
+          {
+            "timestamp": 0.0,
+            "ts": "00:00",
+            "text": "",
+            "segment_id": "0"
+          }
+        ],
+        "assessed_by": []
+      }
+    },
+    {
+      "concept_id": "range",
+      "label": "range",
+      "slug": "range",
+      "source": "vocabulary_matching",
+      "assessed": false,
+      "status": "PARTIALLY_EXPLAINED",
+      "status_reason": [
+        "The concept is explained in speech and concrete on-screen detail was verified, so the screen adds to the spoken idea."
+      ],
+      "speech": [
+        {
+          "segment_id": "3",
+          "timestamp": 8.44,
+          "start": 8.44,
+          "end": 13.4,
+          "ts": "00:08",
+          "type": "speech",
+          "snippet": "Notice the structure, the keyword for, the range function, and the body that repeats.",
+          "match_strength": "strong",
+          "matched_words": [
+            "range"
+          ]
+        }
+      ],
+      "speech_count": 1,
+      "visual": [
+        {
+          "event_id": "event_002",
+          "timestamp": 7.7,
+          "start": 7.7,
+          "end": 15.39,
+          "ts": "00:07",
+          "type": "visual",
+          "visual_type": "slide",
+          "snippet": "Python code editor -- editor.py\n,  foriin range(5):\n4 print (i)",
+          "trust": "VERIFIED",
+          "readable": true
+        },
+        {
+          "event_id": "event_003",
+          "timestamp": 15.39,
+          "start": 15.39,
+          "end": 19.24,
+          "ts": "00:15",
+          "type": "visual",
+          "visual_type": "slide",
+          "snippet": "Python code editor -- editor.py\n4 for iin range(5):\n» print (i)\nOutput:\nbhWNP OS\nPRWNP ®",
+          "trust": "VERIFIED",
+          "readable": true
+        },
+        {
+          "event_id": "event_005",
+          "timestamp": 26.94,
+          "start": 26.94,
+          "end": 30.78,
+          "ts": "00:26",
+          "type": "visual",
+          "visual_type": "code",
+          "snippet": "COMPARE\n® for: fixed number of repetitions\n® while: repeats while a condition is true\nfor iin range(5):\nruns exactly 5 times\nEduAccess Al - PYTHON LOOPS DEMO.",
+          "trust": "VERIFIED",
+          "readable": true
+        },
+        {
+          "event_id": "event_006",
+          "timestamp": 30.78,
+          "start": 30.78,
+          "end": 34.63,
+          "ts": "00:30",
+          "type": "visual",
+          "visual_type": "code",
+          "snippet": "HOw MANY TIMES DOES EACH LOOP RUN?\n10\nrange(5) range(10) while (x<3)\nnumber of repetitions",
+          "trust": "VERIFIED",
+          "readable": true
+        }
+      ],
+      "visual_count": 4,
+      "assessment": [],
+      "assessment_count": 0,
+      "first_timestamp": 7.7,
+      "relationships": {
+        "demonstrated_by": [],
+        "prerequisites": [],
+        "related_to": [],
+        "shown_at": [
+          {
+            "timestamp": 7.7,
+            "ts": "00:07",
+            "snippet": "Python code editor -- editor.py\n,  foriin range(5):\n4 print (i)",
+            "event_id": "event_002"
+          },
+          {
+            "timestamp": 15.39,
+            "ts": "00:15",
+            "snippet": "Python code editor -- editor.py\n4 for iin range(5):\n» print (i)\nOutput:\nbhWNP OS\nPRWNP ®",
+            "event_id": "event_003"
+          },
+          {
+            "timestamp": 26.94,
+            "ts": "00:26",
+            "snippet": "COMPARE\n® for: fixed number of repetitions\n® while: repeats while a condition is true\nfor iin range(5):\nruns exactly 5 times\nEduAccess Al - PYTHON LOOPS DEMO.",
+            "event_id": "event_005"
+          },
+          {
+            "timestamp": 30.78,
+            "ts": "00:30",
+            "snippet": "HOw MANY TIMES DOES EACH LOOP RUN?\n10\nrange(5) range(10) while (x<3)\nnumber of repetitions",
+            "event_id": "event_006"
+          }
+        ],
+        "explained_at": [
+          {
+            "timestamp": 8.44,
+            "ts": "00:08",
+            "text": "",
+            "segment_id": "3"
+          }
+        ],
+        "assessed_by": []
+      }
+    },
+    {
+      "concept_id": "syntax",
+      "label": "syntax",
+      "slug": "syntax",
+      "source": "vocabulary_matching",
+      "assessed": false,
+      "status": "VISUALLY_SHOWN",
+      "status_reason": [
+        "No spoken explanation was found for this concept."
+      ],
+      "speech": [],
+      "speech_count": 0,
+      "visual": [
+        {
+          "event_id": "event_001",
+          "timestamp": 0.0,
+          "start": 0.0,
+          "end": 7.7,
+          "ts": "00:00",
+          "type": "visual",
+          "visual_type": "slide",
+          "snippet": "Python loops repeat a block of code\nThe for loop runs a fixed number of times\nToday: for loop syntax + visuals",
+          "trust": "VERIFIED",
+          "readable": true
+        },
+        {
+          "event_id": "event_007",
+          "timestamp": 34.63,
+          "start": 34.63,
+          "end": 38.48,
+          "ts": "00:34",
+          "type": "visual",
+          "visual_type": "slide",
+          "snippet": "You heard the explanation\nThe screen shows exact syntax\nVisuals complement audio",
+          "trust": "VERIFIED",
+          "readable": true
+        }
+      ],
+      "visual_count": 2,
+      "assessment": [],
+      "assessment_count": 0,
+      "first_timestamp": 0.0,
+      "relationships": {
+        "demonstrated_by": [],
+        "prerequisites": [],
+        "related_to": [],
+        "shown_at": [
+          {
+            "timestamp": 0.0,
+            "ts": "00:00",
+            "snippet": "Python loops repeat a block of code\nThe for loop runs a fixed number of times\nToday: for loop syntax + visuals",
+            "event_id": "event_001"
+          },
+          {
+            "timestamp": 34.63,
+            "ts": "00:34",
+            "snippet": "You heard the explanation\nThe screen shows exact syntax\nVisuals complement audio",
+            "event_id": "event_007"
+          }
+        ],
+        "explained_at": [],
+        "assessed_by": []
+      }
+    },
+    {
+      "concept_id": "while_loop",
+      "label": "while loop",
+      "slug": "while_loop",
+      "source": "vocabulary_matching",
+      "assessed": false,
+      "status": "PARTIALLY_EXPLAINED",
+      "status_reason": [
+        "The concept is explained in speech and concrete on-screen detail was verified, so the screen adds to the spoken idea."
+      ],
+      "speech": [
+        {
+          "segment_id": "1",
+          "timestamp": 2.72,
+          "start": 2.72,
+          "end": 6.52,
+          "ts": "00:02",
+          "type": "speech",
+          "snippet": "By the end, you will understand how a for loop repeats a block of code.",
+          "match_strength": "partial",
+          "matched_words": [
+            "loop"
+          ]
+        },
+        {
+          "segment_id": "2",
+          "timestamp": 6.52,
+          "start": 6.52,
+          "end": 8.44,
+          "ts": "00:06",
+          "type": "speech",
+          "snippet": "Let us look at a simple for loop.",
+          "match_strength": "partial",
+          "matched_words": [
+            "loop"
+          ]
+        },
+        {
+          "segment_id": "6",
+          "timestamp": 19.48,
+          "start": 19.48,
+          "end": 21.36,
+          "ts": "00:19",
+          "type": "speech",
+          "snippet": "Think of the loop as a flow chart.",
+          "match_strength": "partial",
+          "matched_words": [
+            "loop"
+          ]
+        },
+        {
+          "segment_id": "8",
+          "timestamp": 26.6,
+          "start": 26.6,
+          "end": 30.56,
+          "ts": "00:26",
+          "type": "speech",
+          "snippet": "A while loop is similar, but it checks the condition before each repetition, so it may",
+          "match_strength": "strong",
+          "matched_words": [
+            "loop",
+            "while"
+          ]
+        },
+        {
+          "segment_id": "10",
+          "timestamp": 32.24,
+          "start": 32.24,
+          "end": 35.6,
+          "ts": "00:32",
+          "type": "speech",
+          "snippet": "This bar chart shows how many times each example loop runs.",
+          "match_strength": "partial",
+          "matched_words": [
+            "loop"
+          ]
+        }
+      ],
+      "speech_count": 5,
+      "visual": [
+        {
+          "event_id": "event_001",
+          "timestamp": 0.0,
+          "start": 0.0,
+          "end": 7.7,
+          "ts": "00:00",
+          "type": "visual",
+          "visual_type": "slide",
+          "snippet": "Python loops repeat a block of code\nThe for loop runs a fixed number of times\nToday: for loop syntax + visuals",
+          "trust": "VERIFIED",
+          "readable": true
+        },
+        {
+          "event_id": "event_004",
+          "timestamp": 19.24,
+          "start": 19.24,
+          "end": 26.94,
+          "ts": "00:19",
+          "type": "visual",
+          "visual_type": "slide",
+          "snippet": "HOW A FOR LOOP WORKS (",
+          "trust": "VERIFIED",
+          "readable": true
+        },
+        {
+          "event_id": "event_005",
+          "timestamp": 26.94,
+          "start": 26.94,
+          "end": 30.78,
+          "ts": "00:26",
+          "type": "visual",
+          "visual_type": "code",
+          "snippet": "COMPARE\n® for: fixed number of repetitions\n® while: repeats while a condition is true\nfor iin range(5):\nruns exactly 5 times\nEduAccess Al - PYTHON LOOPS DEMO.",
+          "trust": "VERIFIED",
+          "readable": true
+        },
+        {
+          "event_id": "event_006",
+          "timestamp": 30.78,
+          "start": 30.78,
+          "end": 34.63,
+          "ts": "00:30",
+          "type": "visual",
+          "visual_type": "code",
+          "snippet": "HOw MANY TIMES DOES EACH LOOP RUN?\n10\nrange(5) range(10) while (x<3)\nnumber of repetitions",
+          "trust": "VERIFIED",
+          "readable": true
+        }
+      ],
+      "visual_count": 4,
+      "assessment": [],
+      "assessment_count": 0,
+      "first_timestamp": 0.0,
+      "relationships": {
+        "demonstrated_by": [],
+        "prerequisites": [],
+        "related_to": [],
+        "shown_at": [
+          {
+            "timestamp": 0.0,
+            "ts": "00:00",
+            "snippet": "Python loops repeat a block of code\nThe for loop runs a fixed number of times\nToday: for loop syntax + visuals",
+            "event_id": "event_001"
+          },
+          {
+            "timestamp": 19.24,
+            "ts": "00:19",
+            "snippet": "HOW A FOR LOOP WORKS (",
+            "event_id": "event_004"
+          },
+          {
+            "timestamp": 26.94,
+            "ts": "00:26",
+            "snippet": "COMPARE\n® for: fixed number of repetitions\n® while: repeats while a condition is true\nfor iin range(5):\nruns exactly 5 times\nEduAccess Al - PYTHON LOOPS DEMO.",
+            "event_id": "event_005"
+          },
+          {
+            "timestamp": 30.78,
+            "ts": "00:30",
+            "snippet": "HOw MANY TIMES DOES EACH LOOP RUN?\n10\nrange(5) range(10) while (x<3)\nnumber of repetitions",
+            "event_id": "event_006"
+          }
+        ],
+        "explained_at": [
+          {
+            "timestamp": 2.72,
+            "ts": "00:02",
+            "text": "",
+            "segment_id": "1"
+          },
+          {
+            "timestamp": 6.52,
+            "ts": "00:06",
+            "text": "",
+            "segment_id": "2"
+          },
+          {
+            "timestamp": 19.48,
+            "ts": "00:19",
+            "text": "",
+            "segment_id": "6"
+          },
+          {
+            "timestamp": 26.6,
+            "ts": "00:26",
+            "text": "",
+            "segment_id": "8"
+          },
+          {
+            "timestamp": 32.24,
+            "ts": "00:32",
+            "text": "",
+            "segment_id": "10"
+          }
+        ],
+        "assessed_by": []
+      }
+    }
+  ],
+  "nodes": [
+    {
+      "id": "concept:loops",
+      "type": "concept",
+      "label": "loops",
+      "concept_id": "loops",
+      "status": "PARTIALLY_EXPLAINED",
+      "assessed": true,
+      "timestamp": 0.0,
+      "relationships": {
+        "demonstrated_by": [
+          "for loop",
+          "while loop"
+        ],
+        "prerequisites": [],
+        "related_to": [],
+        "shown_at": [
+          {
+            "timestamp": 0.0,
+            "ts": "00:00",
+            "snippet": "Python loops repeat a block of code\nThe for loop runs a fixed number of times\nToday: for loop syntax + visuals",
+            "event_id": "event_001"
+          },
+          {
+            "timestamp": 26.94,
+            "ts": "00:26",
+            "snippet": "COMPARE\n® for: fixed number of repetitions\n® while: repeats while a condition is true\nfor iin range(5):\nruns exactly 5 times\nEduAccess Al - PYTHON LOOPS DEMO.",
+            "event_id": "event_005"
+          }
+        ],
+        "explained_at": [
+          {
+            "timestamp": 0.0,
+            "ts": "00:00",
+            "text": "",
+            "segment_id": "0"
+          }
+        ],
+        "assessed_by": [
+          {
+            "question": "What is the main benefit of a loop?",
+            "question_id": "q1",
+            "timestamp": 0.0
+          }
+        ]
+      }
+    },
+    {
+      "id": "concept:general_programming",
+      "type": "concept",
+      "label": "general_programming",
+      "concept_id": "general_programming",
+      "status": "ASSESSED",
+      "assessed": true,
+      "timestamp": null,
+      "relationships": {
+        "demonstrated_by": [],
+        "prerequisites": [],
+        "related_to": [],
+        "shown_at": [],
+        "explained_at": [],
+        "assessed_by": [
+          {
+            "question": "Briefly explain the main programming concept explained in this lesson.",
+            "question_id": "q1",
+            "timestamp": 0.0
+          }
+        ]
+      }
+    },
+    {
+      "id": "concept:loops_indexing",
+      "type": "concept",
+      "label": "loops_indexing",
+      "concept_id": "loops_indexing",
+      "status": "ASSESSED",
+      "assessed": true,
+      "timestamp": null,
+      "relationships": {
+        "demonstrated_by": [
+          "for loop",
+          "while loop"
+        ],
+        "prerequisites": [],
+        "related_to": [],
+        "shown_at": [],
+        "explained_at": [],
+        "assessed_by": [
+          {
+            "question": "هل تبدأ الحلقات التكرارية دائماً بالقيمة 1 في بايثون؟",
+            "question_id": "q1",
+            "timestamp": 0.0
+          }
+        ]
+      }
+    },
+    {
+      "id": "concept:chart",
+      "type": "concept",
+      "label": "chart",
+      "concept_id": "chart",
+      "status": "EXPLAINED",
+      "assessed": false,
+      "timestamp": 19.48,
+      "relationships": {
+        "demonstrated_by": [],
+        "prerequisites": [],
+        "related_to": [],
+        "shown_at": [],
+        "explained_at": [
+          {
+            "timestamp": 19.48,
+            "ts": "00:19",
+            "text": "",
+            "segment_id": "6"
+          },
+          {
+            "timestamp": 32.24,
+            "ts": "00:32",
+            "text": "",
+            "segment_id": "10"
+          }
+        ],
+        "assessed_by": []
+      }
+    },
+    {
+      "id": "concept:code",
+      "type": "concept",
+      "label": "code",
+      "concept_id": "code",
+      "status": "PARTIALLY_EXPLAINED",
+      "assessed": false,
+      "timestamp": 0.0,
+      "relationships": {
+        "demonstrated_by": [],
+        "prerequisites": [],
+        "related_to": [],
+        "shown_at": [
+          {
+            "timestamp": 0.0,
+            "ts": "00:00",
+            "snippet": "Python loops repeat a block of code\nThe for loop runs a fixed number of times\nToday: for loop syntax + visuals",
+            "event_id": "event_001"
+          },
+          {
+            "timestamp": 7.7,
+            "ts": "00:07",
+            "snippet": "Python code editor -- editor.py\n,  foriin range(5):\n4 print (i)",
+            "event_id": "event_002"
+          },
+          {
+            "timestamp": 15.39,
+            "ts": "00:15",
+            "snippet": "Python code editor -- editor.py\n4 for iin range(5):\n» print (i)\nOutput:\nbhWNP OS\nPRWNP ®",
+            "event_id": "event_003"
+          },
+          {
+            "timestamp": 26.94,
+            "ts": "00:26",
+            "snippet": "COMPARE\n® for: fixed number of repetitions\n® while: repeats while a condition is true\nfor iin range(5):\nruns exactly 5 times\nEduAccess Al - PYTHON LOOPS DEMO.",
+            "event_id": "event_005"
+          },
+          {
+            "timestamp": 30.78,
+            "ts": "00:30",
+            "snippet": "HOw MANY TIMES DOES EACH LOOP RUN?\n10\nrange(5) range(10) while (x<3)\nnumber of repetitions",
+            "event_id": "event_006"
+          }
+        ],
+        "explained_at": [
+          {
+            "timestamp": 2.72,
+            "ts": "00:02",
+            "text": "",
+            "segment_id": "1"
+          },
+          {
+            "timestamp": 13.4,
+            "ts": "00:13",
+            "text": "",
+            "segment_id": "4"
+          },
+          {
+            "timestamp": 37.72,
+            "ts": "00:37",
+            "text": "",
+            "segment_id": "12"
+          }
+        ],
+        "assessed_by": []
+      }
+    },
+    {
+      "id": "concept:condition",
+      "type": "concept",
+      "label": "condition",
+      "concept_id": "condition",
+      "status": "PARTIALLY_EXPLAINED",
+      "assessed": false,
+      "timestamp": 21.36,
+      "relationships": {
+        "demonstrated_by": [],
+        "prerequisites": [],
+        "related_to": [],
+        "shown_at": [
+          {
+            "timestamp": 26.94,
+            "ts": "00:26",
+            "snippet": "COMPARE\n® for: fixed number of repetitions\n® while: repeats while a condition is true\nfor iin range(5):\nruns exactly 5 times\nEduAccess Al - PYTHON LOOPS DEMO.",
+            "event_id": "event_005"
+          }
+        ],
+        "explained_at": [
+          {
+            "timestamp": 21.36,
+            "ts": "00:21",
+            "text": "",
+            "segment_id": "7"
+          },
+          {
+            "timestamp": 26.6,
+            "ts": "00:26",
+            "text": "",
+            "segment_id": "8"
+          }
+        ],
+        "assessed_by": []
+      }
+    },
+    {
+      "id": "concept:for_loop",
+      "type": "concept",
+      "label": "for loop",
+      "concept_id": "for_loop",
+      "status": "PARTIALLY_EXPLAINED",
+      "assessed": false,
+      "timestamp": 0.0,
+      "relationships": {
+        "demonstrated_by": [],
+        "prerequisites": [
+          "range"
+        ],
+        "related_to": [
+          "while loop"
+        ],
+        "shown_at": [
+          {
+            "timestamp": 0.0,
+            "ts": "00:00",
+            "snippet": "Python loops repeat a block of code\nThe for loop runs a fixed number of times\nToday: for loop syntax + visuals",
+            "event_id": "event_001"
+          },
+          {
+            "timestamp": 19.24,
+            "ts": "00:19",
+            "snippet": "HOW A FOR LOOP WORKS (",
+            "event_id": "event_004"
+          },
+          {
+            "timestamp": 30.78,
+            "ts": "00:30",
+            "snippet": "HOw MANY TIMES DOES EACH LOOP RUN?\n10\nrange(5) range(10) while (x<3)\nnumber of repetitions",
+            "event_id": "event_006"
+          }
+        ],
+        "explained_at": [
+          {
+            "timestamp": 2.72,
+            "ts": "00:02",
+            "text": "",
+            "segment_id": "1"
+          },
+          {
+            "timestamp": 6.52,
+            "ts": "00:06",
+            "text": "",
+            "segment_id": "2"
+          },
+          {
+            "timestamp": 19.48,
+            "ts": "00:19",
+            "text": "",
+            "segment_id": "6"
+          },
+          {
+            "timestamp": 26.6,
+            "ts": "00:26",
+            "text": "",
+            "segment_id": "8"
+          },
+          {
+            "timestamp": 32.24,
+            "ts": "00:32",
+            "text": "",
+            "segment_id": "10"
+          }
+        ],
+        "assessed_by": []
+      }
+    },
+    {
+      "id": "concept:function",
+      "type": "concept",
+      "label": "function",
+      "concept_id": "function",
+      "status": "EXPLAINED",
+      "assessed": false,
+      "timestamp": 8.44,
+      "relationships": {
+        "demonstrated_by": [],
+        "prerequisites": [],
+        "related_to": [],
+        "shown_at": [],
+        "explained_at": [
+          {
+            "timestamp": 8.44,
+            "ts": "00:08",
+            "text": "",
+            "segment_id": "3"
+          }
+        ],
+        "assessed_by": []
+      }
+    },
+    {
+      "id": "concept:loop",
+      "type": "concept",
+      "label": "loop",
+      "concept_id": "loop",
+      "status": "PARTIALLY_EXPLAINED",
+      "assessed": false,
+      "timestamp": 0.0,
+      "relationships": {
+        "demonstrated_by": [
+          "for loop",
+          "while loop"
+        ],
+        "prerequisites": [],
+        "related_to": [],
+        "shown_at": [
+          {
+            "timestamp": 0.0,
+            "ts": "00:00",
+            "snippet": "Python loops repeat a block of code\nThe for loop runs a fixed number of times\nToday: for loop syntax + visuals",
+            "event_id": "event_001"
+          },
+          {
+            "timestamp": 19.24,
+            "ts": "00:19",
+            "snippet": "HOW A FOR LOOP WORKS (",
+            "event_id": "event_004"
+          },
+          {
+            "timestamp": 30.78,
+            "ts": "00:30",
+            "snippet": "HOw MANY TIMES DOES EACH LOOP RUN?\n10\nrange(5) range(10) while (x<3)\nnumber of repetitions",
+            "event_id": "event_006"
+          }
+        ],
+        "explained_at": [
+          {
+            "timestamp": 2.72,
+            "ts": "00:02",
+            "text": "",
+            "segment_id": "1"
+          },
+          {
+            "timestamp": 6.52,
+            "ts": "00:06",
+            "text": "",
+            "segment_id": "2"
+          },
+          {
+            "timestamp": 19.48,
+            "ts": "00:19",
+            "text": "",
+            "segment_id": "6"
+          },
+          {
+            "timestamp": 26.6,
+            "ts": "00:26",
+            "text": "",
+            "segment_id": "8"
+          },
+          {
+            "timestamp": 32.24,
+            "ts": "00:32",
+            "text": "",
+            "segment_id": "10"
+          }
+        ],
+        "assessed_by": []
+      }
+    },
+    {
+      "id": "concept:output",
+      "type": "concept",
+      "label": "output",
+      "concept_id": "output",
+      "status": "VISUALLY_SHOWN",
+      "assessed": false,
+      "timestamp": 15.39,
+      "relationships": {
+        "demonstrated_by": [],
+        "prerequisites": [],
+        "related_to": [],
+        "shown_at": [
+          {
+            "timestamp": 15.39,
+            "ts": "00:15",
+            "snippet": "Python code editor -- editor.py\n4 for iin range(5):\n» print (i)\nOutput:\nbhWNP OS\nPRWNP ®",
+            "event_id": "event_003"
+          }
+        ],
+        "explained_at": [],
+        "assessed_by": []
+      }
+    },
+    {
+      "id": "concept:print",
+      "type": "concept",
+      "label": "print",
+      "concept_id": "print",
+      "status": "VISUALLY_SHOWN",
+      "assessed": false,
+      "timestamp": 7.7,
+      "relationships": {
+        "demonstrated_by": [],
+        "prerequisites": [],
+        "related_to": [],
+        "shown_at": [
+          {
+            "timestamp": 7.7,
+            "ts": "00:07",
+            "snippet": "Python code editor -- editor.py\n,  foriin range(5):\n4 print (i)",
+            "event_id": "event_002"
+          },
+          {
+            "timestamp": 15.39,
+            "ts": "00:15",
+            "snippet": "Python code editor -- editor.py\n4 for iin range(5):\n» print (i)\nOutput:\nbhWNP OS\nPRWNP ®",
+            "event_id": "event_003"
+          }
+        ],
+        "explained_at": [],
+        "assessed_by": []
+      }
+    },
+    {
+      "id": "concept:python",
+      "type": "concept",
+      "label": "python",
+      "concept_id": "python",
+      "status": "PARTIALLY_EXPLAINED",
+      "assessed": false,
+      "timestamp": 0.0,
+      "relationships": {
+        "demonstrated_by": [],
+        "prerequisites": [],
+        "related_to": [],
+        "shown_at": [
+          {
+            "timestamp": 0.0,
+            "ts": "00:00",
+            "snippet": "Python loops repeat a block of code\nThe for loop runs a fixed number of times\nToday: for loop syntax + visuals",
+            "event_id": "event_001"
+          },
+          {
+            "timestamp": 7.7,
+            "ts": "00:07",
+            "snippet": "Python code editor -- editor.py\n,  foriin range(5):\n4 print (i)",
+            "event_id": "event_002"
+          },
+          {
+            "timestamp": 15.39,
+            "ts": "00:15",
+            "snippet": "Python code editor -- editor.py\n4 for iin range(5):\n» print (i)\nOutput:\nbhWNP OS\nPRWNP ®",
+            "event_id": "event_003"
+          },
+          {
+            "timestamp": 26.94,
+            "ts": "00:26",
+            "snippet": "COMPARE\n® for: fixed number of repetitions\n® while: repeats while a condition is true\nfor iin range(5):\nruns exactly 5 times\nEduAccess Al - PYTHON LOOPS DEMO.",
+            "event_id": "event_005"
+          }
+        ],
+        "explained_at": [
+          {
+            "timestamp": 0.0,
+            "ts": "00:00",
+            "text": "",
+            "segment_id": "0"
+          }
+        ],
+        "assessed_by": []
+      }
+    },
+    {
+      "id": "concept:range",
+      "type": "concept",
+      "label": "range",
+      "concept_id": "range",
+      "status": "PARTIALLY_EXPLAINED",
+      "assessed": false,
+      "timestamp": 7.7,
+      "relationships": {
+        "demonstrated_by": [],
+        "prerequisites": [],
+        "related_to": [],
+        "shown_at": [
+          {
+            "timestamp": 7.7,
+            "ts": "00:07",
+            "snippet": "Python code editor -- editor.py\n,  foriin range(5):\n4 print (i)",
+            "event_id": "event_002"
+          },
+          {
+            "timestamp": 15.39,
+            "ts": "00:15",
+            "snippet": "Python code editor -- editor.py\n4 for iin range(5):\n» print (i)\nOutput:\nbhWNP OS\nPRWNP ®",
+            "event_id": "event_003"
+          },
+          {
+            "timestamp": 26.94,
+            "ts": "00:26",
+            "snippet": "COMPARE\n® for: fixed number of repetitions\n® while: repeats while a condition is true\nfor iin range(5):\nruns exactly 5 times\nEduAccess Al - PYTHON LOOPS DEMO.",
+            "event_id": "event_005"
+          },
+          {
+            "timestamp": 30.78,
+            "ts": "00:30",
+            "snippet": "HOw MANY TIMES DOES EACH LOOP RUN?\n10\nrange(5) range(10) while (x<3)\nnumber of repetitions",
+            "event_id": "event_006"
+          }
+        ],
+        "explained_at": [
+          {
+            "timestamp": 8.44,
+            "ts": "00:08",
+            "text": "",
+            "segment_id": "3"
+          }
+        ],
+        "assessed_by": []
+      }
+    },
+    {
+      "id": "concept:syntax",
+      "type": "concept",
+      "label": "syntax",
+      "concept_id": "syntax",
+      "status": "VISUALLY_SHOWN",
+      "assessed": false,
+      "timestamp": 0.0,
+      "relationships": {
+        "demonstrated_by": [],
+        "prerequisites": [],
+        "related_to": [],
+        "shown_at": [
+          {
+            "timestamp": 0.0,
+            "ts": "00:00",
+            "snippet": "Python loops repeat a block of code\nThe for loop runs a fixed number of times\nToday: for loop syntax + visuals",
+            "event_id": "event_001"
+          },
+          {
+            "timestamp": 34.63,
+            "ts": "00:34",
+            "snippet": "You heard the explanation\nThe screen shows exact syntax\nVisuals complement audio",
+            "event_id": "event_007"
+          }
+        ],
+        "explained_at": [],
+        "assessed_by": []
+      }
+    },
+    {
+      "id": "concept:while_loop",
+      "type": "concept",
+      "label": "while loop",
+      "concept_id": "while_loop",
+      "status": "PARTIALLY_EXPLAINED",
+      "assessed": false,
+      "timestamp": 0.0,
+      "relationships": {
+        "demonstrated_by": [],
+        "prerequisites": [],
+        "related_to": [],
+        "shown_at": [
+          {
+            "timestamp": 0.0,
+            "ts": "00:00",
+            "snippet": "Python loops repeat a block of code\nThe for loop runs a fixed number of times\nToday: for loop syntax + visuals",
+            "event_id": "event_001"
+          },
+          {
+            "timestamp": 19.24,
+            "ts": "00:19",
+            "snippet": "HOW A FOR LOOP WORKS (",
+            "event_id": "event_004"
+          },
+          {
+            "timestamp": 26.94,
+            "ts": "00:26",
+            "snippet": "COMPARE\n® for: fixed number of repetitions\n® while: repeats while a condition is true\nfor iin range(5):\nruns exactly 5 times\nEduAccess Al - PYTHON LOOPS DEMO.",
+            "event_id": "event_005"
+          },
+          {
+            "timestamp": 30.78,
+            "ts": "00:30",
+            "snippet": "HOw MANY TIMES DOES EACH LOOP RUN?\n10\nrange(5) range(10) while (x<3)\nnumber of repetitions",
+            "event_id": "event_006"
+          }
+        ],
+        "explained_at": [
+          {
+            "timestamp": 2.72,
+            "ts": "00:02",
+            "text": "",
+            "segment_id": "1"
+          },
+          {
+            "timestamp": 6.52,
+            "ts": "00:06",
+            "text": "",
+            "segment_id": "2"
+          },
+          {
+            "timestamp": 19.48,
+            "ts": "00:19",
+            "text": "",
+            "segment_id": "6"
+          },
+          {
+            "timestamp": 26.6,
+            "ts": "00:26",
+            "text": "",
+            "segment_id": "8"
+          },
+          {
+            "timestamp": 32.24,
+            "ts": "00:32",
+            "text": "",
+            "segment_id": "10"
+          }
+        ],
+        "assessed_by": []
+      }
+    },
+    {
+      "id": "quiz:DEMO_python_loops",
+      "type": "quiz",
+      "label": "DEMO_python_loops quiz",
+      "questions": 3,
+      "timestamp": null
+    },
+    {
+      "id": "segment:0",
+      "type": "speech",
+      "label": "Welcome to this short lesson about Python loops.",
+      "timestamp": 0.0
+    },
+    {
+      "id": "segment:1",
+      "type": "speech",
+      "label": "By the end, you will understand how a for loop repeats a block of code.",
+      "timestamp": 2.72
+    },
+    {
+      "id": "segment:2",
+      "type": "speech",
+      "label": "Let us look at a simple for loop.",
+      "timestamp": 6.52
+    },
+    {
+      "id": "segment:3",
+      "type": "speech",
+      "label": "Notice the structure, the keyword for, the range function, and the body that repeats.",
+      "timestamp": 8.44
+    },
+    {
+      "id": "segment:4",
+      "type": "speech",
+      "label": "Inside the code editor, you press the run button in the upper right corner.",
+      "timestamp": 13.4
+    },
+    {
+      "id": "segment:5",
+      "type": "speech",
+      "label": "The program then prints each number below.",
+      "timestamp": 17.2
+    },
+    {
+      "id": "segment:6",
+      "type": "speech",
+      "label": "Think of the loop as a flow chart.",
+      "timestamp": 19.48
+    },
+    {
+      "id": "segment:7",
+      "type": "speech",
+      "label": "It starts, checks a condition, runs the body, and repeats until the condition is false.",
+      "timestamp": 21.36
+    },
+    {
+      "id": "segment:8",
+      "type": "speech",
+      "label": "A while loop is similar, but it checks the condition before each repetition, so it may",
+      "timestamp": 26.6
+    },
+    {
+      "id": "segment:9",
+      "type": "speech",
+      "label": "run zero times.",
+      "timestamp": 30.56
+    },
+    {
+      "id": "segment:10",
+      "type": "speech",
+      "label": "This bar chart shows how many times each example loop runs.",
+      "timestamp": 32.24
+    },
+    {
+      "id": "segment:11",
+      "type": "speech",
+      "label": "This is the end of this demo lesson.",
+      "timestamp": 35.6
+    },
+    {
+      "id": "segment:12",
+      "type": "speech",
+      "label": "Seeing the code on screen adds important detail.",
+      "timestamp": 37.72
+    },
+    {
+      "id": "event:event_001",
+      "type": "visual",
+      "label": "slide",
+      "timestamp": 0.0
+    },
+    {
+      "id": "event:event_002",
+      "type": "visual",
+      "label": "slide",
+      "timestamp": 7.7
+    },
+    {
+      "id": "event:event_003",
+      "type": "visual",
+      "label": "slide",
+      "timestamp": 15.39
+    },
+    {
+      "id": "event:event_004",
+      "type": "visual",
+      "label": "slide",
+      "timestamp": 19.24
+    },
+    {
+      "id": "event:event_005",
+      "type": "visual",
+      "label": "code",
+      "timestamp": 26.94
+    },
+    {
+      "id": "event:event_006",
+      "type": "visual",
+      "label": "code",
+      "timestamp": 30.78
+    },
+    {
+      "id": "event:event_007",
+      "type": "visual",
+      "label": "slide",
+      "timestamp": 34.63
+    }
+  ],
+  "edges": [
+    {
+      "source": "concept:loops",
+      "target": "concept:for_loop",
+      "rel": "demonstrated_by",
+      "label": "demonstrated by"
+    },
+    {
+      "source": "concept:loops",
+      "target": "concept:while_loop",
+      "rel": "demonstrated_by",
+      "label": "demonstrated by"
+    },
+    {
+      "source": "concept:loops_indexing",
+      "target": "concept:for_loop",
+      "rel": "demonstrated_by",
+      "label": "demonstrated by"
+    },
+    {
+      "source": "concept:loops_indexing",
+      "target": "concept:while_loop",
+      "rel": "demonstrated_by",
+      "label": "demonstrated by"
+    },
+    {
+      "source": "concept:range",
+      "target": "concept:for_loop",
+      "rel": "prerequisite_of",
+      "label": "prerequisite of"
+    },
+    {
+      "source": "concept:for_loop",
+      "target": "concept:while_loop",
+      "rel": "related_to",
+      "label": "related to"
+    },
+    {
+      "source": "concept:loop",
+      "target": "concept:for_loop",
+      "rel": "demonstrated_by",
+      "label": "demonstrated by"
+    },
+    {
+      "source": "concept:loop",
+      "target": "concept:while_loop",
+      "rel": "demonstrated_by",
+      "label": "demonstrated by"
+    },
+    {
+      "source": "concept:loops",
+      "target": "segment:0",
+      "rel": "spoken_in",
+      "timestamp": 0.0,
+      "evidence": "content-word overlap with transcript"
+    },
+    {
+      "source": "concept:loops",
+      "target": "event:event_001",
+      "rel": "shown_by",
+      "timestamp": 0.0,
+      "trust": "VERIFIED",
+      "evidence": "content-word overlap with verified on-screen content"
+    },
+    {
+      "source": "concept:loops",
+      "target": "event:event_005",
+      "rel": "shown_by",
+      "timestamp": 26.94,
+      "trust": "VERIFIED",
+      "evidence": "content-word overlap with verified on-screen content"
+    },
+    {
+      "source": "concept:loops",
+      "target": "quiz:DEMO_python_loops",
+      "rel": "assessed_by",
+      "timestamp": 0.0,
+      "question": "What is the main benefit of a loop?"
+    },
+    {
+      "source": "concept:general_programming",
+      "target": "quiz:DEMO_python_loops",
+      "rel": "assessed_by",
+      "timestamp": 0.0,
+      "question": "Briefly explain the main programming concept explained in this lesson."
+    },
+    {
+      "source": "concept:loops_indexing",
+      "target": "quiz:DEMO_python_loops",
+      "rel": "assessed_by",
+      "timestamp": 0.0,
+      "question": "هل تبدأ الحلقات التكرارية دائماً بالقيمة 1 في بايثون؟"
+    },
+    {
+      "source": "concept:chart",
+      "target": "segment:6",
+      "rel": "spoken_in",
+      "timestamp": 19.48,
+      "evidence": "content-word overlap with transcript"
+    },
+    {
+      "source": "concept:chart",
+      "target": "segment:10",
+      "rel": "spoken_in",
+      "timestamp": 32.24,
+      "evidence": "content-word overlap with transcript"
+    },
+    {
+      "source": "concept:code",
+      "target": "segment:1",
+      "rel": "spoken_in",
+      "timestamp": 2.72,
+      "evidence": "content-word overlap with transcript"
+    },
+    {
+      "source": "concept:code",
+      "target": "segment:4",
+      "rel": "spoken_in",
+      "timestamp": 13.4,
+      "evidence": "content-word overlap with transcript"
+    },
+    {
+      "source": "concept:code",
+      "target": "segment:12",
+      "rel": "spoken_in",
+      "timestamp": 37.72,
+      "evidence": "content-word overlap with transcript"
+    },
+    {
+      "source": "concept:code",
+      "target": "event:event_001",
+      "rel": "shown_by",
+      "timestamp": 0.0,
+      "trust": "VERIFIED",
+      "evidence": "content-word overlap with verified on-screen content"
+    },
+    {
+      "source": "concept:code",
+      "target": "event:event_002",
+      "rel": "shown_by",
+      "timestamp": 7.7,
+      "trust": "VERIFIED",
+      "evidence": "content-word overlap with verified on-screen content"
+    },
+    {
+      "source": "concept:code",
+      "target": "event:event_003",
+      "rel": "shown_by",
+      "timestamp": 15.39,
+      "trust": "VERIFIED",
+      "evidence": "content-word overlap with verified on-screen content"
+    },
+    {
+      "source": "concept:code",
+      "target": "event:event_005",
+      "rel": "shown_by",
+      "timestamp": 26.94,
+      "trust": "VERIFIED",
+      "evidence": "content-word overlap with verified on-screen content"
+    },
+    {
+      "source": "concept:code",
+      "target": "event:event_006",
+      "rel": "shown_by",
+      "timestamp": 30.78,
+      "trust": "VERIFIED",
+      "evidence": "content-word overlap with verified on-screen content"
+    },
+    {
+      "source": "concept:condition",
+      "target": "segment:7",
+      "rel": "spoken_in",
+      "timestamp": 21.36,
+      "evidence": "content-word overlap with transcript"
+    },
+    {
+      "source": "concept:condition",
+      "target": "segment:8",
+      "rel": "spoken_in",
+      "timestamp": 26.6,
+      "evidence": "content-word overlap with transcript"
+    },
+    {
+      "source": "concept:condition",
+      "target": "event:event_005",
+      "rel": "shown_by",
+      "timestamp": 26.94,
+      "trust": "VERIFIED",
+      "evidence": "content-word overlap with verified on-screen content"
+    },
+    {
+      "source": "concept:for_loop",
+      "target": "segment:1",
+      "rel": "spoken_in",
+      "timestamp": 2.72,
+      "evidence": "content-word overlap with transcript"
+    },
+    {
+      "source": "concept:for_loop",
+      "target": "segment:2",
+      "rel": "spoken_in",
+      "timestamp": 6.52,
+      "evidence": "content-word overlap with transcript"
+    },
+    {
+      "source": "concept:for_loop",
+      "target": "segment:6",
+      "rel": "spoken_in",
+      "timestamp": 19.48,
+      "evidence": "content-word overlap with transcript"
+    },
+    {
+      "source": "concept:for_loop",
+      "target": "segment:8",
+      "rel": "spoken_in",
+      "timestamp": 26.6,
+      "evidence": "content-word overlap with transcript"
+    },
+    {
+      "source": "concept:for_loop",
+      "target": "segment:10",
+      "rel": "spoken_in",
+      "timestamp": 32.24,
+      "evidence": "content-word overlap with transcript"
+    },
+    {
+      "source": "concept:for_loop",
+      "target": "event:event_001",
+      "rel": "shown_by",
+      "timestamp": 0.0,
+      "trust": "VERIFIED",
+      "evidence": "content-word overlap with verified on-screen content"
+    },
+    {
+      "source": "concept:for_loop",
+      "target": "event:event_004",
+      "rel": "shown_by",
+      "timestamp": 19.24,
+      "trust": "VERIFIED",
+      "evidence": "content-word overlap with verified on-screen content"
+    },
+    {
+      "source": "concept:for_loop",
+      "target": "event:event_006",
+      "rel": "shown_by",
+      "timestamp": 30.78,
+      "trust": "VERIFIED",
+      "evidence": "content-word overlap with verified on-screen content"
+    },
+    {
+      "source": "concept:function",
+      "target": "segment:3",
+      "rel": "spoken_in",
+      "timestamp": 8.44,
+      "evidence": "content-word overlap with transcript"
+    },
+    {
+      "source": "concept:loop",
+      "target": "segment:1",
+      "rel": "spoken_in",
+      "timestamp": 2.72,
+      "evidence": "content-word overlap with transcript"
+    },
+    {
+      "source": "concept:loop",
+      "target": "segment:2",
+      "rel": "spoken_in",
+      "timestamp": 6.52,
+      "evidence": "content-word overlap with transcript"
+    },
+    {
+      "source": "concept:loop",
+      "target": "segment:6",
+      "rel": "spoken_in",
+      "timestamp": 19.48,
+      "evidence": "content-word overlap with transcript"
+    },
+    {
+      "source": "concept:loop",
+      "target": "segment:8",
+      "rel": "spoken_in",
+      "timestamp": 26.6,
+      "evidence": "content-word overlap with transcript"
+    },
+    {
+      "source": "concept:loop",
+      "target": "segment:10",
+      "rel": "spoken_in",
+      "timestamp": 32.24,
+      "evidence": "content-word overlap with transcript"
+    },
+    {
+      "source": "concept:loop",
+      "target": "event:event_001",
+      "rel": "shown_by",
+      "timestamp": 0.0,
+      "trust": "VERIFIED",
+      "evidence": "content-word overlap with verified on-screen content"
+    },
+    {
+      "source": "concept:loop",
+      "target": "event:event_004",
+      "rel": "shown_by",
+      "timestamp": 19.24,
+      "trust": "VERIFIED",
+      "evidence": "content-word overlap with verified on-screen content"
+    },
+    {
+      "source": "concept:loop",
+      "target": "event:event_006",
+      "rel": "shown_by",
+      "timestamp": 30.78,
+      "trust": "VERIFIED",
+      "evidence": "content-word overlap with verified on-screen content"
+    },
+    {
+      "source": "concept:output",
+      "target": "event:event_003",
+      "rel": "shown_by",
+      "timestamp": 15.39,
+      "trust": "VERIFIED",
+      "evidence": "content-word overlap with verified on-screen content"
+    },
+    {
+      "source": "concept:print",
+      "target": "event:event_002",
+      "rel": "shown_by",
+      "timestamp": 7.7,
+      "trust": "VERIFIED",
+      "evidence": "content-word overlap with verified on-screen content"
+    },
+    {
+      "source": "concept:print",
+      "target": "event:event_003",
+      "rel": "shown_by",
+      "timestamp": 15.39,
+      "trust": "VERIFIED",
+      "evidence": "content-word overlap with verified on-screen content"
+    },
+    {
+      "source": "concept:python",
+      "target": "segment:0",
+      "rel": "spoken_in",
+      "timestamp": 0.0,
+      "evidence": "content-word overlap with transcript"
+    },
+    {
+      "source": "concept:python",
+      "target": "event:event_001",
+      "rel": "shown_by",
+      "timestamp": 0.0,
+      "trust": "VERIFIED",
+      "evidence": "content-word overlap with verified on-screen content"
+    },
+    {
+      "source": "concept:python",
+      "target": "event:event_002",
+      "rel": "shown_by",
+      "timestamp": 7.7,
+      "trust": "VERIFIED",
+      "evidence": "content-word overlap with verified on-screen content"
+    },
+    {
+      "source": "concept:python",
+      "target": "event:event_003",
+      "rel": "shown_by",
+      "timestamp": 15.39,
+      "trust": "VERIFIED",
+      "evidence": "content-word overlap with verified on-screen content"
+    },
+    {
+      "source": "concept:python",
+      "target": "event:event_005",
+      "rel": "shown_by",
+      "timestamp": 26.94,
+      "trust": "VERIFIED",
+      "evidence": "content-word overlap with verified on-screen content"
+    },
+    {
+      "source": "concept:range",
+      "target": "segment:3",
+      "rel": "spoken_in",
+      "timestamp": 8.44,
+      "evidence": "content-word overlap with transcript"
+    },
+    {
+      "source": "concept:range",
+      "target": "event:event_002",
+      "rel": "shown_by",
+      "timestamp": 7.7,
+      "trust": "VERIFIED",
+      "evidence": "content-word overlap with verified on-screen content"
+    },
+    {
+      "source": "concept:range",
+      "target": "event:event_003",
+      "rel": "shown_by",
+      "timestamp": 15.39,
+      "trust": "VERIFIED",
+      "evidence": "content-word overlap with verified on-screen content"
+    },
+    {
+      "source": "concept:range",
+      "target": "event:event_005",
+      "rel": "shown_by",
+      "timestamp": 26.94,
+      "trust": "VERIFIED",
+      "evidence": "content-word overlap with verified on-screen content"
+    },
+    {
+      "source": "concept:range",
+      "target": "event:event_006",
+      "rel": "shown_by",
+      "timestamp": 30.78,
+      "trust": "VERIFIED",
+      "evidence": "content-word overlap with verified on-screen content"
+    },
+    {
+      "source": "concept:syntax",
+      "target": "event:event_001",
+      "rel": "shown_by",
+      "timestamp": 0.0,
+      "trust": "VERIFIED",
+      "evidence": "content-word overlap with verified on-screen content"
+    },
+    {
+      "source": "concept:syntax",
+      "target": "event:event_007",
+      "rel": "shown_by",
+      "timestamp": 34.63,
+      "trust": "VERIFIED",
+      "evidence": "content-word overlap with verified on-screen content"
+    },
+    {
+      "source": "concept:while_loop",
+      "target": "segment:1",
+      "rel": "spoken_in",
+      "timestamp": 2.72,
+      "evidence": "content-word overlap with transcript"
+    },
+    {
+      "source": "concept:while_loop",
+      "target": "segment:2",
+      "rel": "spoken_in",
+      "timestamp": 6.52,
+      "evidence": "content-word overlap with transcript"
+    },
+    {
+      "source": "concept:while_loop",
+      "target": "segment:6",
+      "rel": "spoken_in",
+      "timestamp": 19.48,
+      "evidence": "content-word overlap with transcript"
+    },
+    {
+      "source": "concept:while_loop",
+      "target": "segment:8",
+      "rel": "spoken_in",
+      "timestamp": 26.6,
+      "evidence": "content-word overlap with transcript"
+    },
+    {
+      "source": "concept:while_loop",
+      "target": "segment:10",
+      "rel": "spoken_in",
+      "timestamp": 32.24,
+      "evidence": "content-word overlap with transcript"
+    },
+    {
+      "source": "concept:while_loop",
+      "target": "event:event_001",
+      "rel": "shown_by",
+      "timestamp": 0.0,
+      "trust": "VERIFIED",
+      "evidence": "content-word overlap with verified on-screen content"
+    },
+    {
+      "source": "concept:while_loop",
+      "target": "event:event_004",
+      "rel": "shown_by",
+      "timestamp": 19.24,
+      "trust": "VERIFIED",
+      "evidence": "content-word overlap with verified on-screen content"
+    },
+    {
+      "source": "concept:while_loop",
+      "target": "event:event_005",
+      "rel": "shown_by",
+      "timestamp": 26.94,
+      "trust": "VERIFIED",
+      "evidence": "content-word overlap with verified on-screen content"
+    },
+    {
+      "source": "concept:while_loop",
+      "target": "event:event_006",
+      "rel": "shown_by",
+      "timestamp": 30.78,
+      "trust": "VERIFIED",
+      "evidence": "content-word overlap with verified on-screen content"
+    },
+    {
+      "source": "segment:0",
+      "target": "segment:1",
+      "rel": "followed_by",
+      "start": 0.0,
+      "timestamp": 0.0
+    },
+    {
+      "source": "segment:1",
+      "target": "segment:2",
+      "rel": "followed_by",
+      "start": 2.72,
+      "timestamp": 2.72
+    },
+    {
+      "source": "segment:2",
+      "target": "segment:3",
+      "rel": "followed_by",
+      "start": 6.52,
+      "timestamp": 6.52
+    },
+    {
+      "source": "segment:3",
+      "target": "segment:4",
+      "rel": "followed_by",
+      "start": 8.44,
+      "timestamp": 8.44
+    },
+    {
+      "source": "segment:4",
+      "target": "segment:5",
+      "rel": "followed_by",
+      "start": 13.4,
+      "timestamp": 13.4
+    },
+    {
+      "source": "segment:5",
+      "target": "segment:6",
+      "rel": "followed_by",
+      "start": 17.2,
+      "timestamp": 17.2
+    },
+    {
+      "source": "segment:6",
+      "target": "segment:7",
+      "rel": "followed_by",
+      "start": 19.48,
+      "timestamp": 19.48
+    },
+    {
+      "source": "segment:7",
+      "target": "segment:8",
+      "rel": "followed_by",
+      "start": 21.36,
+      "timestamp": 21.36
+    },
+    {
+      "source": "segment:8",
+      "target": "segment:9",
+      "rel": "followed_by",
+      "start": 26.6,
+      "timestamp": 26.6
+    },
+    {
+      "source": "segment:9",
+      "target": "segment:10",
+      "rel": "followed_by",
+      "start": 30.56,
+      "timestamp": 30.56
+    },
+    {
+      "source": "segment:10",
+      "target": "segment:11",
+      "rel": "followed_by",
+      "start": 32.24,
+      "timestamp": 32.24
+    },
+    {
+      "source": "segment:11",
+      "target": "segment:12",
+      "rel": "followed_by",
+      "start": 35.6,
+      "timestamp": 35.6
+    },
+    {
+      "source": "event:event_001",
+      "target": "event:event_002",
+      "rel": "next_visual",
+      "start": 7.7,
+      "timestamp": 7.7
+    },
+    {
+      "source": "event:event_002",
+      "target": "event:event_003",
+      "rel": "next_visual",
+      "start": 15.39,
+      "timestamp": 15.39
+    },
+    {
+      "source": "event:event_003",
+      "target": "event:event_004",
+      "rel": "next_visual",
+      "start": 19.24,
+      "timestamp": 19.24
+    },
+    {
+      "source": "event:event_004",
+      "target": "event:event_005",
+      "rel": "next_visual",
+      "start": 26.94,
+      "timestamp": 26.94
+    },
+    {
+      "source": "event:event_005",
+      "target": "event:event_006",
+      "rel": "next_visual",
+      "start": 30.78,
+      "timestamp": 30.78
+    },
+    {
+      "source": "event:event_006",
+      "target": "event:event_007",
+      "rel": "next_visual",
+      "start": 34.63,
+      "timestamp": 34.63
+    }
+  ],
+  "evidence": {
+    "segments": 13,
+    "visual_events": 7,
+    "quiz_questions": 3
+  },
+  "generated_at": "2026-09-19T19:45:56.558758+00:00"
+}

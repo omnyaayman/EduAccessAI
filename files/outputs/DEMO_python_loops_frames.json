@@ -1,0 +1,40 @@
+{
+  "job_id": "DEMO_python_loops",
+  "frames": [
+    {
+      "path": "C:\\Users\\hp\\Downloads\\EduAccess-AI\\data\\frames\\DEMO_python_loops\\frame_0000.jpg",
+      "timestamp": 0.0
+    },
+    {
+      "path": "C:\\Users\\hp\\Downloads\\EduAccess-AI\\data\\frames\\DEMO_python_loops\\frame_0001.jpg",
+      "timestamp": 7.7
+    },
+    {
+      "path": "C:\\Users\\hp\\Downloads\\EduAccess-AI\\data\\frames\\DEMO_python_loops\\frame_0002.jpg",
+      "timestamp": 15.39
+    },
+    {
+      "path": "C:\\Users\\hp\\Downloads\\EduAccess-AI\\data\\frames\\DEMO_python_loops\\frame_0003.jpg",
+      "timestamp": 19.24
+    },
+    {
+      "path": "C:\\Users\\hp\\Downloads\\EduAccess-AI\\data\\frames\\DEMO_python_loops\\frame_0004.jpg",
+      "timestamp": 26.94
+    },
+    {
+      "path": "C:\\Users\\hp\\Downloads\\EduAccess-AI\\data\\frames\\DEMO_python_loops\\frame_0005.jpg",
+      "timestamp": 30.78
+    },
+    {
+      "path": "C:\\Users\\hp\\Downloads\\EduAccess-AI\\data\\frames\\DEMO_python_loops\\frame_0006.jpg",
+      "timestamp": 34.63
+    }
+  ],
+  "metadata": {
+    "duration": 38.48,
+    "fps": 0.5197505197505198,
+    "width": 1280,
+    "height": 720,
+    "frame_count": 20
+  }
+}
